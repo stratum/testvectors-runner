@@ -140,7 +140,7 @@ func SendRawPacket(iface string, pkt []byte) bool {
 
 // CheckRawPacket verifies if packets captured in pcap file are as expected.
 // It takes as arguments the name of the interface, a slice of packets with each packet
-// represented by a slice of bytes, and a timeout.
+// represented by a slice of bytes, timeout and match type.
 // It verifies that the packets captured in the pcap file match the ones specified in
 // pkts within the given timeout. When pkts is empty it verifies that no packet has been
 // received.
