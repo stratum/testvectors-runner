@@ -1,0 +1,159 @@
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"io/ioutil"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/golang/protobuf/proto"
+
+	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator"
+	tg "github.com/opennetworkinglab/testvectors-runner/pkg/proto/target"
+	tv "github.com/opennetworkinglab/testvectors-runner/pkg/proto/testvector"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
+	"github.com/opennetworkinglab/testvectors-runner/tests"
+)
+
+var log = logger.NewLogger()
+
+func main() {
+	testNames := flag.String("testNames", "", "Names of the tests to run, separated by comma")
+	tvFiles := flag.String("tvFiles", "", "Path to the Test Vector files, separated by comma")
+	tvDir := flag.String("tvDir", "", "Directory of Test Vector files")
+	tgFile := flag.String("tgFile", "", "Path to the Target file")
+	portMapFile := flag.String("portMapFile", "tools/bmv2/port-map.json", "Path to the port-map file")
+	level := flag.String("logLevel", "warn", "Log Level")
+	flag.Parse()
+	//logger.Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
+	log.SetLogLevel(*level)
+
+	// Read Target file
+	tgdata, err := ioutil.ReadFile(*tgFile)
+	if err != nil {
+		log.InvalidFile("Target File: "+*tgFile, err)
+	}
+	target := &tg.Target{}
+	if err = proto.UnmarshalText(string(tgdata), target); err != nil {
+		log.InvalidProtoUnmarshal(reflect.TypeOf(target), err)
+	}
+	log.Infoln("Target: ", target)
+
+	// Read port-map file
+	pmdata, err := ioutil.ReadFile(*portMapFile)
+	if err != nil {
+		log.InvalidFile("Port Map File: "+*portMapFile, err)
+	}
+	var portmap map[string]string
+	if err = json.Unmarshal(pmdata, &portmap); err != nil {
+		log.InvalidJSONUnmarshal(reflect.TypeOf(portmap), err)
+	}
+	log.Infoln("Port Map: ", portmap)
+
+	// Check if we run with Test Vectors or not
+	runTV := false
+	if *testNames == "" {
+		if *tvFiles == "" && *tvDir == "" {
+			log.Fatalf("Please specify test names with -testNames or test vector files with -tvFiles or test vector directory with -tvDir")
+		} else {
+			runTV = true
+		}
+	}
+
+	// Build test suite
+	testSuite := []testing.InternalTest{}
+	if !runTV {
+		testNameSlice := strings.Split(*testNames, ",")
+		stSuite := createTestSuite(testNameSlice, target)
+		testSuite = append(testSuite, stSuite...)
+
+	} else {
+		// Get a slice of TV files
+		var tvFilesSlice []string
+		if *tvDir != "" {
+			tvFiles, err := ioutil.ReadDir(*tvDir)
+			if err != nil {
+				log.InvalidDir(*tvDir, err)
+			}
+			for _, file := range tvFiles {
+				if file.IsDir() {
+					log.Infof("Ignoring directory %s", file.Name())
+					continue
+				}
+				tvFilesSlice = append(tvFilesSlice, *tvDir+file.Name())
+			}
+		} else {
+			tvFilesSlice = strings.Split(*tvFiles, ",")
+		}
+		tvSuite := createTVTestSuite(tvFilesSlice, target)
+		testSuite = append(testSuite, tvSuite...)
+	}
+
+	test.SetUpSuite(target, portmap)
+	var match test.Deps
+	testing.MainStart(match, testSuite, nil, nil).Run()
+	test.TearDownSuite()
+}
+
+func createTestSuite(testNameSlice []string, target *tg.Target) []testing.InternalTest {
+	testSuite := []testing.InternalTest{}
+	for _, testName := range testNameSlice {
+		// Tests are Go functions
+		f := reflect.ValueOf(tests.Test{}).MethodByName(testName)
+		if !f.IsValid() {
+			log.Fatalf("Not able to find test with name '%s'\nExiting...\n", testName)
+		}
+		// TODO: Read Target information from config file
+		t := testing.InternalTest{
+			Name: testName,
+			F: func(t *testing.T) {
+				test.SetUpTest()
+				f.Interface().(func(*testing.T, *tg.Target))(t, target)
+				test.TearDownTest()
+			},
+		}
+		testSuite = append(testSuite, t)
+	}
+	return testSuite
+}
+
+func createTVTestSuite(tvFilesSlice []string, target *tg.Target) []testing.InternalTest {
+	testSuite := []testing.InternalTest{}
+	// Read TV files and add them to the test suite
+	for _, tvFile := range tvFilesSlice {
+		data, err := ioutil.ReadFile(tvFile)
+		if err != nil {
+			log.InvalidFile("Test Vector File: "+tvFile, err)
+		}
+		tv := &tv.TestVector{}
+		err = proto.UnmarshalText(string(data), tv)
+		if err != nil {
+			log.InvalidProtoUnmarshal(reflect.TypeOf(tv), err)
+		}
+
+		t := testing.InternalTest{
+			Name: strings.Replace(filepath.Base(tvFile), ".pb.txt", "", 1),
+			F: func(t *testing.T) {
+				test.SetUpTest()
+				// Process test cases and add them to the test
+				for _, tc := range tv.GetTestCases() {
+					t.Run(tc.TestCaseId, func(t *testing.T) {
+						test.SetUpTestCase(t, target)
+						result := orchestrator.ProcessTestCase(tc, target)
+						test.TearDownTestCase(t, target)
+						if result == false {
+							t.Fail()
+						}
+					})
+				}
+				test.TearDownTest()
+			},
+		}
+		testSuite = append(testSuite, t)
+	}
+	return testSuite
+}
