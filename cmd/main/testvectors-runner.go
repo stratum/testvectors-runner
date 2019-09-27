@@ -21,6 +21,10 @@ import (
 
 var log = logger.NewLogger()
 
+// main reads test data and utilize testing package to drive the tests. Currently two types of test data are supported.
+// One is Test Vectors (see README for more details) and the other is Go function based tests (see examples under tests folder)
+// To run with Test Vectors, specify Test Vector files using either tvFiles or tvDir flag, otherwise specify test function
+// names using testNames flag. A target file (tgfile) and a port-map file (portMapFile) are mandatory in both cases.
 func main() {
 	testNames := flag.String("testNames", "", "Names of the tests to run, separated by comma")
 	tvFiles := flag.String("tvFiles", "", "Path to the Test Vector files, separated by comma")
@@ -29,7 +33,6 @@ func main() {
 	portMapFile := flag.String("portMapFile", "tools/bmv2/port-map.json", "Path to the port-map file")
 	level := flag.String("logLevel", "warn", "Log Level")
 	flag.Parse()
-	//logger.Init(ioutil.Discard, os.Stdout, os.Stdout, os.Stderr)
 	log.SetLogLevel(*level)
 
 	// Read Target file
@@ -99,6 +102,7 @@ func main() {
 	test.TearDownSuite()
 }
 
+// createTestSuite creates and returns a slice of InternalTest using a slice of test names
 func createTestSuite(testNameSlice []string, target *tg.Target) []testing.InternalTest {
 	testSuite := []testing.InternalTest{}
 	for _, testName := range testNameSlice {
@@ -107,7 +111,6 @@ func createTestSuite(testNameSlice []string, target *tg.Target) []testing.Intern
 		if !f.IsValid() {
 			log.Fatalf("Not able to find test with name '%s'\nExiting...\n", testName)
 		}
-		// TODO: Read Target information from config file
 		t := testing.InternalTest{
 			Name: testName,
 			F: func(t *testing.T) {
@@ -121,6 +124,7 @@ func createTestSuite(testNameSlice []string, target *tg.Target) []testing.Intern
 	return testSuite
 }
 
+// createTVTestSuite creates and returns a slice of InternalTest using a slice of TV files
 func createTVTestSuite(tvFilesSlice []string, target *tg.Target) []testing.InternalTest {
 	testSuite := []testing.InternalTest{}
 	// Read TV files and add them to the test suite

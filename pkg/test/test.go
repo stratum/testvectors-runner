@@ -55,18 +55,13 @@ func TearDownTest() {
 //SetUpTestCase includes steps for setting up a test case
 func SetUpTestCase(t *testing.T, target *tg.Target) {
 	log.Debugln("Setting up test case...")
-	// FIXME: only start capture if local packet verifiaction is enabled
-	result := packet.StartCapturesWithPortMap()
-	if result == false {
-		// Teardown test case before exiting
-		t.FailNow()
-	}
+	// FIXME: only start packet capture if needed
+	packet.StartCapturesWithPortMap()
 }
 
 //TearDownTestCase includes steps for tearing down a test case
 func TearDownTestCase(t *testing.T, target *tg.Target) {
 	log.Debugln("Tearing down test case...")
-	// FIXME: only stop capture if local packet verifiaction is enabled
 	packet.StopAllCaptures()
 	log.Infoln(strings.Repeat("*", 100))
 }
