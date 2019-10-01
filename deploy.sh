@@ -2,6 +2,7 @@
 
 PLATFORM=tofino
 REMOTE_TV_RUNNER_DIR=~/tv_runner
+TV_RUNNER_BIN=./cmd/main/tv_runner
 
 # Create tv_runner directory on remote node
 ssh -tt $1 "
@@ -10,8 +11,8 @@ ssh -tt $1 "
 	[ -d $REMOTE_TV_RUNNER_DIR/logs ] || mkdir $REMOTE_TV_RUNNER_DIR/logs
 "
 
-# Copy tv_runner binary and other files to remote node
-scp ./cmd/main/tv_runner $1:$REMOTE_TV_RUNNER_DIR/tv_runner
+# Build and copy tv_runner binary and other files to remote node
+scp $TV_RUNNER_BIN $1:$REMOTE_TV_RUNNER_DIR/tv_runner
 scp ./tools/Makefile $1:$REMOTE_TV_RUNNER_DIR
 scp ./tools/$PLATFORM/port-map.json $1:$REMOTE_TV_RUNNER_DIR/tools/$PLATFORM
 
