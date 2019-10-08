@@ -31,9 +31,11 @@ func main() {
 	tvDir := flag.String("tvDir", "", "Directory of Test Vector files")
 	tgFile := flag.String("tgFile", "", "Path to the Target file")
 	portMapFile := flag.String("portMapFile", "tools/bmv2/port-map.json", "Path to the port-map file")
+	logDir := flag.String("logDir", "/tmp", "Location to store logs")
 	level := flag.String("logLevel", "warn", "Log Level")
 	flag.Parse()
 	log.SetLogLevel(*level)
+	log.SetLogFolder(*logDir)
 
 	// Read Target file
 	tgdata, err := ioutil.ReadFile(*tgFile)
