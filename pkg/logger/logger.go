@@ -12,6 +12,7 @@ import (
 var (
 	//logger is instance of logrus
 	logger                      = logrus.New()
+	logDir                      = "/tmp/"
 	fileName                    = "logfile_" + time.Now().Format(time.RFC3339) + ".log"
 	fileOptions                 = os.O_WRONLY | os.O_CREATE | os.O_TRUNC
 	filePermissions os.FileMode = 0666
@@ -53,21 +54,15 @@ func NewLogger() *StandardLogger {
 	formatter.FullTimestamp = true
 	formatter.ForceColors = true
 
-	//Output
-	file, err := os.OpenFile("./logs/"+fileName, fileOptions, filePermissions)
-	if err != nil {
-		logrus.Fatalf("Error opening log file %s", err)
-		writer = io.Writer(os.Stdout)
-	} else {
-		writer = io.MultiWriter(os.Stdout, file)
-		//writer = io.MultiWriter(file)
-	}
-
 	standardLogger.SetFormatter(formatter)
+
+	//default output to stdout & /tmp
+	file, _ := os.OpenFile(logDir+"/"+fileName, fileOptions, filePermissions)
+	writer = io.MultiWriter(os.Stdout, file)
 	standardLogger.SetOutput(writer)
 
-	//log level
-	//standardLogger.SetLevel(logrus.ErrorLevel)
+	//default log level
+	standardLogger.SetLevel(logrus.ErrorLevel)
 	return standardLogger
 }
 
@@ -79,6 +74,19 @@ func (sl *StandardLogger) SetLogLevel(level string) {
 	} else {
 		sl.SetLevel(logLevel)
 	}
+}
+
+//SetLogFolder sets the output folder
+func (sl *StandardLogger) SetLogFolder(logDirPath string) {
+	logFolder, err := os.Stat(logDirPath)
+	if os.IsNotExist(err) || !logFolder.IsDir() {
+		logrus.Warnf("Error opening log directory %s", err)
+		writer = io.Writer(os.Stdout)
+	} else {
+		file, _ := os.OpenFile(logDirPath+"/"+fileName, fileOptions, filePermissions)
+		writer = io.MultiWriter(os.Stdout, file)
+	}
+	sl.SetOutput(writer)
 }
 
 //InvalidFile log message
