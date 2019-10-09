@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"os"
 
 	"github.com/golang/protobuf/proto"
 
@@ -100,8 +101,9 @@ func main() {
 
 	test.SetUpSuite(target, portmap)
 	var match test.Deps
-	testing.MainStart(match, testSuite, nil, nil).Run()
+	code := testing.MainStart(match, testSuite, nil, nil).Run()
 	test.TearDownSuite()
+	os.Exit(code)
 }
 
 // createTestSuite creates and returns a slice of InternalTest using a slice of test names
