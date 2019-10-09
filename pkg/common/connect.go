@@ -31,7 +31,7 @@ import (
 	gpb "github.com/openconfig/gnmi/proto/gnmi"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	tvb "github.com/opennetworkinglab/testvectors-runner/pkg/proto/target"
+	tvb "github.com/opennetworkinglab/testvectors/proto/target"
 )
 
 var log = logger.NewLogger()

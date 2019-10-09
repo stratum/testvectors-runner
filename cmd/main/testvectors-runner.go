@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
-	"os"
 
 	"github.com/golang/protobuf/proto"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator"
-	tg "github.com/opennetworkinglab/testvectors-runner/pkg/proto/target"
-	tv "github.com/opennetworkinglab/testvectors-runner/pkg/proto/testvector"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
 	"github.com/opennetworkinglab/testvectors-runner/tests"
+	tg "github.com/opennetworkinglab/testvectors/proto/target"
+	tv "github.com/opennetworkinglab/testvectors/proto/testvector"
 )
 
 var log = logger.NewLogger()

@@ -9,7 +9,7 @@ import (
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/packet"
-	tg "github.com/opennetworkinglab/testvectors-runner/pkg/proto/target"
+	tg "github.com/opennetworkinglab/testvectors/proto/target"
 )
 
 var log = logger.NewLogger()
