@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
-	tv "github.com/opennetworkinglab/testvectors-runner/pkg/proto/testvector"
+	tv "github.com/opennetworkinglab/testvectors/proto/testvector"
 )
 
 //ProcessConfigExpectation will execute config expectations

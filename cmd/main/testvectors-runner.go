@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -13,10 +14,10 @@ import (
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator"
-	tg "github.com/opennetworkinglab/testvectors-runner/pkg/proto/target"
-	tv "github.com/opennetworkinglab/testvectors-runner/pkg/proto/testvector"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
 	"github.com/opennetworkinglab/testvectors-runner/tests"
+	tg "github.com/opennetworkinglab/testvectors/proto/target"
+	tv "github.com/opennetworkinglab/testvectors/proto/testvector"
 )
 
 var log = logger.NewLogger()
@@ -100,8 +101,9 @@ func main() {
 
 	test.SetUpSuite(target, portmap)
 	var match test.Deps
-	testing.MainStart(match, testSuite, nil, nil).Run()
+	code := testing.MainStart(match, testSuite, nil, nil).Run()
 	test.TearDownSuite()
+	os.Exit(code)
 }
 
 // createTestSuite creates and returns a slice of InternalTest using a slice of test names

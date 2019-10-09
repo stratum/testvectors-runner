@@ -5,7 +5,7 @@ import (
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	tv "github.com/opennetworkinglab/testvectors-runner/pkg/proto/testvector"
+	tv "github.com/opennetworkinglab/testvectors/proto/testvector"
 )
 
 var log = logger.NewLogger()
