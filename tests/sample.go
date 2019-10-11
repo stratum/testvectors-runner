@@ -1,3 +1,9 @@
+/*
+*Copyright 2019-present Open Networking Foundation
+*
+*SPDX-License-Identifier: Apache-2.0
+ */
+
 package tests
 
 import (
@@ -5,8 +11,8 @@ import (
 	"time"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
+	tg "github.com/opennetworkinglab/testvectors/proto/target"
 	"gotest.tools/assert"
 )
 

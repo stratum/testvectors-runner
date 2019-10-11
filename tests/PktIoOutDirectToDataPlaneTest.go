@@ -1,3 +1,9 @@
+/*
+*Copyright 2019-present Open Networking Foundation
+*
+*SPDX-License-Identifier: Apache-2.0
+ */
+
 package tests
 
 import (
@@ -7,8 +13,8 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	"github.com/golang/protobuf/proto"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
+	tg "github.com/opennetworkinglab/testvectors/proto/target"
 	"github.com/stretchr/testify/assert"
 )
 
