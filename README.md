@@ -31,7 +31,7 @@ For now we only support deploying testvectors-runner on a server connected to th
 
 A `port-map.json` file is required to map switch port IDs to corresponding interface names on the server. Modify the `port-map.json` file under `tools/<PLATFORM>/` to match your environment setup.
 
-Assuming testvectors-runner binary is already downloaded or built, run `deploy.sh <SERVER_IP>` to copy the binary and other files to the server.
+Assuming testvectors-runner binary is already downloaded or built, go to `tools` directory and run `deploy.sh <USER@SERVER_IP>` to copy the binary and other files to the server.
 > Note: modify the `PLATFORM`, `REMOTE_TV_RUNNER_DIR` and `TV_RUNNER_BIN` variables in `deploy.sh` as needed.
 
 Once testvectors-runner binary is deployed, login to the server and use the Makefile located under `REMOTE_TV_RUNNER_DIR` to start the tests the same way as the docker environment.
