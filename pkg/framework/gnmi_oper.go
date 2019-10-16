@@ -98,7 +98,12 @@ func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sre
 		log.Infoln(err)
 		return false
 	}
-	defer subcl.CloseSend()
+	defer func() {
+		err := subcl.CloseSend()
+		if err != nil {
+			log.Warnln("Error closing subscription client: ", err)
+		}
+	}()
 	result := true
 	waitc := make(chan struct{})
 	log.Tracef("Length of expected result: %d\n\n", len(sresp))
@@ -125,7 +130,6 @@ func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sre
 			}
 		}
 		close(waitc)
-		return
 	}()
 	log.Infoln("Sending subscription request")
 	err = subcl.Send(sreq)

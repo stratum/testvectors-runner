@@ -159,7 +159,7 @@ func createTVTestSuite(tvFilesSlice []string, target *tg.Target) []testing.Inter
 						test.SetUpTestCase(t, target)
 						result := orchestrator.ProcessTestCase(tc, target)
 						test.TearDownTestCase(t, target)
-						if result == false {
+						if !result {
 							t.Fail()
 						}
 					})

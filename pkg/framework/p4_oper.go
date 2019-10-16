@@ -104,7 +104,10 @@ func TearDown() {
 	log.Traceln("In p4_oper tear down")
 	p4rtCancel()
 	if sc != nil {
-		sc.CloseSend()
+		err := sc.CloseSend()
+		if err != nil {
+			log.Warnln("Error closing the stream channel:", err)
+		}
 	}
 }
 
