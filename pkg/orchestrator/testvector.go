@@ -13,7 +13,6 @@ import (
 
 //Target global variable
 var Target *tg.Target
-var result = true
 
 //ProcessTestVector will parse test vector
 func ProcessTestVector(tv1 *tv.TestVector, tg1 *tg.Target) {

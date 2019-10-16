@@ -33,11 +33,8 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	gpb "github.com/openconfig/gnmi/proto/gnmi"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	tvb "github.com/opennetworkinglab/testvectors/proto/target"
 )
-
-var log = logger.NewLogger()
 
 // Connect opens a new gRPC connection to the target speciifed by the
 // ConnectionArgs. It returns the gNMI Client connection, and a function
