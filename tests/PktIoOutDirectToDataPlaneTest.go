@@ -14,7 +14,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
+	tg "github.com/stratum/testvectors/proto/target"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -15,7 +15,7 @@ import (
 	scpb "google.golang.org/genproto/googleapis/rpc/code"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/common"
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
+	tg "github.com/stratum/testvectors/proto/target"
 )
 
 var (

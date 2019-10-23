@@ -12,7 +12,7 @@ import (
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
+	tg "github.com/stratum/testvectors/proto/target"
 	"gotest.tools/assert"
 )
 

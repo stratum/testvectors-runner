@@ -7,8 +7,8 @@
 package orchestrator
 
 import (
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
-	tv "github.com/opennetworkinglab/testvectors/proto/testvector"
+	tg "github.com/stratum/testvectors/proto/target"
+	tv "github.com/stratum/testvectors/proto/testvector"
 )
 
 //Target global variable
