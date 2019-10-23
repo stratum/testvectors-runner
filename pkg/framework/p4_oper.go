@@ -19,37 +19,55 @@ import (
 )
 
 var (
-	p4rtClient                                           v1.P4RuntimeClient
-	p4rtContext, scContext                               context.Context
-	sc                                                   v1.P4Runtime_StreamChannelClient
-	p4rtError                                            error
-	lock                                                 bool
-	p4rtCancel                                           context.CancelFunc
-	pktInChan                                            = make(chan *v1.PacketIn)
-	pktOutChan                                           = make(chan *v1.PacketOut)
-	masterArbitrationRecvChan, masterArbitrationSendChan = make(chan *v1.MasterArbitrationUpdate), make(chan *v1.MasterArbitrationUpdate)
-	genericStreamMessageChannel                          = make(chan *v1.StreamMessageResponse)
+	//P4rtClient description
+	P4rtClient  v1.P4RuntimeClient
+	p4rtContext context.Context
+	lock        bool
+	//SCV Description
+	SCV StreamChannelVar
 )
+
+//StreamChannelVar definition
+type StreamChannelVar struct {
+	sc                                   v1.P4Runtime_StreamChannelClient
+	scError                              error
+	scCancel                             context.CancelFunc
+	masterArbRecvChan, masterArbSendChan chan *v1.MasterArbitrationUpdate
+	pktInChan                            chan *v1.PacketIn
+	pktOutChan                           chan *v1.PacketOut
+	genericStreamMessageChannel          chan *v1.StreamMessageResponse
+}
+
+//GetStreamChannel description
+func GetStreamChannel(p4rtClient v1.P4RuntimeClient) StreamChannelVar {
+	scv := StreamChannelVar{}
+	scv.masterArbRecvChan = make(chan *v1.MasterArbitrationUpdate)
+	scv.masterArbSendChan = make(chan *v1.MasterArbitrationUpdate)
+	scv.pktInChan = make(chan *v1.PacketIn)
+	scv.pktOutChan = make(chan *v1.PacketOut)
+	scv.genericStreamMessageChannel = make(chan *v1.StreamMessageResponse)
+	scContext := context.Background()
+	//ctx = context.TODO()
+	scContext, scv.scCancel = context.WithCancel(scContext)
+	scv.sc, scv.scError = p4rtClient.StreamChannel(scContext)
+	if scv.scError != nil {
+		log.Errorln(scv.scError)
+		log.Fatalln("Unable to get a stream channel")
+	}
+	go receiveStreamChannel(scv.sc, scv.pktInChan, scv.masterArbRecvChan, scv.genericStreamMessageChannel)
+	go sendStreamChannel(scv.sc, scv.pktOutChan, scv.masterArbSendChan)
+	return scv
+}
 
 //Init starts a P4Runtime client and runs go routines to send and receive stream channel messages from P4Runtime stream channel client
 func Init(target *tg.Target) {
 	p4rtContext = context.Background()
-	p4rtClient, _, _ = common.ConnectP4(p4rtContext, target)
-	scContext = context.Background()
-	//ctx = context.TODO()
-	scContext, p4rtCancel = context.WithCancel(scContext)
-	sc, p4rtError = p4rtClient.StreamChannel(scContext)
-	if p4rtError != nil {
-		log.Errorln(p4rtError)
-		log.Fatalln("Unable to get a stream channel")
-	}
-	go receiveStreamChannel(sc, pktInChan, masterArbitrationRecvChan)
-	go sendStreamChannel(sc, pktOutChan, masterArbitrationSendChan)
-
+	P4rtClient, _, _ = common.ConnectP4(p4rtContext, target)
+	SCV = GetStreamChannel(P4rtClient)
 }
 
 //receiveStreamChannel runs a loop to continuously monitor stream channel client and sorts received messages to appropriate channels
-func receiveStreamChannel(sc v1.P4Runtime_StreamChannelClient, pktInChan chan *v1.PacketIn, masterArbitrationRecvChan chan *v1.MasterArbitrationUpdate) {
+func receiveStreamChannel(sc v1.P4Runtime_StreamChannelClient, pktInChan chan *v1.PacketIn, masterArbitrationRecvChan chan *v1.MasterArbitrationUpdate, genericStreamMessageChannel chan *v1.StreamMessageResponse) {
 	for {
 		smr, err := sc.Recv()
 		if err != nil {
@@ -102,9 +120,9 @@ func sendStreamChannel(sc v1.P4Runtime_StreamChannelClient, pktOutChan chan *v1.
 //TearDown closes the stream channel client
 func TearDown() {
 	log.Traceln("In p4_oper tear down")
-	p4rtCancel()
-	if sc != nil {
-		err := sc.CloseSend()
+	SCV.scCancel()
+	if SCV.sc != nil {
+		err := SCV.sc.CloseSend()
 		if err != nil {
 			log.Warnln("Error closing the stream channel:", err)
 		}
@@ -114,15 +132,16 @@ func TearDown() {
 //ProcessP4WriteRequest processes the write request
 func ProcessP4WriteRequest(target *tg.Target, wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
 	log.Traceln("In ProcessP4WriteRequest")
-	//FIXME: How to obtain master lock with different election id
-	if !lock {
-		lock = GetMasterArbitrationLock(sc, wreq.DeviceId, wreq.ElectionId)
+	if wreq == nil {
+		return false
 	}
+
+	lock = GetMasterArbitrationLock(SCV, wreq.DeviceId, wreq.ElectionId)
 
 	if lock {
 		log.Infoln("Sending P4 write request")
 		log.Debugf("Write request: %s", wreq)
-		resp, err := p4rtClient.Write(p4rtContext, wreq)
+		resp, err := P4rtClient.Write(p4rtContext, wreq)
 		if err != nil {
 			log.Errorf("err:%s\n", err)
 			return false
@@ -136,14 +155,14 @@ func ProcessP4WriteRequest(target *tg.Target, wreq *v1.WriteRequest, wres *v1.Wr
 //ProcessP4PipelineConfigOperation processes the forwarding request.
 func ProcessP4PipelineConfigOperation(target *tg.Target, req *v1.SetForwardingPipelineConfigRequest, res *v1.SetForwardingPipelineConfigResponse) bool {
 	log.Traceln("In ProcessP4PipelineConfigOperation")
-	//FIXME: How to obtain master lock with different election id
-	if !lock {
-		lock = GetMasterArbitrationLock(sc, req.DeviceId, req.ElectionId)
+	if req == nil {
+		return false
 	}
+	lock = GetMasterArbitrationLock(SCV, req.DeviceId, req.ElectionId)
 	if lock {
 		log.Infoln("Sending P4 pipeline config")
 		log.Tracef("Pipeline config: %s", req)
-		resp, err := p4rtClient.SetForwardingPipelineConfig(p4rtContext, req)
+		resp, err := P4rtClient.SetForwardingPipelineConfig(p4rtContext, req)
 		if err != nil {
 			log.Errorf("err:%s\n", err)
 			return false
@@ -157,18 +176,13 @@ func ProcessP4PipelineConfigOperation(target *tg.Target, req *v1.SetForwardingPi
 //ProcessPacketOutOperation sends packet to stream channel client.
 func ProcessPacketOutOperation(target *tg.Target, po *v1.PacketOut) bool {
 	log.Traceln("In ProcessP4 Packet Out")
-	//smr := &v1.StreamMessageRequest{Update: &v1.StreamMessageRequest_Packet{Packet: po}}
-
 	var deviceID uint64 = 1
 	electionID := &v1.Uint128{High: 1, Low: 5}
-	//FIXME: How to obtain master lock with different election id
-	if !lock {
-		lock = GetMasterArbitrationLock(sc, deviceID, electionID)
-	}
+	lock = GetMasterArbitrationLock(SCV, deviceID, electionID)
 	if lock {
 		log.Infoln("Sending packet")
 		log.Debugf("Packet info: %s", po)
-		pktOutChan <- po
+		SCV.pktOutChan <- po
 		return true
 	}
 	return false
@@ -179,7 +193,7 @@ func ProcessPacketIn(exp *v1.PacketIn) bool {
 	packetMatched := false
 
 	select {
-	case ret := <-pktInChan:
+	case ret := <-SCV.pktInChan:
 		log.Traceln("In ProcessPacketIn Case PktInChan")
 		if bytes.Equal(ret.GetPayload(), exp.GetPayload()) {
 			packetMatched = true
@@ -196,17 +210,17 @@ func ProcessPacketIn(exp *v1.PacketIn) bool {
 	return packetMatched
 }
 
-//GetMasterArbitrationLock sends a master arbitration request to stream channel client. Returns true if returned status code is Code_OK.
-func GetMasterArbitrationLock(sc v1.P4Runtime_StreamChannelClient, deviceID uint64, electionID *v1.Uint128) bool {
+//GetMasterArbitrationLock description
+func GetMasterArbitrationLock(scv StreamChannelVar, deviceID uint64, electionID *v1.Uint128) bool {
 	log.Traceln("In GetMasterArbitrationLock")
 	lockAchieved := false
 
 	arb := &v1.MasterArbitrationUpdate{}
 	arb.DeviceId = deviceID
 	arb.ElectionId = electionID
-	masterArbitrationSendChan <- arb
+	scv.masterArbSendChan <- arb
 	select {
-	case ret := <-masterArbitrationRecvChan:
+	case ret := <-scv.masterArbRecvChan:
 		if ret.Status.Code == int32(scpb.Code_OK) {
 			log.Traceln("Master lock achieved")
 			lockAchieved = true
