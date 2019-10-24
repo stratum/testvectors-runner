@@ -2,7 +2,7 @@
 FROM golang:1.12.7 as builder
 
 RUN apt-get update \
-  && apt-get install -y vim libpcap-dev\
+  && apt-get install -y make libpcap-dev\
   && rm -rf /var/lib/apt/lists/* 
 
 WORKDIR /root/testvectors-runner
@@ -11,8 +11,7 @@ WORKDIR /root/testvectors-runner
 COPY . . 
 
 #Build go binary
-RUN env GOOS=$(go env GOOS) GOARCH=$(go env GOARCH) go build -o ./cmd/main/tv_runner ./cmd/main/testvectors-runner.go
-
+RUN make build
 
 
 # Docker image to run tv_runner with stratum_bmv2 switch
@@ -26,7 +25,7 @@ RUN apt-get update \
 
 WORKDIR /root
 
-COPY --from=builder /root/testvectors-runner/cmd/main/tv_runner ./tv_runner
+COPY --from=builder /root/testvectors-runner/build/_output/tv_runner ./tv_runner
 COPY ./tools/Makefile ./Makefile
 
 RUN mkdir ./tools
