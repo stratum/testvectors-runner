@@ -7,25 +7,25 @@
 package orchestrator
 
 import (
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
-	tv "github.com/opennetworkinglab/testvectors/proto/testvector"
+	tg "github.com/stratum/testvectors/proto/target"
+	tv "github.com/stratum/testvectors/proto/testvector"
 )
 
 //Target global variable
 var Target *tg.Target
 
 //ProcessTestVector will parse test vector
-func ProcessTestVector(tv1 *tv.TestVector, tg1 *tg.Target) {
+func ProcessTestVector(tv1 *tv.TestVector, tg1 *tg.Target) bool {
 	if Target = tg1; Target == nil {
 		log.Errorln("Unspecified target, cannot execute tests")
-		return
+		return false
 	}
-
+	result := true
 	log.Infof("Target ID: %s, Target Address: %s\n", Target.TargetId, Target.Address)
 	for _, tc := range tv1.GetTestCases() {
-		ProcessTestCase(tc, Target)
+		result = ProcessTestCase(tc, Target) && result
 	}
-
+	return result
 }
 
 //ProcessTestCase will go through each test case and execute

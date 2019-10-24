@@ -15,7 +15,7 @@ import (
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/common"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
+	tg "github.com/stratum/testvectors/proto/target"
 )
 
 var log = logger.NewLogger()
@@ -92,8 +92,8 @@ func ProcessSetRequest(target *tg.Target, sreq *gnmi.SetRequest, sresp *gnmi.Set
 
 //ProcessSubscribeRequest opens a subscription channel and verifies the response
 func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, resultChan chan bool) bool {
-
-	subcl, err := gnmiClient.Subscribe(gnmiContext)
+	ctx := context.Background()
+	subcl, err := gnmiClient.Subscribe(ctx)
 	if err != nil {
 		log.Infoln(err)
 		return false

@@ -72,7 +72,7 @@ func StartCapture(iface string, timeout time.Duration) *time.Timer {
 		timeout = maxTimeout
 	}
 	// Check if packet capturing on this interface has already started
-	if timer, ok := captures.Load(iface); ok == true {
+	if timer, ok := captures.Load(iface); ok {
 		// Update the timer and return it
 		log.Debugf("Packet capturing already started on %s\n", iface)
 		timer.(*time.Timer).Reset(timeout)
@@ -83,7 +83,9 @@ func StartCapture(iface string, timeout time.Duration) *time.Timer {
 	f, _ := os.Create(pcapFile)
 	log.Debugf("Saving capture results to %s", pcapFile)
 	w := pcapgo.NewWriter(f)
-	w.WriteFileHeader(uint32(snapshotLen), layers.LinkTypeEthernet)
+	if err := w.WriteFileHeader(uint32(snapshotLen), layers.LinkTypeEthernet); err != nil {
+		log.Fatal(err)
+	}
 
 	// Open the device for capturing
 	handle, err := pcap.OpenLive(iface, snapshotLen, promiscuous, -1*time.Second)
@@ -110,13 +112,14 @@ func StartCapture(iface string, timeout time.Duration) *time.Timer {
 				// Save captured packets to file
 				log.Infof("Caught packet on interface %s\n", iface)
 				log.Debugf("Packet info: %s\n", packet)
-				w.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
+				if err := w.WritePacket(packet.Metadata().CaptureInfo, packet.Data()); err != nil {
+					log.Fatal(err)
+				}
 			case <-timer.C:
 				// Stop capturing on timeout
 				log.Debugf("Stop capturing on interface %s...", iface)
 				wg.Done()
 				return
-			default:
 			}
 		}
 	}()
@@ -166,7 +169,7 @@ func CheckRawPacket(iface string, pkts [][]byte, timeout time.Duration, match Ma
 		select {
 		case <-timer:
 			log.Debugf("Timeout exceeded, stop checking packet on interface %s...", iface)
-			if result == true {
+			if result {
 				log.Infof("Packet check passed on interface %s...", iface)
 			} else {
 				log.Errorf("Packet check failed on interface %s...", iface)

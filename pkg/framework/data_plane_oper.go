@@ -8,7 +8,7 @@ package framework
 
 import (
 	"github.com/opennetworkinglab/testvectors-runner/pkg/packet"
-	tg "github.com/opennetworkinglab/testvectors/proto/target"
+	tg "github.com/stratum/testvectors/proto/target"
 )
 
 //ProcessTrafficStimulus sends packets to specific ports

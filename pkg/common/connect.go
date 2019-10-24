@@ -33,7 +33,7 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	gpb "github.com/openconfig/gnmi/proto/gnmi"
 
-	tvb "github.com/opennetworkinglab/testvectors/proto/target"
+	tvb "github.com/stratum/testvectors/proto/target"
 )
 
 // Connect opens a new gRPC connection to the target speciifed by the

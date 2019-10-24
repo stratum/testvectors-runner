@@ -8,4 +8,4 @@ COPY ./tools/bmv2 ./tools/bmv2/
 
 WORKDIR /root/tools/bmv2
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT make switch
