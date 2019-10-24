@@ -4,7 +4,7 @@ This project is a reference implementation of a Test Vector runner which execute
 
 ## Run Test Vectors
 
-testvectors-runner works with various switch targets including bmv2 switches and hardware switches. For running with bmv2 switches we provide a Dockerfile which deploys the runner binary and a bmv2 switch inside a docker container. For running with hardware switches we also provide a script to deploy and run testvectors-runner binary on a server which has both gPRC and data plane connections to the hardware switch under test. In both cases you'll need to point testvectors-runner to the correct Test Vector files either downloaded from [Test Vectors repo](https://github.com/opennetworkinglab/testvectors) or created on your own.
+testvectors-runner works with various switch targets including bmv2 switches and hardware switches. For running with bmv2 switch we provide a docker image  which deploys the bmv2 switch inside a docker container and another docker image for testvectors-runner binary. For running with hardware switches we also provide a script to deploy and run testvectors-runner binary on a server which has both gPRC and data plane connections to the hardware switch under test. In both cases you'll need to point testvectors-runner to the correct Test Vector files either downloaded from [Test Vectors repo](https://github.com/opennetworkinglab/testvectors) or created on your own.
 
 ### Run with bmv2 and Docker
 
