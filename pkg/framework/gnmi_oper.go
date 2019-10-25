@@ -8,6 +8,7 @@ package framework
 
 import (
 	"context"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/openconfig/gnmi/proto/gnmi"
@@ -91,12 +92,11 @@ func ProcessSetRequest(target *tg.Target, sreq *gnmi.SetRequest, sresp *gnmi.Set
 }
 
 //ProcessSubscribeRequest opens a subscription channel and verifies the response
-func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, resultChan chan bool) bool {
+func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, resultChan chan bool) {
 	ctx := context.Background()
 	subcl, err := gnmiClient.Subscribe(ctx)
 	if err != nil {
 		log.Infoln(err)
-		return false
 	}
 	defer func() {
 		err := subcl.CloseSend()
@@ -137,7 +137,12 @@ func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sre
 		log.Errorln(err)
 		result = false
 	}
-	<-waitc
-	resultChan <- result
-	return true
+	select {
+	case <-waitc:
+		resultChan <- result
+	case <-time.After(15 * time.Second):
+		log.Errorln("Timed out")
+		resultChan <- false
+	}
+
 }

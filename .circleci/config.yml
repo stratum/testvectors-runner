@@ -1,18 +1,23 @@
-version: 2.1
+version: 2.0
 jobs:
   build:
     docker:
-      - image: golang:1.12.7
+      - image: circleci/ruby:2.4.1
     steps:
       - checkout
-      - run: apt-get update; apt-get install -y libpcap-dev docker.io
-      - run: docker -v
-      - run: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.21.0
       - setup_remote_docker
       - run:
           name: Start bmv2 switch
-          command: docker run -d --privileged --rm -it --network=host --name bmv2 stratumproject/tvrunner:bmv2
-      - run: make test
+          command: docker run -d --privileged --rm -it -p50001:50001 --name bmv2 stratumproject/tvrunner:bmv2
+      - run:
+          name: Build dev image
+          command: docker build -t stratumproject/tvrunner:dev -f build/dev/Dockerfile .
+      - run:
+          name: Start testvectors-runner
+          command: docker run -d --rm -it --network=container:bmv2 --name tvrunner stratumproject/tvrunner:dev
+      - run:
+          name: Run tests
+          command: docker exec -it tvrunner /bin/bash -c "make test"
   test:
     docker:
       - image: circleci/ruby:2.4.1
