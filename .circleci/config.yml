@@ -36,7 +36,7 @@ jobs:
           at: /tmp
       - setup_remote_docker
       - run:
-          docker load -t /tmp/tvrunner_binary.tar
+          docker load -i /tmp/tvrunner_binary.tar
       - run:
           name: Start bmv2 switch
           command: docker run -d --privileged --rm -it --name bmv2 stratumproject/tvrunner:bmv2
