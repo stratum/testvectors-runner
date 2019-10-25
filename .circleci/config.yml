@@ -1,4 +1,4 @@
-version: 2.1
+version: 2.0
 jobs:
   build:
     docker:
@@ -11,7 +11,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Start bmv2 switch
-          command: docker run -d --privileged --rm -it --network=host --name bmv2 stratumproject/tvrunner:bmv2
+          command: docker run -d --privileged --rm -it -p50001:50001 --name bmv2 stratumproject/tvrunner:bmv2
       - run: make test
   test:
     docker:
