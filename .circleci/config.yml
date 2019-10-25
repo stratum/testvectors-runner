@@ -23,7 +23,7 @@ jobs:
           command: docker build -t stratumproject/tvrunner:binary -f build/test/Dockerfile .
       - run:
           name: Save docker image
-          commad: docker save -o /tmp/tvrunner_binary.tar stratumproject/tvrunner:binary
+          command: docker save -o /tmp/tvrunner_binary.tar stratumproject/tvrunner:binary
       - persist_to_workspace:
           root: /tmp
           paths:
