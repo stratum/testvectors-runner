@@ -7,7 +7,11 @@ jobs:
       - checkout
       - run: apt-get update; apt-get install -y libpcap-dev
       - run: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.21.0
-      - run: make test || true
+      - setup_remote_docker
+      - run:
+          name: Start bmv2 switch
+          command: docker run -d --privileged --rm -it -p50001:50001 --name bmv2 stratumproject/tvrunner:bmv2
+      - run: make test
   test:
     docker:
       - image: circleci/ruby:2.4.1
