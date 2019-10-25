@@ -99,9 +99,11 @@ func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sre
 		log.Infoln(err)
 	}
 	defer func() {
-		err := subcl.CloseSend()
-		if err != nil {
-			log.Warnln("Error closing subscription client: ", err)
+		if subcl != nil {
+			err := subcl.CloseSend()
+			if err != nil {
+				log.Warnln("Error closing subscription client: ", err)
+			}
 		}
 	}()
 	result := true
