@@ -11,7 +11,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Start bmv2 switch
-          command: docker run -d --privileged --rm -it -p50001:50001 --name bmv2 stratumproject/tvrunner:bmv2
+          command: docker run -d --privileged --rm -it --network=host --name bmv2 stratumproject/tvrunner:bmv2
       - run: make test
   test:
     docker:
@@ -20,7 +20,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Start bmv2 switch
-          command: docker run -d --privileged --rm -it -p50001:50001 --name bmv2 stratumproject/tvrunner:bmv2
+          command: docker run -d --privileged --rm -it --name bmv2 stratumproject/tvrunner:bmv2
       - run:
           name: Start testvectors-runner
           command: docker run -d --rm -it --network=container:bmv2 --name tvrunner stratumproject/tvrunner:binary
