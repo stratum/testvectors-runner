@@ -1,0 +1,39 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: golang:1.12.7
+    steps:
+      - checkout
+      - run: apt-get update; apt-get install -y libpcap-dev
+      - run: curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.21.0
+      - run: make test
+  test:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Start bmv2 switch
+          command: docker run -d --privileged --rm -it -p50001:50001 --name bmv2 stratumproject/tvrunner:bmv2
+      - run:
+          name: Start testvectors-runner
+          command: docker run -d --rm -it --network=container:bmv2 --name tvrunner stratumproject/tvrunner:binary
+      - run:
+          name: Clone testvectors repo
+          command: git clone https://github.com/stratum/testvectors.git
+      - run:
+          name: Copy testv vectors to runner
+          command: docker cp /home/circleci/project/testvectors/bmv2/ tvrunner:/root/tv/
+      - run:
+          name: Run tests
+          command: docker exec -it tvrunner /bin/bash -c "make tests"
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
