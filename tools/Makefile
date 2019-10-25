@@ -25,5 +25,4 @@ p4runtime:
 e2e:
 	./tv_runner -test.v -tvDir=${TV_DIR}e2e/ -tgFile=${TG_FILE} -portMapFile=${PORT_MAP_FILE} -logLevel=${LOG_LEVEL}
 
-tests:
-	pipeline gnmi e2e p4runtime
+tests: pipeline gnmi e2e p4runtime
