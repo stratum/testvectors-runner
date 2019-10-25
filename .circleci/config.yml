@@ -18,11 +18,25 @@ jobs:
       - run:
           name: Run tests
           command: docker exec -it tvrunner /bin/bash -c "make test"
+      - run:
+          name: Build binary image
+          command: docker build -t stratumproject/tvrunner:binary -f build/test/Dockerfile .
+      - run:
+          name: Save docker image
+          commad: docker save -o /tmp/tvrunner_binary.tar stratumproject/tvrunner:binary
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - tvrunner_binary.tar
   test:
     docker:
       - image: circleci/ruby:2.4.1
     steps:
+      - attach_workspace:
+          at: /tmp
       - setup_remote_docker
+      - run:
+          docker load -t /tmp/tvrunner_binary.tar
       - run:
           name: Start bmv2 switch
           command: docker run -d --privileged --rm -it --name bmv2 stratumproject/tvrunner:bmv2
