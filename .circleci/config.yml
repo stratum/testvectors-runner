@@ -53,7 +53,7 @@ jobs:
           command: docker build -t stratumproject/tvrunner:binary -f build/test/Dockerfile .
       - run:
           name: Docker login
-          command: echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+          command: docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
       - run:
           name: Push docker image
           command: docker push stratumproject/tvrunner:binary
