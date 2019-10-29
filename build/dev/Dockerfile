@@ -11,4 +11,4 @@ RUN curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/in
 WORKDIR /root/testvectors-runner
 
 # Copy everything from the current directory to the PWD(Present Working Directory) inside the container
-#COPY . .
+COPY . .
