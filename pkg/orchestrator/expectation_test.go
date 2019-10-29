@@ -170,8 +170,8 @@ func TestProcessDataPlaneExpectation(t *testing.T) {
 func TestProcessTelemetryExpectation(t *testing.T) {
 	framework.InitGNMI(TestTarget)
 	framework.Init(TestTarget)
-	framework.TearDown()
-	framework.TearDownGNMI()
+	defer framework.TearDown()
+	defer framework.TearDownGNMI()
 	var (
 		telemetryExpectation = &tv.TelemetryExpectation{
 			GnmiSubscribeRequest:  &gnmi.SubscribeRequest{},
