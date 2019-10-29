@@ -1,0 +1,73 @@
+version: 2.0
+jobs:
+  unit_test:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Start bmv2 switch
+          command: docker run -d --privileged --rm -it -p50001:50001 --name bmv2 stratumproject/tvrunner:bmv2
+      - run:
+          name: Build dev image
+          command: docker build -t stratumproject/tvrunner:dev -f build/dev/Dockerfile .
+      - run:
+          name: Start testvectors-runner
+          command: docker run -d --rm -it --network=container:bmv2 --name tvrunner stratumproject/tvrunner:dev
+      - run:
+          name: Run tests
+          command: docker exec -it tvrunner /bin/bash -c "make test"
+  integration_test:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Start bmv2 switch
+          command: docker run -d --privileged --rm -it --name bmv2 stratumproject/tvrunner:bmv2
+      - run:
+          name: Build bin image
+          command: docker build -t stratumproject/tvrunner:binary -f build/test/Dockerfile .
+      - run:
+          name: Start testvectors-runner
+          command: docker run -d --rm -it --network=container:bmv2 --name tvrunner stratumproject/tvrunner:binary
+      - run:
+          name: Clone testvectors repo
+          command: git clone https://github.com/stratum/testvectors.git
+      - run:
+          name: Copy testvectors to runner
+          command: docker cp /home/circleci/project/testvectors/bmv2/ tvrunner:/root/tv/
+      - run:
+          name: Run tests
+          command: docker exec -it tvrunner /bin/bash -c "make tests"
+  publish:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build bin image
+          command: docker build -t stratumproject/tvrunner:binary -f build/test/Dockerfile .
+      - run:
+          name: Docker login
+          command: docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
+      - run:
+          name: Push docker image
+          command: docker push stratumproject/tvrunner:binary
+
+workflows:
+  version: 2
+  test_and_publish:
+    jobs:
+    - unit_test
+    - integration_test
+    - publish:
+        requires:
+          - unit_test
+          - integration_test
+        filters:
+          branches:
+            only: master
