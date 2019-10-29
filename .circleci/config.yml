@@ -1,6 +1,6 @@
 version: 2.0
 jobs:
-  build:
+  unit_test:
     docker:
       - image: circleci/ruby:2.4.1
     steps:
@@ -18,17 +18,38 @@ jobs:
       - run:
           name: Run tests
           command: docker exec -it tvrunner /bin/bash -c "make test"
+  integration_test:
+    docker:
+      - image: circleci/ruby:2.4.1
+    steps:
+      - checkout
+      - setup_remote_docker
       - run:
-          name: Build binary image
+          name: Start bmv2 switch
+          command: docker run -d --privileged --rm -it --name bmv2 stratumproject/tvrunner:bmv2
+      - run:
+          name: Build bin image
           command: docker build -t stratumproject/tvrunner:binary -f build/test/Dockerfile .
       - run:
-          name: Save docker image
+          name: Start testvectors-runner
+          command: docker run -d --rm -it --network=container:bmv2 --name tvrunner stratumproject/tvrunner:binary
+      - run:
+          name: Clone testvectors repo
+          command: git clone https://github.com/stratum/testvectors.git
+      - run:
+          name: Copy testvectors to runner
+          command: docker cp /home/circleci/project/testvectors/bmv2/ tvrunner:/root/tv/
+      - run:
+          name: Run tests
+          command: docker exec -it tvrunner /bin/bash -c "make tests"
+      - run:
+          name: Save tvrunner:bin docker image
           command: docker save -o /tmp/tvrunner_binary.tar stratumproject/tvrunner:binary
       - persist_to_workspace:
           root: /tmp
           paths:
             - tvrunner_binary.tar
-  test:
+  publish:
     docker:
       - image: circleci/ruby:2.4.1
     steps:
@@ -38,26 +59,22 @@ jobs:
       - run:
           docker load -i /tmp/tvrunner_binary.tar
       - run:
-          name: Start bmv2 switch
-          command: docker run -d --privileged --rm -it --name bmv2 stratumproject/tvrunner:bmv2
+          name: Docker login
+          command: echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
       - run:
-          name: Start testvectors-runner
-          command: docker run -d --rm -it --network=container:bmv2 --name tvrunner stratumproject/tvrunner:binary
-      - run:
-          name: Clone testvectors repo
-          command: git clone https://github.com/stratum/testvectors.git
-      - run:
-          name: Copy testv vectors to runner
-          command: docker cp /home/circleci/project/testvectors/bmv2/ tvrunner:/root/tv/
-      - run:
-          name: Run tests
-          command: docker exec -it tvrunner /bin/bash -c "make tests"
+          name: Push docker image
+          command: docker push stratumproject/tvrunner:binary
+
 
 workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
-      - test:
-          requires:
-            - build
+    - unit_test
+    - integration_test
+  docker_publish:
+    jobs:
+    - publish:
+        filters:
+          branches:
+            only: master
