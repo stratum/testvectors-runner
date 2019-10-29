@@ -42,29 +42,21 @@ jobs:
       - run:
           name: Run tests
           command: docker exec -it tvrunner /bin/bash -c "make tests"
-      - run:
-          name: Save tvrunner:bin docker image
-          command: docker save -o /tmp/tvrunner_binary.tar stratumproject/tvrunner:binary
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - tvrunner_binary.tar
   publish:
     docker:
       - image: circleci/ruby:2.4.1
     steps:
-      - attach_workspace:
-          at: /tmp
+      - checkout
       - setup_remote_docker
       - run:
-          docker load -i /tmp/tvrunner_binary.tar
+          name: Build bin image
+          command: docker build -t stratumproject/tvrunner:binary -f build/test/Dockerfile .
       - run:
           name: Docker login
           command: echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
       - run:
           name: Push docker image
           command: docker push stratumproject/tvrunner:binary
-
 
 workflows:
   version: 2
