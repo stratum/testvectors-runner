@@ -1,4 +1,9 @@
 #!/bin/bash
+# 
+# Copyright 2019-present Open Networking Foundation
+# 
+# SPDX-License-Identifier: Apache-2.0
+# 
 
 PLATFORM=tofino
 REMOTE_TV_RUNNER_DIR="~/tv_runner"

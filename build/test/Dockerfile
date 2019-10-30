@@ -1,3 +1,8 @@
+# 
+# Copyright 2019-present Open Networking Foundation
+# 
+# SPDX-License-Identifier: Apache-2.0
+# 
 # Start from golang v1.12.7 base image
 FROM golang:1.12.7 as builder
 

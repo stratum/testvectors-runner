@@ -1,3 +1,8 @@
+# 
+# Copyright 2019-present Open Networking Foundation
+# 
+# SPDX-License-Identifier: Apache-2.0
+# 
 PLATFORM := bmv2
 TV_DIR := $$HOME/tv/${PLATFORM}/
 TV_SUITE := p4runtime/
