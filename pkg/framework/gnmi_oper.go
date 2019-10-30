@@ -1,7 +1,7 @@
 /*
-*Copyright 2019-present Open Networking Foundation
-*
-*SPDX-License-Identifier: Apache-2.0
+ * Copyright 2019-present Open Networking Foundation
+ *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 package framework
@@ -139,7 +139,7 @@ func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sre
 	}
 	select {
 	case <-waitc:
-	resultChan <- result
+		resultChan <- result
 	case <-time.After(15 * time.Second):
 		log.Errorln("Timed out")
 		resultChan <- false

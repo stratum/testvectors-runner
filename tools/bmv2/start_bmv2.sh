@@ -1,4 +1,9 @@
 #!/bin/bash
+# 
+# Copyright 2019-present Open Networking Foundation
+# 
+# SPDX-License-Identifier: Apache-2.0
+# 
 
 CHASSIS_CONFIG_FILE=/root/tools/bmv2/chassis-config.txt
 CPU_PORT=253
