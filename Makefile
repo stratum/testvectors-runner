@@ -3,7 +3,7 @@
 # 
 # SPDX-License-Identifier: Apache-2.0
 # 
-TV_DIR := $$HOME/testvectors
+TV_DIR := $$HOME/testvectors/bmv2
 TV_RUNNER_DIR := $$PWD
 
 .PHONY: build
