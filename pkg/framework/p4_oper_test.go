@@ -42,7 +42,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 						Arch: "v1model",
 					},
 					Tables: []*config.Table{
-						&config.Table{
+						{
 							Preamble: &config.Preamble{
 								Id:          33572104,
 								Name:        "ingress.l3_fwd.l3_fwd_table",
@@ -50,7 +50,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								Annotations: []string{"@switchstack(\"pipeline_stage: L3_LPM\")"},
 							},
 							MatchFields: []*config.MatchField{
-								&config.MatchField{
+								{
 									Id:       1,
 									Name:     "local_metadata.vrf_id",
 									Bitwidth: 10,
@@ -58,7 +58,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 										MatchType: config.MatchField_EXACT,
 									},
 								},
-								&config.MatchField{
+								{
 									Id:       2,
 									Name:     "hdr.ipv4_base.dst_addr",
 									Bitwidth: 32,
@@ -68,13 +68,13 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								},
 							},
 							ActionRefs: []*config.ActionRef{
-								&config.ActionRef{
+								{
 									Id: 16782370,
 								},
-								&config.ActionRef{
+								{
 									Id: 16819938,
 								},
-								&config.ActionRef{
+								{
 									Id: 16822646,
 								},
 							},
@@ -82,7 +82,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 							ImplementationId:     285233948,
 							Size:                 1024,
 						},
-						&config.Table{
+						{
 							Preamble: &config.Preamble{
 								Id:          33582129,
 								Name:        "ingress.l2_fwd.l2_unicast_table",
@@ -90,7 +90,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								Annotations: []string{"@switchstack(\"pipeline_stage: L2\")"},
 							},
 							MatchFields: []*config.MatchField{
-								&config.MatchField{
+								{
 									Id:       1,
 									Name:     "hdr.ethernet.dst_addr",
 									Bitwidth: 48,
@@ -98,10 +98,10 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								},
 							},
 							ActionRefs: []*config.ActionRef{
-								&config.ActionRef{
+								{
 									Id: 16838806,
 								},
-								&config.ActionRef{
+								{
 									Id:          16800567,
 									Scope:       config.ActionRef_DEFAULT_ONLY,
 									Annotations: []string{"@defaultonly"},
@@ -109,7 +109,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 							},
 							Size: 1024,
 						},
-						&config.Table{
+						{
 							Preamble: &config.Preamble{
 								Id:          33598026,
 								Name:        "ingress.punt.punt_table",
@@ -117,79 +117,79 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								Annotations: []string{"@switchstack(\"pipeline_stage: INGRESS_ACL\")"},
 							},
 							MatchFields: []*config.MatchField{
-								&config.MatchField{
+								{
 									Id:       1,
 									Name:     "standard_metadata.ingress_port",
 									Bitwidth: 9,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       2,
 									Name:     "standard_metadata.egress_spec",
 									Bitwidth: 9,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       3,
 									Name:     "hdr.ethernet.ether_type",
 									Bitwidth: 16,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       4,
 									Name:     "hdr.ipv4_base.diffserv",
 									Bitwidth: 8,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       5,
 									Name:     "hdr.ipve_base.ttl",
 									Bitwidth: 8,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       6,
 									Name:     "hdr.ipv4_base.src_addr",
 									Bitwidth: 32,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       7,
 									Name:     "hdr.ipv4_base.dst_addr",
 									Bitwidth: 32,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       8,
 									Name:     "hdr.ipv4_base.protocol",
 									Bitwidth: 8,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       9,
 									Name:     "local_metadata.icmp_code",
 									Bitwidth: 8,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       10,
 									Name:     "hdr.vlan_tag[0].vid",
 									Bitwidth: 12,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       11,
 									Name:     "hdr.vlan_tag[0].pcp",
 									Bitwidth: 3,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       12,
 									Name:     "local_metadata.class_id",
 									Bitwidth: 8,
 									Match:    &config.MatchField_MatchType_{MatchType: config.MatchField_TERNARY},
 								},
-								&config.MatchField{
+								{
 									Id:       13,
 									Name:     "local_metadata.vrf_id",
 									Bitwidth: 10,
@@ -197,16 +197,16 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								},
 							},
 							ActionRefs: []*config.ActionRef{
-								&config.ActionRef{
+								{
 									Id: 16824483,
 								},
-								&config.ActionRef{
+								{
 									Id: 16804007,
 								},
-								&config.ActionRef{
+								{
 									Id: 16820507,
 								},
-								&config.ActionRef{
+								{
 									Id:          16800567,
 									Scope:       config.ActionRef_DEFAULT_ONLY,
 									Annotations: []string{"@defaultonly"},
@@ -215,7 +215,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 							DirectResourceIds: []uint32{318787623, 352360565},
 							Size:              25,
 						},
-						&config.Table{
+						{
 							Preamble: &config.Preamble{
 								Id:          33573106,
 								Name:        "ingress.my_station_table",
@@ -223,7 +223,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								Annotations: []string{"@switchstack(\"pipeline_stage: L2\")"},
 							},
 							MatchFields: []*config.MatchField{
-								&config.MatchField{
+								{
 									Id:       1,
 									Name:     "hdr.ethernet.dst_addr",
 									Bitwidth: 48,
@@ -231,10 +231,10 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								},
 							},
 							ActionRefs: []*config.ActionRef{
-								&config.ActionRef{
+								{
 									Id: 16832439,
 								},
-								&config.ActionRef{
+								{
 									Id: 16819938,
 								},
 							},
@@ -242,113 +242,113 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 						},
 					},
 					Actions: []*config.Action{
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16819938,
 								Name:  "nop",
 								Alias: "nop",
 							},
 						},
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16800567,
 								Name:  "NoAction",
 								Alias: "NoAction",
 							},
 						},
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16822646,
 								Name:  "ingress.l3_fwd.drop",
 								Alias: "drop",
 							},
 						},
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16782370,
 								Name:  "ingress.l3_fwd.set_nexthop",
 								Alias: "set_nexthop",
 							},
 							Params: []*config.Action_Param{
-								&config.Action_Param{
+								{
 									Id:       1,
 									Name:     "port",
 									Bitwidth: 9,
 								},
-								&config.Action_Param{
+								{
 									Id:       2,
 									Name:     "smac",
 									Bitwidth: 48,
 								},
-								&config.Action_Param{
+								{
 									Id:       3,
 									Name:     "dmac",
 									Bitwidth: 48,
 								},
-								&config.Action_Param{
+								{
 									Id:       4,
 									Name:     "dst_vlan",
 									Bitwidth: 12,
 								},
 							},
 						},
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16838806,
 								Name:  "ingress.l2_fwd.set_egress_port",
 								Alias: "l2_fwd.set_egress_port",
 							},
 							Params: []*config.Action_Param{
-								&config.Action_Param{
+								{
 									Id:       1,
 									Name:     "port",
 									Bitwidth: 9,
 								},
 							},
 						},
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16824483,
 								Name:  "ingress.punt.set_queue_and_clone_to_cpu",
 								Alias: "set_queue_and_clone_to_cpu",
 							},
 							Params: []*config.Action_Param{
-								&config.Action_Param{
+								{
 									Id:       1,
 									Name:     "queue_id",
 									Bitwidth: 5,
 								},
 							},
 						},
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16804007,
 								Name:  "ingress.punt.set_queue_and_send_to_cpu",
 								Alias: "set_queue_and_send_to_cpu",
 							},
 							Params: []*config.Action_Param{
-								&config.Action_Param{
+								{
 									Id:       1,
 									Name:     "queue_id",
 									Bitwidth: 5,
 								},
 							},
 						},
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16820507,
 								Name:  "ingress.punt.set_egress_port",
 								Alias: "punt.set_egress_port",
 							},
 							Params: []*config.Action_Param{
-								&config.Action_Param{
+								{
 									Id:       1,
 									Name:     "port",
 									Bitwidth: 9,
 								},
 							},
 						},
-						&config.Action{
+						{
 							Preamble: &config.Preamble{
 								Id:    16832439,
 								Name:  "ingress.set_l3_admit",
@@ -357,7 +357,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 						},
 					},
 					ActionProfiles: []*config.ActionProfile{
-						&config.ActionProfile{
+						{
 							Preamble: &config.Preamble{
 								Id:    285233948,
 								Name:  "ingress.l3_fwd.wcmp_action_profile",
@@ -370,7 +370,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 						},
 					},
 					DirectCounters: []*config.DirectCounter{
-						&config.DirectCounter{
+						{
 							Preamble: &config.Preamble{
 								Id:    318787623,
 								Name:  "ingress.punt.punt_packet_counter",
@@ -384,7 +384,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 					},
 					DirectMeters: []*config.DirectMeter{
 
-						&config.DirectMeter{
+						{
 							Preamble: &config.Preamble{
 								Id:    352360565,
 								Name:  "ingress.punt.ingress_port_meter",
@@ -397,7 +397,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 						},
 					},
 					ControllerPacketMetadata: []*config.ControllerPacketMetadata{
-						&config.ControllerPacketMetadata{
+						{
 							Preamble: &config.Preamble{
 								Id:          67146229,
 								Name:        "packet_in",
@@ -405,31 +405,31 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								Annotations: []string{"@controller_header(\"packet_in\")"},
 							},
 							Metadata: []*config.ControllerPacketMetadata_Metadata{
-								&config.ControllerPacketMetadata_Metadata{
+								{
 									Id:          1,
 									Name:        "ingress_physical_port",
 									Annotations: []string{"@switchstack(\"field_type: P4_FIELD_TYPE_INGRESS_PORT\")", "@proto_tag(1)"},
 									Bitwidth:    9,
 								},
-								&config.ControllerPacketMetadata_Metadata{
+								{
 									Id:          2,
 									Name:        "padding1",
 									Annotations: []string{"@proto_tag(2)"},
 									Bitwidth:    7,
 								},
-								&config.ControllerPacketMetadata_Metadata{
+								{
 									Id:          3,
 									Name:        "ingress_logical_port",
 									Annotations: []string{"@proto_tag(3)"},
 									Bitwidth:    32,
 								},
-								&config.ControllerPacketMetadata_Metadata{
+								{
 									Id:          4,
 									Name:        "target_egress_port",
 									Annotations: []string{"@switchstack(\"field_type: P4_FIELD_TYPE_EGRESS_PORT\")", "@proto_tag(4)"},
 									Bitwidth:    9,
 								},
-								&config.ControllerPacketMetadata_Metadata{
+								{
 									Id:          2,
 									Name:        "padding2",
 									Annotations: []string{"@proto_tag(5)"},
@@ -437,7 +437,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								},
 							},
 						},
-						&config.ControllerPacketMetadata{
+						{
 							Preamble: &config.Preamble{
 								Id:          67121543,
 								Name:        "packet_out",
@@ -445,19 +445,19 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 								Annotations: []string{"@not_extracted_in_egress", "@controller_header(\"packet_out\")"},
 							},
 							Metadata: []*config.ControllerPacketMetadata_Metadata{
-								&config.ControllerPacketMetadata_Metadata{
+								{
 									Id:          1,
 									Name:        "egress_physical_port",
 									Annotations: []string{"@switchstack(\"field_type: P4_FIELD_TYPE_EGRESS_PORT\")", "@proto_tag(1)"},
 									Bitwidth:    9,
 								},
-								&config.ControllerPacketMetadata_Metadata{
+								{
 									Id:          2,
 									Name:        "submit_to_ingress",
 									Annotations: []string{"@proto_tag(2)"},
 									Bitwidth:    1,
 								},
-								&config.ControllerPacketMetadata_Metadata{
+								{
 									Id:          3,
 									Name:        "padding",
 									Annotations: []string{"@proto_tag(3)"},
@@ -569,7 +569,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 			DeviceId:   deviceID,
 			ElectionId: electionID,
 			Updates: []*v1.Update{
-				&v1.Update{
+				{
 					Type: v1.Update_INSERT,
 					Entity: &v1.Entity{
 						Entity: &v1.Entity_TableEntry{
@@ -577,7 +577,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 								TableId:  33598026,
 								Priority: 10,
 								Match: []*v1.FieldMatch{
-									&v1.FieldMatch{
+									{
 										FieldId: 3,
 										FieldMatchType: &v1.FieldMatch_Ternary_{
 											Ternary: &v1.FieldMatch_Ternary{
@@ -592,7 +592,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 										Action: &v1.Action{
 											ActionId: 16804007,
 											Params: []*v1.Action_Param{
-												&v1.Action_Param{
+												{
 													ParamId: 1,
 													Value:   []byte("\004"),
 												},
@@ -610,7 +610,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 			DeviceId:   deviceID,
 			ElectionId: electionID,
 			Updates: []*v1.Update{
-				&v1.Update{
+				{
 					Type: v1.Update_DELETE,
 					Entity: &v1.Entity{
 						Entity: &v1.Entity_TableEntry{
@@ -618,7 +618,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 								TableId:  33598026,
 								Priority: 10,
 								Match: []*v1.FieldMatch{
-									&v1.FieldMatch{
+									{
 										FieldId: 3,
 										FieldMatchType: &v1.FieldMatch_Ternary_{
 											Ternary: &v1.FieldMatch_Ternary{
@@ -633,7 +633,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 										Action: &v1.Action{
 											ActionId: 16804007,
 											Params: []*v1.Action_Param{
-												&v1.Action_Param{
+												{
 													ParamId: 1,
 													Value:   []byte("\004"),
 												},
@@ -650,7 +650,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 		validPO = &v1.PacketOut{
 			Payload: []byte("\x3C\xFD\xFE\xA8\xEA\x31\x00\x00\x00\xC0\x1A\x10\x08\x00\x45\x00\x00\x2E\x00\x01\x00\x00\x40\x00\x66\xCB\x0A\x01\x00\x01\x0A\x02\x00\x01\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b"),
 			Metadata: []*v1.PacketMetadata{
-				&v1.PacketMetadata{
+				{
 					MetadataId: 1,
 					Value:      []byte("\000\000"),
 				},
@@ -660,7 +660,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 		invalidPO = &v1.PacketOut{
 			Payload: []byte("\x3C\xFD\xFE\xA8\xEA\x31\x00\x00\x00\xC0\x1A\x10\x08\x00\x45\x00\x00\x2E\x00\x01\x00\x00\x40\x00\x66\xCB\x0A\x01\x00\x01\x0A\x02\x00\x01\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b"),
 			Metadata: []*v1.PacketMetadata{
-				&v1.PacketMetadata{
+				{
 					MetadataId: 1,
 					Value:      []byte("\000\007"),
 				},
