@@ -22,7 +22,7 @@ func TestProcessConfigExpectation(t *testing.T) {
 		validConfigExpectation = &tv.ConfigExpectation{
 			GnmiGetRequest: &gnmi.GetRequest{
 				Path: []*gnmi.Path{
-					&gnmi.Path{
+					{
 						Elem: []*gnmi.PathElem{
 							{Name: "interfaces"},
 							{Name: "interface", Key: map[string]string{"name": "veth1"}},
@@ -35,10 +35,10 @@ func TestProcessConfigExpectation(t *testing.T) {
 			},
 			GnmiGetResponse: &gnmi.GetResponse{
 				Notification: []*gnmi.Notification{
-					&gnmi.Notification{
+					{
 						Timestamp: 1234567890123456789,
 						Update: []*gnmi.Update{
-							&gnmi.Update{
+							{
 								Path: &gnmi.Path{
 									Elem: []*gnmi.PathElem{
 										{Name: "interfaces"},

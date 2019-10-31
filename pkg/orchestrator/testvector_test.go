@@ -27,57 +27,57 @@ func TestProcessTestVector(t *testing.T) {
 
 		allScenariosTV = &tv.TestVector{
 			TestCases: []*tv.TestCase{
-				&tv.TestCase{
+				{
 					ActionGroups: []*tv.ActionGroup{
-						&tv.ActionGroup{
+						{
 							ActionGroup: &tv.ActionGroup_SequentialActionGroup{
 								SequentialActionGroup: &tv.SequentialActionGroup{},
 							},
 							ActionGroupId: "ag1",
 						},
-						&tv.ActionGroup{
+						{
 							ActionGroup: &tv.ActionGroup_ParallelActionGroup{
 								ParallelActionGroup: &tv.ParallelActionGroup{},
 							},
 							ActionGroupId: "ag2",
 						},
-						&tv.ActionGroup{
+						{
 							ActionGroup: &tv.ActionGroup_RandomizedActionGroup{
 								RandomizedActionGroup: &tv.RandomizedActionGroup{},
 							},
 							ActionGroupId: "ag3",
 						},
-						&tv.ActionGroup{},
+						{},
 					},
 					TestCaseId: "tc1",
 				},
-				&tv.TestCase{
+				{
 					Expectations: []*tv.Expectation{
-						&tv.Expectation{
+						{
 							Expectations: &tv.Expectation_ConfigExpectation{
 								ConfigExpectation: &tv.ConfigExpectation{},
 							},
 							ExpectationId: "e1",
 						},
-						&tv.Expectation{
+						{
 							Expectations: &tv.Expectation_ControlPlaneExpectation{
 								ControlPlaneExpectation: &tv.ControlPlaneExpectation{},
 							},
 							ExpectationId: "e2",
 						},
-						&tv.Expectation{
+						{
 							Expectations: &tv.Expectation_TelemetryExpectation{
 								TelemetryExpectation: &tv.TelemetryExpectation{},
 							},
 							ExpectationId: "e3",
 						},
-						&tv.Expectation{
+						{
 							Expectations: &tv.Expectation_DataPlaneExpectation{
 								DataPlaneExpectation: &tv.DataPlaneExpectation{},
 							},
 							ExpectationId: "e4",
 						},
-						&tv.Expectation{},
+						{},
 					},
 					TestCaseId: "tc2",
 				},

@@ -26,7 +26,7 @@ func TestProcessGetRequest(t *testing.T) {
 
 	validGetReq := &gnmi.GetRequest{
 		Path: []*gnmi.Path{
-			&gnmi.Path{
+			{
 				Elem: []*gnmi.PathElem{
 					{Name: "interfaces"},
 					{Name: "interface", Key: map[string]string{"name": "veth1"}},
@@ -39,10 +39,10 @@ func TestProcessGetRequest(t *testing.T) {
 
 	validGetResp := &gnmi.GetResponse{
 		Notification: []*gnmi.Notification{
-			&gnmi.Notification{
+			{
 				Timestamp: 1234567890123456789,
 				Update: []*gnmi.Update{
-					&gnmi.Update{
+					{
 						Path: &gnmi.Path{
 							Elem: []*gnmi.PathElem{
 								{Name: "interfaces"},
@@ -124,7 +124,7 @@ func TestProcessSetRequest(t *testing.T) {
 
 	validSetReq := &gnmi.SetRequest{
 		Update: []*gnmi.Update{
-			&gnmi.Update{
+			{
 				Path: &gnmi.Path{
 					Elem: []*gnmi.PathElem{
 						{Name: "interfaces"},
@@ -142,7 +142,7 @@ func TestProcessSetRequest(t *testing.T) {
 
 	invalidSetReq := &gnmi.SetRequest{
 		Update: []*gnmi.Update{
-			&gnmi.Update{
+			{
 				Path: &gnmi.Path{
 					Elem: []*gnmi.PathElem{
 						{Name: "interfaces"},
@@ -161,7 +161,7 @@ func TestProcessSetRequest(t *testing.T) {
 	validSetResp := &gnmi.SetResponse{
 		Prefix: &gnmi.Path{},
 		Response: []*gnmi.UpdateResult{
-			&gnmi.UpdateResult{
+			{
 				Path: &gnmi.Path{
 					Elem: []*gnmi.PathElem{
 						{Name: "interfaces"},
@@ -243,7 +243,7 @@ func TestProcessSubscribeRequest(t *testing.T) {
 		Request: &gnmi.SubscribeRequest_Subscribe{
 			Subscribe: &gnmi.SubscriptionList{
 				Subscription: []*gnmi.Subscription{
-					&gnmi.Subscription{
+					{
 						Path: &gnmi.Path{
 							Elem: []*gnmi.PathElem{
 								{Name: "interfaces"},
@@ -264,7 +264,7 @@ func TestProcessSubscribeRequest(t *testing.T) {
 		Request: &gnmi.SubscribeRequest_Subscribe{
 			Subscribe: &gnmi.SubscriptionList{
 				Subscription: []*gnmi.Subscription{
-					&gnmi.Subscription{
+					{
 						Path: &gnmi.Path{
 							Elem: []*gnmi.PathElem{
 								{Name: "interfaces"},
@@ -281,12 +281,12 @@ func TestProcessSubscribeRequest(t *testing.T) {
 		},
 	}
 	validSubResp := []*gnmi.SubscribeResponse{
-		&gnmi.SubscribeResponse{
+		{
 			Response: &gnmi.SubscribeResponse_Update{
 				Update: &gnmi.Notification{
 					Timestamp: 1234567890123456789,
 					Update: []*gnmi.Update{
-						&gnmi.Update{
+						{
 							Path: &gnmi.Path{
 								Elem: []*gnmi.PathElem{
 									{Name: "interfaces"},
@@ -303,17 +303,17 @@ func TestProcessSubscribeRequest(t *testing.T) {
 				},
 			},
 		},
-		&gnmi.SubscribeResponse{
+		{
 			Response: &gnmi.SubscribeResponse_SyncResponse{
 				SyncResponse: true,
 			},
 		},
-		&gnmi.SubscribeResponse{
+		{
 			Response: &gnmi.SubscribeResponse_Update{
 				Update: &gnmi.Notification{
 					Timestamp: 1234567890123456789,
 					Update: []*gnmi.Update{
-						&gnmi.Update{
+						{
 							Path: &gnmi.Path{
 								Elem: []*gnmi.PathElem{
 									{Name: "interfaces"},
@@ -330,12 +330,12 @@ func TestProcessSubscribeRequest(t *testing.T) {
 				},
 			},
 		},
-		&gnmi.SubscribeResponse{
+		{
 			Response: &gnmi.SubscribeResponse_Update{
 				Update: &gnmi.Notification{
 					Timestamp: 1234567890123456789,
 					Update: []*gnmi.Update{
-						&gnmi.Update{
+						{
 							Path: &gnmi.Path{
 								Elem: []*gnmi.PathElem{
 									{Name: "interfaces"},
@@ -355,7 +355,7 @@ func TestProcessSubscribeRequest(t *testing.T) {
 	}
 	setReq1 := &gnmi.SetRequest{
 		Update: []*gnmi.Update{
-			&gnmi.Update{
+			{
 				Path: &gnmi.Path{
 					Elem: []*gnmi.PathElem{
 						{Name: "interfaces"},
@@ -372,7 +372,7 @@ func TestProcessSubscribeRequest(t *testing.T) {
 	}
 	setReq2 := &gnmi.SetRequest{
 		Update: []*gnmi.Update{
-			&gnmi.Update{
+			{
 				Path: &gnmi.Path{
 					Elem: []*gnmi.PathElem{
 						{Name: "interfaces"},
@@ -390,7 +390,7 @@ func TestProcessSubscribeRequest(t *testing.T) {
 	setResp := &gnmi.SetResponse{
 		Prefix: &gnmi.Path{},
 		Response: []*gnmi.UpdateResult{
-			&gnmi.UpdateResult{
+			{
 				Path: &gnmi.Path{
 					Elem: []*gnmi.PathElem{
 						{Name: "interfaces"},
