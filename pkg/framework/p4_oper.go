@@ -130,7 +130,7 @@ func TearDown() {
 }
 
 //ProcessP4WriteRequest processes the write request
-func ProcessP4WriteRequest(target *tg.Target, wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
+func ProcessP4WriteRequest(wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
 	log.Traceln("In ProcessP4WriteRequest")
 	if wreq == nil {
 		return false
@@ -153,7 +153,7 @@ func ProcessP4WriteRequest(target *tg.Target, wreq *v1.WriteRequest, wres *v1.Wr
 }
 
 //ProcessP4PipelineConfigOperation processes the forwarding request.
-func ProcessP4PipelineConfigOperation(target *tg.Target, req *v1.SetForwardingPipelineConfigRequest, res *v1.SetForwardingPipelineConfigResponse) bool {
+func ProcessP4PipelineConfigOperation(req *v1.SetForwardingPipelineConfigRequest, res *v1.SetForwardingPipelineConfigResponse) bool {
 	log.Traceln("In ProcessP4PipelineConfigOperation")
 	if req == nil {
 		return false
@@ -174,7 +174,7 @@ func ProcessP4PipelineConfigOperation(target *tg.Target, req *v1.SetForwardingPi
 }
 
 //ProcessPacketOutOperation sends packet to stream channel client.
-func ProcessPacketOutOperation(target *tg.Target, po *v1.PacketOut) bool {
+func ProcessPacketOutOperation(po *v1.PacketOut) bool {
 	log.Traceln("In ProcessP4 Packet Out")
 	var deviceID uint64 = 1
 	electionID := &v1.Uint128{High: 1, Low: 5}

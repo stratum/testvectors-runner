@@ -109,7 +109,7 @@ func TestProcessGetRequest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			InitGNMI(tt.args.target)
-			if got := ProcessGetRequest(tt.args.target, tt.args.greq, tt.args.gresp); got != tt.want {
+			if got := ProcessGetRequest(tt.args.greq, tt.args.gresp); got != tt.want {
 				t.Errorf("ProcessGetRequest() = %v, want %v", got, tt.want)
 			}
 			TearDownGNMI()
@@ -224,7 +224,7 @@ func TestProcessSetRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessSetRequest(tt.args.target, tt.args.sreq, tt.args.sresp); got != tt.want {
+			if got := ProcessSetRequest(tt.args.sreq, tt.args.sresp); got != tt.want {
 				t.Errorf("ProcessSetRequest() = %v, want %v", got, tt.want)
 			}
 		})
@@ -459,9 +459,9 @@ func TestProcessSubscribeRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			go ProcessSubscribeRequest(tt.args.target, tt.args.subreq, tt.args.subresp, tt.args.resultChan)
+			go ProcessSubscribeRequest(tt.args.subreq, tt.args.subresp, tt.args.resultChan)
 			time.Sleep(2 * time.Millisecond)
-			if got := ProcessSetRequest(tt.args.target, tt.args.setreq1, tt.args.setresp) && ProcessSetRequest(tt.args.target, tt.args.setreq2, tt.args.setresp); got != true {
+			if got := ProcessSetRequest(tt.args.setreq1, tt.args.setresp) && ProcessSetRequest(tt.args.setreq2, tt.args.setresp); got != true {
 				t.Errorf("ProcessSetRequest() = %v, want %v", got, tt.want)
 			}
 			if got := <-tt.args.resultChan; got != tt.want {
