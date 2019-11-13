@@ -15,7 +15,7 @@ import (
 
 //ProcessConfigExpectation will execute config expectations
 func ProcessConfigExpectation(ce *tv.ConfigExpectation) bool {
-	return framework.ProcessGetRequest(Target, ce.GetGnmiGetRequest(), ce.GetGnmiGetResponse())
+	return framework.ProcessGetRequest(ce.GetGnmiGetRequest(), ce.GetGnmiGetResponse())
 }
 
 //ProcessControlPlaneExpectation will execute control plane expectations
@@ -46,7 +46,7 @@ func ProcessDataPlaneExpectation(dpe *tv.DataPlaneExpectation) bool {
 			payload := pkt.GetPayload()
 			payloads = append(payloads, payload)
 		}
-		return framework.ProcessTrafficExpectation(Target, payloads, dpe.GetTrafficExpectation().GetPorts())
+		return framework.ProcessTrafficExpectation(payloads, dpe.GetTrafficExpectation().GetPorts())
 	}
 	return false
 }
@@ -55,7 +55,7 @@ func ProcessDataPlaneExpectation(dpe *tv.DataPlaneExpectation) bool {
 func ProcessTelemetryExpectation(tme *tv.TelemetryExpectation) bool {
 	resultChan := make(chan bool, 1)
 	var subResult, actionResult bool
-	go framework.ProcessSubscribeRequest(Target, tme.GetGnmiSubscribeRequest(), tme.GetGnmiSubscribeResponse(), resultChan)
+	go framework.ProcessSubscribeRequest(tme.GetGnmiSubscribeRequest(), tme.GetGnmiSubscribeResponse(), resultChan)
 	time.Sleep(2 * time.Second)
 	if ag := tme.GetActionGroup(); ag != nil {
 		switch {

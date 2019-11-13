@@ -7,33 +7,21 @@
 package orchestrator
 
 import (
-	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
 
-//Target global variable
-var Target *tg.Target
-
 //ProcessTestVector will parse test vector
-func ProcessTestVector(tv1 *tv.TestVector, tg1 *tg.Target) bool {
-	if Target = tg1; Target == nil {
-		log.Errorln("Unspecified target, cannot execute tests")
-		return false
-	}
+func ProcessTestVector(tv1 *tv.TestVector) bool {
 	result := true
-	log.Infof("Target ID: %s, Target Address: %s\n", Target.TargetId, Target.Address)
+	//log.Infof("Target ID: %s, Target Address: %s\n", target.TargetId, target.Address)
 	for _, tc := range tv1.GetTestCases() {
-		result = ProcessTestCase(tc, Target) && result
+		result = ProcessTestCase(tc) && result
 	}
 	return result
 }
 
 //ProcessTestCase will go through each test case and execute
-func ProcessTestCase(tc *tv.TestCase, tg *tg.Target) bool {
-	if Target = tg; Target == nil {
-		log.Errorln("Unspecified target, cannot execute tests")
-		return false
-	}
+func ProcessTestCase(tc *tv.TestCase) bool {
 	log.Infof("Test Case ID: %s\n", tc.TestCaseId)
 	return ProcessActionGroups(tc.GetActionGroups()) && ProcessExpectations(tc.GetExpectations())
 }

@@ -157,7 +157,7 @@ func createTVTestSuite(tvFilesSlice []string, target *tg.Target) []testing.Inter
 				for _, tc := range tv.GetTestCases() {
 					t.Run(tc.TestCaseId, func(t *testing.T) {
 						test.SetUpTestCase(t, target)
-						result := orchestrator.ProcessTestCase(tc, target)
+						result := orchestrator.ProcessTestCase(tc)
 						test.TearDownTestCase(t, target)
 						if !result {
 							t.Fail()

@@ -62,7 +62,7 @@ func ProcessAction(action *tv.Action) bool {
 	switch {
 	case action.GetConfigOperation() != nil:
 		co := action.GetConfigOperation()
-		return framework.ProcessSetRequest(Target, co.GnmiSetRequest, co.GnmiSetResponse)
+		return framework.ProcessSetRequest(co.GnmiSetRequest, co.GnmiSetResponse)
 	case action.GetAlarmStimulus() != nil:
 		//TODO
 		as := action.GetAlarmStimulus()
@@ -94,13 +94,13 @@ func ProcessControlPlaneOperation(cpo *tv.ControlPlaneOperation) bool {
 	switch {
 	case cpo.GetPipelineConfigOperation() != nil:
 		log.Traceln("In Get Pipeline Config Oper")
-		return framework.ProcessP4PipelineConfigOperation(Target, cpo.GetPipelineConfigOperation().GetP4SetPipelineConfigRequest(), cpo.GetPipelineConfigOperation().GetP4SetPipelineConfigResponse())
+		return framework.ProcessP4PipelineConfigOperation(cpo.GetPipelineConfigOperation().GetP4SetPipelineConfigRequest(), cpo.GetPipelineConfigOperation().GetP4SetPipelineConfigResponse())
 	case cpo.GetWriteOperation() != nil:
 		log.Traceln("In Get Write Oper")
-		return framework.ProcessP4WriteRequest(Target, cpo.GetWriteOperation().GetP4WriteRequest(), cpo.GetWriteOperation().GetP4WriteResponse())
+		return framework.ProcessP4WriteRequest(cpo.GetWriteOperation().GetP4WriteRequest(), cpo.GetWriteOperation().GetP4WriteResponse())
 	case cpo.GetPacketOutOperation() != nil:
 		log.Traceln("In PacketOut Oper")
-		return framework.ProcessPacketOutOperation(Target, cpo.GetPacketOutOperation().GetP4PacketOut())
+		return framework.ProcessPacketOutOperation(cpo.GetPacketOutOperation().GetP4PacketOut())
 	}
 	return false
 }
@@ -117,7 +117,7 @@ func ProcessDataPlaneStimulus(dps *tv.DataPlaneStimulus) bool {
 			payload := pkt.GetPayload()
 			payloads = append(payloads, payload)
 		}
-		return framework.ProcessTrafficStimulus(Target, payloads, dps.GetTrafficStimulus().GetPort())
+		return framework.ProcessTrafficStimulus(payloads, dps.GetTrafficStimulus().GetPort())
 	}
 	return false
 }

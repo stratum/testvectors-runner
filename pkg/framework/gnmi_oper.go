@@ -45,7 +45,7 @@ func TearDownGNMI() {
 }
 
 //ProcessGetRequest sends a request to SUT and gives the response
-func ProcessGetRequest(target *tg.Target, greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
+func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
 	log.Infoln("Sending get request")
 	resp, err := gnmiClient.Get(gnmiContext, greq)
 	if err != nil {
@@ -63,7 +63,7 @@ func ProcessGetRequest(target *tg.Target, greq *gnmi.GetRequest, gresp *gnmi.Get
 }
 
 //ProcessSetRequest sends a set request to SUT and gives the response
-func ProcessSetRequest(target *tg.Target, sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
+func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
 	log.Traceln("In ProcessSetRequest")
 	log.Infoln("Sending set request")
 	resp, err := gnmiClient.Set(gnmiContext, sreq)
@@ -92,7 +92,7 @@ func ProcessSetRequest(target *tg.Target, sreq *gnmi.SetRequest, sresp *gnmi.Set
 }
 
 //ProcessSubscribeRequest opens a subscription channel and verifies the response
-func ProcessSubscribeRequest(target *tg.Target, sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, resultChan chan bool) {
+func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, resultChan chan bool) {
 	ctx := context.Background()
 	subcl, err := gnmiClient.Subscribe(ctx)
 	if err != nil {
