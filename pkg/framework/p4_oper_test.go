@@ -496,7 +496,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			//fmt.Println(proto.MarshalTextString(tt.args.req))
-			if got := ProcessP4PipelineConfigOperation(tt.args.target, tt.args.req, tt.args.res); got != tt.want {
+			if got := ProcessP4PipelineConfigOperation(tt.args.req, tt.args.res); got != tt.want {
 				t.Errorf("ProcessP4PipelineConfigOperation() = %v, want %v", got, tt.want)
 			}
 		})
@@ -547,7 +547,7 @@ func TestProcessP4WriteRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessP4WriteRequest(tt.args.target, tt.args.wreq, tt.args.wres); got != tt.want {
+			if got := ProcessP4WriteRequest(tt.args.wreq, tt.args.wres); got != tt.want {
 				t.Errorf("ProcessP4WriteRequest() = %v, want %v", got, tt.want)
 			}
 		})
@@ -734,16 +734,16 @@ func TestProcessPacketIOOperation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessP4WriteRequest(tt.args.target, tt.args.insertWriteReq, tt.args.writeResponse); got != tt.writeWant {
+			if got := ProcessP4WriteRequest(tt.args.insertWriteReq, tt.args.writeResponse); got != tt.writeWant {
 				t.Errorf("Insert Write ProcessP4WriteRequest() = %v, want %v", got, tt.writeWant)
 			}
-			if got := ProcessPacketOutOperation(tt.args.target, tt.args.po); got != tt.poWant {
+			if got := ProcessPacketOutOperation(tt.args.po); got != tt.poWant {
 				t.Errorf("ProcessPacketOutOperation() = %v, want %v", got, tt.poWant)
 			}
 			if got := ProcessPacketIn(tt.args.pi); got != tt.piWant {
 				t.Errorf("ProcessPacketIn() = %v, want %v", got, tt.piWant)
 			}
-			if got := ProcessP4WriteRequest(tt.args.target, tt.args.deleteWriteReq, tt.args.writeResponse); got != tt.writeWant {
+			if got := ProcessP4WriteRequest(tt.args.deleteWriteReq, tt.args.writeResponse); got != tt.writeWant {
 				t.Errorf("Delete Write ProcessP4WriteRequest() = %v, want %v", got, tt.writeWant)
 			}
 		})

@@ -75,14 +75,14 @@ func (st Test) PktIoOutDirectToDataPlaneTest(t *testing.T, target *tg.Target) {
 		log.InvalidProtoUnmarshal(reflect.TypeOf(pktOut), err)
 	}
 	// Send packet-out
-	result := framework.ProcessPacketOutOperation(target, pktOut)
+	result := framework.ProcessPacketOutOperation(pktOut)
 	assert.True(t, result, "PacketOut operation failed")
 
 	// Check if we received packets from data plane port 1
-	result = framework.ProcessTrafficExpectation(target, [][]byte{[]byte(payload)}, []uint32{1})
+	result = framework.ProcessTrafficExpectation([][]byte{[]byte(payload)}, []uint32{1})
 	assert.True(t, result, "Packet not received on port 1")
 	// Check if we received no packets from data plane port 2
-	result = framework.ProcessTrafficExpectation(target, [][]byte{}, []uint32{2})
+	result = framework.ProcessTrafficExpectation([][]byte{}, []uint32{2})
 	assert.True(t, result, "Unexpected packet received on port 2")
 
 	// Stop packet capturing
@@ -101,7 +101,7 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T, targ
 	}
 
 	// Insert table entry
-	result := framework.ProcessP4WriteRequest(target, request, nil)
+	result := framework.ProcessP4WriteRequest(request, nil)
 	assert.True(t, result, "Write request failed")
 
 	// Build packet-out
@@ -110,14 +110,14 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T, targ
 		log.InvalidProtoUnmarshal(reflect.TypeOf(pktOut), err)
 	}
 	// Send packet-out
-	result = framework.ProcessPacketOutOperation(target, pktOut)
+	result = framework.ProcessPacketOutOperation(pktOut)
 	assert.True(t, result, "PacketOut operation failed")
 
 	// Check if we received packets from data plane port 2
-	result = framework.ProcessTrafficExpectation(target, [][]byte{[]byte(payload)}, []uint32{2})
+	result = framework.ProcessTrafficExpectation([][]byte{[]byte(payload)}, []uint32{2})
 	assert.True(t, result, "Packet not received on port 1")
 	// Check if we received no packets from data plane port 1
-	result = framework.ProcessTrafficExpectation(target, [][]byte{}, []uint32{1})
+	result = framework.ProcessTrafficExpectation([][]byte{}, []uint32{1})
 	assert.True(t, result, "Unexpected packet received on port 2")
 
 	// TODO: Delete table entry
