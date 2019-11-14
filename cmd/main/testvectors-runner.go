@@ -7,7 +7,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
@@ -39,6 +38,8 @@ func main() {
 	tvDir := flag.String("tvDir", "", "Directory of Test Vector files")
 	tgFile := flag.String("tgFile", "", "Path to the Target file")
 	portMapFile := flag.String("portMapFile", "tools/bmv2/port-map.json", "Path to the port-map file")
+	dpMode := flag.String("dpMode", "direct", "Data plane mode: 'direct' or 'loopback'")
+	matchType := flag.String("matchType", "exact", "Data plane match type: 'exact' or 'in'")
 	logDir := flag.String("logDir", "/tmp", "Location to store logs")
 	level := flag.String("logLevel", "warn", "Log Level")
 	flag.Parse()
@@ -56,20 +57,8 @@ func main() {
 	}
 	log.Infoln("Target: ", target)
 
-	// Read port-map file
-	pmdata, err := ioutil.ReadFile(*portMapFile)
-	if err != nil {
-		log.InvalidFile("Port Map File: "+*portMapFile, err)
-	}
-	var portmap map[string]string
-	if err = json.Unmarshal(pmdata, &portmap); err != nil {
-		log.InvalidJSONUnmarshal(reflect.TypeOf(portmap), err)
-	}
-	log.Infoln("Port Map: ", portmap)
-
 	// Create data plane
-	// TODO: read arguments from command line
-	dataplane.CreateDataPlane("direct", portmap, dataplane.Exact)
+	dataplane.CreateDataPlane(*dpMode, *matchType, *portMapFile)
 
 	// Check if we run with Test Vectors or not
 	runTV := false
