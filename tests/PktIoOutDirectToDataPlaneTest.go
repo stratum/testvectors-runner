@@ -13,6 +13,7 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	"github.com/golang/protobuf/proto"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
 	tg "github.com/stratum/testvectors/proto/target"
 	"github.com/stretchr/testify/assert"
@@ -79,10 +80,10 @@ func (st Test) PktIoOutDirectToDataPlaneTest(t *testing.T, target *tg.Target) {
 	assert.True(t, result, "PacketOut operation failed")
 
 	// Check if we received packets from data plane port 1
-	result = framework.ProcessTrafficExpectation([][]byte{[]byte(payload)}, []uint32{1})
+	result = dataplane.ProcessTrafficExpectation([][]byte{[]byte(payload)}, []uint32{1})
 	assert.True(t, result, "Packet not received on port 1")
 	// Check if we received no packets from data plane port 2
-	result = framework.ProcessTrafficExpectation([][]byte{}, []uint32{2})
+	result = dataplane.ProcessTrafficExpectation([][]byte{}, []uint32{2})
 	assert.True(t, result, "Unexpected packet received on port 2")
 
 	// Stop packet capturing
@@ -114,10 +115,10 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T, targ
 	assert.True(t, result, "PacketOut operation failed")
 
 	// Check if we received packets from data plane port 2
-	result = framework.ProcessTrafficExpectation([][]byte{[]byte(payload)}, []uint32{2})
+	result = dataplane.ProcessTrafficExpectation([][]byte{[]byte(payload)}, []uint32{2})
 	assert.True(t, result, "Packet not received on port 1")
 	// Check if we received no packets from data plane port 1
-	result = framework.ProcessTrafficExpectation([][]byte{}, []uint32{1})
+	result = dataplane.ProcessTrafficExpectation([][]byte{}, []uint32{1})
 	assert.True(t, result, "Unexpected packet received on port 2")
 
 	// TODO: Delete table entry

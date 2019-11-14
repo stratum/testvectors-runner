@@ -217,7 +217,7 @@ func TestProcessAction(t *testing.T) {
 		{
 			name: "Data Plane Traffic Action",
 			args: args{action: dataPlaneAction},
-			want: true,
+			want: false,
 		},
 		{
 			name: "Management Action",

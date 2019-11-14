@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
-Package packet implements basic packet send/receive functions
-*/
-package packet
+package dataplane
 
 import (
 	"bytes"
@@ -21,43 +18,41 @@ import (
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/pcapgo"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 )
 
-// Match is used by CheckRawPacket
-type Match uint8
-
-// Match values for CheckRawPacket
-const (
-	Exact   = Match(0x1)
-	Contain = Match(0x2)
-)
-
-var (
+type directDataPlane struct {
 	portMap map[string]string
+	match   Match
 	// Packet check timeout
-	pktCheckTimeout       = 2 * time.Second
-	snapshotLen     int32 = 2048
-	promiscuous           = false
+	pktCheckTimeout time.Duration
+	snapshotLen     int32
+	promiscuous     bool
 	// Path for saving pcap files
-	pcapPath = "/tmp/"
+	pcapPath string
 	// Sleep for 0.5s for each packet verification retry
-	packetCheckSleep = 500000000 * time.Nanosecond
+	packetCheckSleep time.Duration
 	// Maximum duration for packet capturing
-	maxTimeout = 1 * time.Hour
+	maxTimeout time.Duration
 	// Map that keeps track of all ongoing captures
 	captures sync.Map
 	// A wait group which keeps track of all ongoing captures
-	wg  sync.WaitGroup
-	log = logger.NewLogger()
-)
-
-// Init intializes the port map
-func Init(portmap map[string]string) {
-	portMap = portmap
+	wg sync.WaitGroup
 }
 
-// StartCapture is used to capture the packet and save to a pcap file.
+func createDirectDataPlane(portMap map[string]string, match Match) *directDataPlane {
+	ddp := directDataPlane{}
+	ddp.portMap = portMap
+	ddp.match = match
+	ddp.pktCheckTimeout = 2 * time.Second
+	ddp.snapshotLen = 2048
+	ddp.promiscuous = false
+	ddp.pcapPath = "/tmp/"
+	ddp.packetCheckSleep = 500000000 * time.Nanosecond
+	ddp.maxTimeout = 1 * time.Hour
+	return &ddp
+}
+
+// captureOnInterface is used to capture the packet and save to a pcap file.
 // It takes as arguments the name of the interface for packet captureing and
 // a timeout which specifies the duration of the capture.
 // When timeout is set to -1*time.Second, it'll use maxTimeout instead.
@@ -67,28 +62,28 @@ func Init(portmap map[string]string) {
 // name as the file name.
 // If packet captures on the interface sepcified has already started, it updates
 // the timer of the ongoing capture and returns the updated timer
-func StartCapture(iface string, timeout time.Duration) *time.Timer {
+func (ddp *directDataPlane) captureOnInterface(iface string, timeout time.Duration) *time.Timer {
 	if timeout == -1*time.Second {
-		timeout = maxTimeout
+		timeout = ddp.maxTimeout
 	}
 	// Check if packet capturing on this interface has already started
-	if timer, ok := captures.Load(iface); ok {
+	if timer, ok := ddp.captures.Load(iface); ok {
 		// Update the timer and return it
 		log.Debugf("Packet capturing already started on %s\n", iface)
 		timer.(*time.Timer).Reset(timeout)
 		return timer.(*time.Timer)
 	}
 	// Create pcap file for saving captured packets
-	pcapFile := fmt.Sprintf("%s%s.pcap", pcapPath, iface)
+	pcapFile := fmt.Sprintf("%s%s.pcap", ddp.pcapPath, iface)
 	f, _ := os.Create(pcapFile)
 	log.Debugf("Saving capture results to %s", pcapFile)
 	w := pcapgo.NewWriter(f)
-	if err := w.WriteFileHeader(uint32(snapshotLen), layers.LinkTypeEthernet); err != nil {
+	if err := w.WriteFileHeader(uint32(ddp.snapshotLen), layers.LinkTypeEthernet); err != nil {
 		log.Fatal(err)
 	}
 
 	// Open the device for capturing
-	handle, err := pcap.OpenLive(iface, snapshotLen, promiscuous, -1*time.Second)
+	handle, err := pcap.OpenLive(iface, ddp.snapshotLen, ddp.promiscuous, -1*time.Second)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,8 +95,8 @@ func StartCapture(iface string, timeout time.Duration) *time.Timer {
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	timer := time.NewTimer(timeout)
 	// Keep track of the capture using a global map
-	captures.Store(iface, timer)
-	wg.Add(1)
+	ddp.captures.Store(iface, timer)
+	ddp.wg.Add(1)
 	// Start the packet capturing loop in a goroutine and return the timer
 	go func() {
 		defer f.Close()
@@ -115,10 +110,11 @@ func StartCapture(iface string, timeout time.Duration) *time.Timer {
 				if err := w.WritePacket(packet.Metadata().CaptureInfo, packet.Data()); err != nil {
 					log.Fatal(err)
 				}
+				// TODO: also save packets to a buffer for later verification
 			case <-timer.C:
 				// Stop capturing on timeout
 				log.Debugf("Stop capturing on interface %s...", iface)
-				wg.Done()
+				ddp.wg.Done()
 				return
 			}
 		}
@@ -126,13 +122,13 @@ func StartCapture(iface string, timeout time.Duration) *time.Timer {
 	return timer
 }
 
-// SendRawPacket is used to send a raw packet to a specific interface.
+// sendOnInterface is used to send a raw packet to a specific interface.
 // It takes as arguments the name of the interface and a slice of byte which
 // represents the packet payload.
 // It returns true if the packet was successfully sent and false otherwise.
-func SendRawPacket(iface string, pkt []byte) bool {
+func (ddp *directDataPlane) sendOnInterface(iface string, pkt []byte) bool {
 	// Open the device for sending packet
-	handle, err := pcap.OpenLive(iface, snapshotLen, promiscuous, -1*time.Second)
+	handle, err := pcap.OpenLive(iface, ddp.snapshotLen, ddp.promiscuous, -1*time.Second)
 	if err != nil {
 		log.Errorln(err)
 		return false
@@ -147,25 +143,27 @@ func SendRawPacket(iface string, pkt []byte) bool {
 	return true
 }
 
-// CheckRawPacket verifies if packets captured in pcap file are as expected.
-// It takes as arguments the name of the interface, a slice of packets with each packet
-// represented by a slice of bytes, timeout and match type.
+// verifyOnInterface verifies if packets captured in pcap file are as expected.
+// It takes as arguments the name of the interface and a slice of packets with each packet
+// represented by a slice of bytes.
 // It verifies that the packets captured in the pcap file match the ones specified in
-// pkts within the given timeout. When pkts is empty it verifies that no packet has been
+// pkts within the timeout. When pkts is empty it verifies that no packet has been
 // received.
 // When "Exact" is used as match type, it returns true if packets captured are exactly
 // the same as pkts including the order. Otherwise it returns false.
-// When "Contain" is used as match type, it returns true if packets captured contain pkts.
+// When "In" is used as match type, it returns true if packets captured contain pkts.
 // Otherwise if returns false.
-func CheckRawPacket(iface string, pkts [][]byte, timeout time.Duration, match Match) bool {
-	timer := time.After(timeout)
-	pcapFile := fmt.Sprintf("%s%s.pcap", pcapPath, iface)
+func (ddp *directDataPlane) verifyOnInterface(iface string, pkts [][]byte) bool {
+	timer := time.After(ddp.pktCheckTimeout)
+	// TODO: read packets from buffer instead of file
+	// Also see TODO in captureOnInterface()
+	pcapFile := fmt.Sprintf("%s%s.pcap", ddp.pcapPath, iface)
 	log.Debugf("Expecting %d packets captured on interface %s\n", len(pkts), iface)
 	result := false
 	for {
 		// Sleep between checks in the loop
 	recheck:
-		time.Sleep(packetCheckSleep)
+		time.Sleep(ddp.packetCheckSleep)
 		select {
 		case <-timer:
 			log.Debugf("Timeout exceeded, stop checking packet on interface %s...", iface)
@@ -206,7 +204,7 @@ func CheckRawPacket(iface string, pkts [][]byte, timeout time.Duration, match Ma
 				}
 				capturedNum++
 				if !bytes.Equal(pkt, packet.Data()) {
-					switch match {
+					switch ddp.match {
 					case Exact:
 						// Packets don't match, check failed
 						log.Errorf("Payloads of packet #%d don't match\n", capturedNum)
@@ -214,7 +212,7 @@ func CheckRawPacket(iface string, pkts [][]byte, timeout time.Duration, match Ma
 						// No need for recheck in this case
 						handle.Close()
 						return false
-					case Contain:
+					case In:
 						// Packets don't match, ignore it
 						log.Debugf("Ingoring unmached packet: % x\n", packet.Data())
 						goto nextpacket
@@ -225,7 +223,7 @@ func CheckRawPacket(iface string, pkts [][]byte, timeout time.Duration, match Ma
 					matchedNum++
 				}
 			}
-			switch match {
+			switch ddp.match {
 			case Exact:
 				// Check if there are more captured packets than expected
 				for packet := range packetSource.Packets() {
@@ -238,7 +236,7 @@ func CheckRawPacket(iface string, pkts [][]byte, timeout time.Duration, match Ma
 					handle.Close()
 					return false
 				}
-			case Contain:
+			case In:
 				handle.Close()
 				return true
 			}
@@ -247,43 +245,44 @@ func CheckRawPacket(iface string, pkts [][]byte, timeout time.Duration, match Ma
 	}
 }
 
-//StopAllCaptures stops all goroutines
-func StopAllCaptures() {
-	captures.Range(func(iface, timer interface{}) bool {
+//stop stops all goroutines
+func (ddp *directDataPlane) stop() bool {
+	ddp.captures.Range(func(iface, timer interface{}) bool {
 		// Stop each capture by resetting its timer to 1 nanosecond
 		timer.(*time.Timer).Reset(1 * time.Nanosecond)
-		captures.Delete(iface)
+		ddp.captures.Delete(iface)
 		return true
 	})
 	// Wait for all captures to finish
-	wg.Wait()
+	ddp.wg.Wait()
+	return true
 }
 
-//StartCapturesWithPortMap calls StartCapture for all ports in the port map.
-func StartCapturesWithPortMap() bool {
-	for _, intf := range portMap {
+//capture calls captureOnInterface for all ports in the port map.
+func (ddp *directDataPlane) capture() bool {
+	for _, intf := range ddp.portMap {
 		log.Debugf("Capturing packets on interface %s\n", intf)
-		StartCapture(intf, -1*time.Second)
+		ddp.captureOnInterface(intf, -1*time.Second)
 	}
 	return true
 }
 
-//SendRawPacketsWithPortMap finds the port in the port map and calls SendRawPacket with the port for each packet.
-func SendRawPacketsWithPortMap(pkts [][]byte, port uint32) bool {
+//send finds the port in the port map and calls sendOnInterface with the port for each packet.
+func (ddp *directDataPlane) send(pkts [][]byte, port uint32) bool {
 	log.Infof("Sending packets to port %d\n", port)
 	result := true
 	for _, pkt := range pkts {
-		result = SendRawPacket(portMap[fmt.Sprint(port)], pkt) && result
+		result = ddp.sendOnInterface(ddp.portMap[fmt.Sprint(port)], pkt) && result
 	}
 	return result
 }
 
-//CheckRawPacketsWithPortMap finds the ports in the port map and calls CheckRawPacket for each port.
-func CheckRawPacketsWithPortMap(pkts [][]byte, ports []uint32, match Match) bool {
+//verify finds the ports in the port map and calls verifyOnInterface for each port.
+func (ddp *directDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 	result := true
 	for _, port := range ports {
 		log.Infof("Checking packets on port %d\n", port)
-		result = CheckRawPacket(portMap[fmt.Sprint(port)], pkts, pktCheckTimeout, match) && result
+		result = ddp.verifyOnInterface(ddp.portMap[fmt.Sprint(port)], pkts) && result
 	}
 	return result
 }

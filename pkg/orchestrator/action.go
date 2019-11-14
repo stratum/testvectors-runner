@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
@@ -117,7 +118,7 @@ func ProcessDataPlaneStimulus(dps *tv.DataPlaneStimulus) bool {
 			payload := pkt.GetPayload()
 			payloads = append(payloads, payload)
 		}
-		return framework.ProcessTrafficStimulus(payloads, dps.GetTrafficStimulus().GetPort())
+		return dataplane.ProcessTrafficStimulus(payloads, dps.GetTrafficStimulus().GetPort())
 	}
 	return false
 }
