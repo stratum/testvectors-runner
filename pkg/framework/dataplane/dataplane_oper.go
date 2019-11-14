@@ -10,6 +10,10 @@ Package dataplane implements packet send/receive functions
 package dataplane
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"reflect"
+
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 )
 
@@ -38,9 +42,28 @@ type dataPlane interface {
 
 var dp dataPlane
 
-func CreateDataPlane(mode string, portMap map[string]string, match Match) {
+func CreateDataPlane(mode string, matchType string, portMapFile string) {
+	var match Match
+	switch matchType {
+	case "exact":
+		match = Exact
+	case "in":
+		match = In
+	default:
+		log.Fatalf("Unknown data plane match type: %s", matchType)
+	}
 	switch mode {
 	case "direct":
+		// Read port-map file
+		pmdata, err := ioutil.ReadFile(portMapFile)
+		if err != nil {
+			log.InvalidFile("Port Map File: "+portMapFile, err)
+		}
+		var portMap map[string]string
+		if err = json.Unmarshal(pmdata, &portMap); err != nil {
+			log.InvalidJSONUnmarshal(reflect.TypeOf(portMap), err)
+		}
+		log.Infof("Creating direct data plane with match type: %s and port map: %s\n", matchType, portMap)
 		dp = createDirectDataPlane(portMap, match)
 	default:
 		log.Fatalf("Unknown data plane mode: %s", mode)
