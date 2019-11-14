@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package framework
+package gnmi
 
 import (
 	"context"
@@ -28,8 +28,8 @@ var (
 	gnmiCancel  context.CancelFunc
 )
 
-//InitGNMI starts a gNMI client connection to switch under test
-func InitGNMI(target *tg.Target) {
+//Init starts a gNMI client connection to switch under test
+func Init(target *tg.Target) {
 	gnmiContext = context.Background()
 	gnmiClient, gnmiCancel, gnmiError = common.Connect(gnmiContext, target)
 	if gnmiError != nil {
@@ -38,8 +38,8 @@ func InitGNMI(target *tg.Target) {
 	}
 }
 
-//TearDownGNMI closes the gNMI connection
-func TearDownGNMI() {
+//TearDown closes the gNMI connection
+func TearDown() {
 	log.Traceln("In gnmi_oper tear down")
 	gnmiCancel()
 }

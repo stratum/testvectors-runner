@@ -12,8 +12,9 @@ import (
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	"github.com/golang/protobuf/proto"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
+
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
 	tg "github.com/stratum/testvectors/proto/target"
 	"github.com/stretchr/testify/assert"
@@ -76,7 +77,7 @@ func (st Test) PktIoOutDirectToDataPlaneTest(t *testing.T, target *tg.Target) {
 		log.InvalidProtoUnmarshal(reflect.TypeOf(pktOut), err)
 	}
 	// Send packet-out
-	result := framework.ProcessPacketOutOperation(pktOut)
+	result := p4rt.ProcessPacketOutOperation(pktOut)
 	assert.True(t, result, "PacketOut operation failed")
 
 	// Check if we received packets from data plane port 1
@@ -102,7 +103,7 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T, targ
 	}
 
 	// Insert table entry
-	result := framework.ProcessP4WriteRequest(request, nil)
+	result := p4rt.ProcessP4WriteRequest(request, nil)
 	assert.True(t, result, "Write request failed")
 
 	// Build packet-out
@@ -111,7 +112,7 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T, targ
 		log.InvalidProtoUnmarshal(reflect.TypeOf(pktOut), err)
 	}
 	// Send packet-out
-	result = framework.ProcessPacketOutOperation(pktOut)
+	result = p4rt.ProcessPacketOutOperation(pktOut)
 	assert.True(t, result, "PacketOut operation failed")
 
 	// Check if we received packets from data plane port 2
