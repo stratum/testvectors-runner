@@ -18,6 +18,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
@@ -66,6 +67,10 @@ func main() {
 	}
 	log.Infoln("Port Map: ", portmap)
 
+	// Create data plane
+	// TODO: read arguments from command line
+	dataplane.CreateDataPlane("direct", portmap, dataplane.Exact)
+
 	// Check if we run with Test Vectors or not
 	runTV := false
 	if *testNames == "" {
@@ -105,7 +110,7 @@ func main() {
 		testSuite = append(testSuite, tvSuite...)
 	}
 
-	test.SetUpSuite(target, portmap)
+	test.SetUpSuite(target)
 	var match test.Deps
 	code := testing.MainStart(match, testSuite, nil, nil).Run()
 	test.TearDownSuite()

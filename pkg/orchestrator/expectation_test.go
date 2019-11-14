@@ -155,7 +155,7 @@ func TestProcessDataPlaneExpectation(t *testing.T) {
 		{
 			name: "Empty Data Plane Expectation",
 			args: args{dpe: dataplaneExpectation},
-			want: true,
+			want: false,
 		},
 	}
 	for _, tt := range tests {

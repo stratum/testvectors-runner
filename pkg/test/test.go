@@ -10,11 +10,10 @@ import (
 	"io"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/packet"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
@@ -33,12 +32,11 @@ func (Deps) WriteHeapProfile(io.Writer) error            { return nil }
 func (Deps) WriteProfileTo(string, io.Writer, int) error { return nil }
 
 //SetUpSuite includes steps for setting up test suite
-func SetUpSuite(target *tg.Target, portmap map[string]string) {
+func SetUpSuite(target *tg.Target) {
 	log.Infoln("Setting up test suite...")
 	log.Infof("Target: %s", target)
 	framework.InitGNMI(target)
 	framework.Init(target)
-	packet.Init(portmap)
 }
 
 //TearDownSuite includes steps for tearing down test suite
@@ -62,20 +60,12 @@ func TearDownTest() {
 func SetUpTestCase(t *testing.T, target *tg.Target) {
 	log.Debugln("Setting up test case...")
 	// FIXME: only start packet capture if needed
-	packet.StartCapturesWithPortMap()
+	dataplane.Capture()
 }
 
 //TearDownTestCase includes steps for tearing down a test case
 func TearDownTestCase(t *testing.T, target *tg.Target) {
 	log.Debugln("Tearing down test case...")
-	packet.StopAllCaptures()
+	dataplane.Stop()
 	log.Infoln(strings.Repeat("*", 100))
-}
-
-//VerifyRawPacketLocal verifies local packet
-func VerifyRawPacketLocal(srcIface string, dstIface string, pkt []byte, timeout time.Duration) {
-	packet.StartCapture(dstIface, -1*time.Second)
-	packet.SendRawPacket(srcIface, pkt)
-	packet.CheckRawPacket(dstIface, [][]byte{pkt}, timeout, packet.Exact)
-	packet.StopAllCaptures()
 }
