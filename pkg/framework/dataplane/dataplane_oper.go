@@ -43,7 +43,7 @@ func CreateDataPlane(mode string, portMap map[string]string, match Match) {
 	case "direct":
 		dp = createDirectDataPlane(portMap, match)
 	default:
-		log.Fatal("Unknown data plane mode: %s", mode)
+		log.Fatalf("Unknown data plane mode: %s", mode)
 	}
 }
 
