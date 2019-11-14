@@ -20,7 +20,7 @@ import (
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/testvector"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
 	"github.com/opennetworkinglab/testvectors-runner/tests"
 	tg "github.com/stratum/testvectors/proto/target"
@@ -162,7 +162,7 @@ func createTVTestSuite(tvFilesSlice []string, target *tg.Target) []testing.Inter
 				for _, tc := range tv.GetTestCases() {
 					t.Run(tc.TestCaseId, func(t *testing.T) {
 						test.SetUpTestCase(t, target)
-						result := orchestrator.ProcessTestCase(tc)
+						result := testvector.ProcessTestCase(tc)
 						test.TearDownTestCase(t, target)
 						if !result {
 							t.Fail()

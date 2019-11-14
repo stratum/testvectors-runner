@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package orchestrator
+package testvector_test
 
 import (
 	"testing"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/testvector"
 	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
@@ -20,8 +21,8 @@ var (
 )
 
 func TestProcessTestVector(t *testing.T) {
-	framework.InitGNMI(TestTarget)
-	defer framework.TearDownGNMI()
+	gnmi.Init(TestTarget)
+	defer gnmi.TearDown()
 	var (
 		emptyTestVector = &tv.TestVector{}
 
@@ -107,7 +108,7 @@ func TestProcessTestVector(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessTestVector(tt.args.tv1); got != tt.want {
+			if got := testvector.ProcessTestVector(tt.args.tv1); got != tt.want {
 				t.Errorf("ProcessTestVector() = %v, want %v", got, tt.want)
 			}
 		})

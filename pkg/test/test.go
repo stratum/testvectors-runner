@@ -11,8 +11,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	tg "github.com/stratum/testvectors/proto/target"
 )
@@ -35,15 +37,16 @@ func (Deps) WriteProfileTo(string, io.Writer, int) error { return nil }
 func SetUpSuite(target *tg.Target) {
 	log.Infoln("Setting up test suite...")
 	log.Infof("Target: %s", target)
-	framework.InitGNMI(target)
-	framework.Init(target)
+
+	gnmi.Init(target)
+	p4rt.Init(target)
 }
 
 //TearDownSuite includes steps for tearing down test suite
 func TearDownSuite() {
 	log.Infoln("Tearing down test suite...")
-	framework.TearDownGNMI()
-	framework.TearDown()
+	gnmi.TearDown()
+	p4rt.TearDown()
 }
 
 //SetUpTest includes steps for setting up a test

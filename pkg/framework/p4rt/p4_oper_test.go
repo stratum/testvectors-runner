@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package framework
+package p4rt_test
 
 import (
 	"strings"
@@ -12,15 +12,22 @@ import (
 
 	config "github.com/abhilashendurthi/p4runtime/proto/p4/config/v1"
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
+var (
+	TestTarget = &tg.Target{Address: "localhost:50001"}
+	log        = logger.NewLogger()
+)
+
 func setupTest() {
-	Init(TestTarget)
+	p4rt.Init(TestTarget)
 }
 
 func tearDownTest() {
-	TearDown()
+	p4rt.TearDown()
 }
 
 func TestProcessP4PipelineConfigOperation(t *testing.T) {
@@ -496,7 +503,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			//fmt.Println(proto.MarshalTextString(tt.args.req))
-			if got := ProcessP4PipelineConfigOperation(tt.args.req, tt.args.res); got != tt.want {
+			if got := p4rt.ProcessP4PipelineConfigOperation(tt.args.req, tt.args.res); got != tt.want {
 				t.Errorf("ProcessP4PipelineConfigOperation() = %v, want %v", got, tt.want)
 			}
 		})
@@ -547,7 +554,7 @@ func TestProcessP4WriteRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessP4WriteRequest(tt.args.wreq, tt.args.wres); got != tt.want {
+			if got := p4rt.ProcessP4WriteRequest(tt.args.wreq, tt.args.wres); got != tt.want {
 				t.Errorf("ProcessP4WriteRequest() = %v, want %v", got, tt.want)
 			}
 		})
@@ -734,16 +741,16 @@ func TestProcessPacketIOOperation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessP4WriteRequest(tt.args.insertWriteReq, tt.args.writeResponse); got != tt.writeWant {
+			if got := p4rt.ProcessP4WriteRequest(tt.args.insertWriteReq, tt.args.writeResponse); got != tt.writeWant {
 				t.Errorf("Insert Write ProcessP4WriteRequest() = %v, want %v", got, tt.writeWant)
 			}
-			if got := ProcessPacketOutOperation(tt.args.po); got != tt.poWant {
+			if got := p4rt.ProcessPacketOutOperation(tt.args.po); got != tt.poWant {
 				t.Errorf("ProcessPacketOutOperation() = %v, want %v", got, tt.poWant)
 			}
-			if got := ProcessPacketIn(tt.args.pi); got != tt.piWant {
+			if got := p4rt.ProcessPacketIn(tt.args.pi); got != tt.piWant {
 				t.Errorf("ProcessPacketIn() = %v, want %v", got, tt.piWant)
 			}
-			if got := ProcessP4WriteRequest(tt.args.deleteWriteReq, tt.args.writeResponse); got != tt.writeWant {
+			if got := p4rt.ProcessP4WriteRequest(tt.args.deleteWriteReq, tt.args.writeResponse); got != tt.writeWant {
 				t.Errorf("Delete Write ProcessP4WriteRequest() = %v, want %v", got, tt.writeWant)
 			}
 		})
@@ -759,10 +766,10 @@ func TestMasterArbitration(t *testing.T) {
 		invalidDeviceID uint64 = 2
 		electionID             = &v1.Uint128{High: 1, Low: 5}
 		highElectionID         = &v1.Uint128{High: 2, Low: 5}
-		scv                    = GetStreamChannel(P4rtClient)
+		scv                    = p4rt.GetStreamChannel(p4rt.P4rtClient)
 	)
 	type args struct {
-		scv        StreamChannelVar
+		scv        p4rt.StreamChannelVar
 		deviceID   uint64
 		electionID *v1.Uint128
 	}
@@ -801,7 +808,7 @@ func TestMasterArbitration(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetMasterArbitrationLock(tt.args.scv, tt.args.deviceID, tt.args.electionID); got != tt.want {
+			if got := p4rt.GetMasterArbitrationLock(tt.args.scv, tt.args.deviceID, tt.args.electionID); got != tt.want {
 				t.Errorf("GetMasterArbitrationLock() = %v, want %v", got, tt.want)
 			}
 		})
@@ -818,12 +825,12 @@ func TestLowElectionMasterArbitration(t *testing.T) {
 		deviceID      uint64 = 1
 		electionID           = &v1.Uint128{High: 1, Low: 5}
 		lowElectionID        = &v1.Uint128{High: 0, Low: 5}
-		scv1                 = GetStreamChannel(P4rtClient)
-		scv2                 = GetStreamChannel(P4rtClient)
+		scv1                 = p4rt.GetStreamChannel(p4rt.P4rtClient)
+		scv2                 = p4rt.GetStreamChannel(p4rt.P4rtClient)
 	)
 	type args struct {
-		scv1          StreamChannelVar
-		scv2          StreamChannelVar
+		scv1          p4rt.StreamChannelVar
+		scv2          p4rt.StreamChannelVar
 		deviceID      uint64
 		electionID    *v1.Uint128
 		lowElectionID *v1.Uint128
@@ -838,11 +845,11 @@ func TestLowElectionMasterArbitration(t *testing.T) {
 			args: args{scv1: scv1, scv2: scv2, deviceID: deviceID, electionID: electionID, lowElectionID: lowElectionID},
 		},
 	}
-	Init(TestTarget)
+	setupTest()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			GetMasterArbitrationLock(tt.args.scv1, tt.args.deviceID, tt.args.electionID)
-			if got := GetMasterArbitrationLock(tt.args.scv2, tt.args.deviceID, tt.args.lowElectionID); got != tt.want {
+			p4rt.GetMasterArbitrationLock(tt.args.scv1, tt.args.deviceID, tt.args.electionID)
+			if got := p4rt.GetMasterArbitrationLock(tt.args.scv2, tt.args.deviceID, tt.args.lowElectionID); got != tt.want {
 				t.Errorf("GetMasterArbitrationLock() = %v, want %v", got, tt.want)
 			}
 		})

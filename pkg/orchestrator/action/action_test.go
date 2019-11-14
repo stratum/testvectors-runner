@@ -4,17 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package orchestrator
+package action_test
 
 import (
 	"testing"
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
+	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
+
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/action"
 )
 
 var (
+	TestTarget   = &tg.Target{Address: "localhost:50001"}
 	emptyAction  = &tv.Action{}
 	configAction = &tv.Action{
 		Actions: &tv.Action_ConfigOperation{
@@ -107,7 +112,7 @@ func TestProcessSequentialActionGroup(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessSequentialActionGroup(tt.args.sag); got != tt.want {
+			if got := action.ProcessSequentialActionGroup(tt.args.sag); got != tt.want {
 				t.Errorf("ProcessSequentialActionGroup() = %v, want %v", got, tt.want)
 			}
 		})
@@ -145,7 +150,7 @@ func TestProcessParallelActionGroup(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessParallelActionGroup(tt.args.pag); got != tt.want {
+			if got := action.ProcessParallelActionGroup(tt.args.pag); got != tt.want {
 				t.Errorf("ProcessParallelActionGroup() = %v, want %v", got, tt.want)
 			}
 		})
@@ -173,7 +178,7 @@ func TestProcessRandomizedActionGroup(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessRandomizedActionGroup(tt.args.rag); got != tt.want {
+			if got := action.ProcessRandomizedActionGroup(tt.args.rag); got != tt.want {
 				t.Errorf("ProcessRandomizedActionGroup() = %v, want %v", got, tt.want)
 			}
 		})
@@ -181,10 +186,10 @@ func TestProcessRandomizedActionGroup(t *testing.T) {
 }
 
 func TestProcessAction(t *testing.T) {
-	framework.InitGNMI(TestTarget)
-	framework.Init(TestTarget)
-	defer framework.TearDown()
-	defer framework.TearDownGNMI()
+	gnmi.Init(TestTarget)
+	p4rt.Init(TestTarget)
+	defer p4rt.TearDown()
+	defer gnmi.TearDown()
 
 	type args struct {
 		action *tv.Action
@@ -237,7 +242,7 @@ func TestProcessAction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessAction(tt.args.action); got != tt.want {
+			if got := action.ProcessAction(tt.args.action); got != tt.want {
 				t.Errorf("ProcessAction() = %v, want %v", got, tt.want)
 			}
 		})

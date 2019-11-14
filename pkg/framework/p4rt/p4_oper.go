@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package framework
+package p4rt
 
 import (
 	"bytes"
@@ -15,8 +15,11 @@ import (
 	scpb "google.golang.org/genproto/googleapis/rpc/code"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/common"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	tg "github.com/stratum/testvectors/proto/target"
 )
+
+var log = logger.NewLogger()
 
 var (
 	//P4rtClient description

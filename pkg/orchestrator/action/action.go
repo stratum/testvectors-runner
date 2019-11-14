@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package orchestrator
+package action
 
 import (
 	"sync"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
@@ -63,7 +64,7 @@ func ProcessAction(action *tv.Action) bool {
 	switch {
 	case action.GetConfigOperation() != nil:
 		co := action.GetConfigOperation()
-		return framework.ProcessSetRequest(co.GnmiSetRequest, co.GnmiSetResponse)
+		return gnmi.ProcessSetRequest(co.GnmiSetRequest, co.GnmiSetResponse)
 	case action.GetAlarmStimulus() != nil:
 		//TODO
 		as := action.GetAlarmStimulus()
@@ -71,11 +72,11 @@ func ProcessAction(action *tv.Action) bool {
 	case action.GetControlPlaneOperation() != nil:
 		//TODO
 		cpo := action.GetControlPlaneOperation()
-		return ProcessControlPlaneOperation(cpo)
+		return processControlPlaneOperation(cpo)
 	case action.GetDataPlaneStimulus() != nil:
 		//TODO
 		dps := action.GetDataPlaneStimulus()
-		return ProcessDataPlaneStimulus(dps)
+		return processDataPlaneStimulus(dps)
 	case action.GetManagementOperation() != nil:
 		//TODO
 		mo := action.GetManagementOperation()
@@ -91,23 +92,23 @@ func ProcessAction(action *tv.Action) bool {
 }
 
 //ProcessControlPlaneOperation extracts pipeline config, write or packet out operations and forwards to framework.
-func ProcessControlPlaneOperation(cpo *tv.ControlPlaneOperation) bool {
+func processControlPlaneOperation(cpo *tv.ControlPlaneOperation) bool {
 	switch {
 	case cpo.GetPipelineConfigOperation() != nil:
 		log.Traceln("In Get Pipeline Config Oper")
-		return framework.ProcessP4PipelineConfigOperation(cpo.GetPipelineConfigOperation().GetP4SetPipelineConfigRequest(), cpo.GetPipelineConfigOperation().GetP4SetPipelineConfigResponse())
+		return p4rt.ProcessP4PipelineConfigOperation(cpo.GetPipelineConfigOperation().GetP4SetPipelineConfigRequest(), cpo.GetPipelineConfigOperation().GetP4SetPipelineConfigResponse())
 	case cpo.GetWriteOperation() != nil:
 		log.Traceln("In Get Write Oper")
-		return framework.ProcessP4WriteRequest(cpo.GetWriteOperation().GetP4WriteRequest(), cpo.GetWriteOperation().GetP4WriteResponse())
+		return p4rt.ProcessP4WriteRequest(cpo.GetWriteOperation().GetP4WriteRequest(), cpo.GetWriteOperation().GetP4WriteResponse())
 	case cpo.GetPacketOutOperation() != nil:
 		log.Traceln("In PacketOut Oper")
-		return framework.ProcessPacketOutOperation(cpo.GetPacketOutOperation().GetP4PacketOut())
+		return p4rt.ProcessPacketOutOperation(cpo.GetPacketOutOperation().GetP4PacketOut())
 	}
 	return false
 }
 
 //ProcessDataPlaneStimulus extracts traffic stimulus and forwards to framework.
-func ProcessDataPlaneStimulus(dps *tv.DataPlaneStimulus) bool {
+func processDataPlaneStimulus(dps *tv.DataPlaneStimulus) bool {
 	switch {
 	case dps.GetTrafficStimulus() != nil:
 		log.Traceln("In Get Traffic Stimulus")

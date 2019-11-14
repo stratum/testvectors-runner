@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package framework
+package gnmi_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/openconfig/gnmi/proto/gnmi"
+	gpb "github.com/openconfig/gnmi/proto/gnmi"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
@@ -21,13 +22,13 @@ var (
 
 func TestProcessGetRequest(t *testing.T) {
 
-	emptyGetReq := &gnmi.GetRequest{Encoding: 2}
-	emptyGetResp := &gnmi.GetResponse{}
+	emptyGetReq := &gpb.GetRequest{Encoding: 2}
+	emptyGetResp := &gpb.GetResponse{}
 
-	validGetReq := &gnmi.GetRequest{
-		Path: []*gnmi.Path{
+	validGetReq := &gpb.GetRequest{
+		Path: []*gpb.Path{
 			{
-				Elem: []*gnmi.PathElem{
+				Elem: []*gpb.PathElem{
 					{Name: "interfaces"},
 					{Name: "interface", Key: map[string]string{"name": "veth1"}},
 					{Name: "state"},
@@ -35,24 +36,24 @@ func TestProcessGetRequest(t *testing.T) {
 				},
 			},
 		},
-		Encoding: gnmi.Encoding_PROTO}
+		Encoding: gpb.Encoding_PROTO}
 
-	validGetResp := &gnmi.GetResponse{
-		Notification: []*gnmi.Notification{
+	validGetResp := &gpb.GetResponse{
+		Notification: []*gpb.Notification{
 			{
 				Timestamp: 1234567890123456789,
-				Update: []*gnmi.Update{
+				Update: []*gpb.Update{
 					{
-						Path: &gnmi.Path{
-							Elem: []*gnmi.PathElem{
+						Path: &gpb.Path{
+							Elem: []*gpb.PathElem{
 								{Name: "interfaces"},
 								{Name: "interface", Key: map[string]string{"name": "veth1"}},
 								{Name: "state"},
 								{Name: "name"},
 							},
 						},
-						Val: &gnmi.TypedValue{
-							Value: &gnmi.TypedValue_StringVal{StringVal: "veth1"},
+						Val: &gpb.TypedValue{
+							Value: &gpb.TypedValue_StringVal{StringVal: "veth1"},
 						},
 					},
 				},
@@ -61,8 +62,8 @@ func TestProcessGetRequest(t *testing.T) {
 	}
 	type args struct {
 		target *tg.Target
-		greq   *gnmi.GetRequest
-		gresp  *gnmi.GetResponse
+		greq   *gpb.GetRequest
+		gresp  *gpb.GetResponse
 	}
 	tests := []struct {
 		name string
@@ -108,77 +109,77 @@ func TestProcessGetRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			InitGNMI(tt.args.target)
-			if got := ProcessGetRequest(tt.args.greq, tt.args.gresp); got != tt.want {
+			gnmi.Init(tt.args.target)
+			if got := gnmi.ProcessGetRequest(tt.args.greq, tt.args.gresp); got != tt.want {
 				t.Errorf("ProcessGetRequest() = %v, want %v", got, tt.want)
 			}
-			TearDownGNMI()
+			gnmi.TearDown()
 		})
 	}
 }
 
 func TestProcessSetRequest(t *testing.T) {
 
-	emptySetReq := &gnmi.SetRequest{}
-	emptySetResp := &gnmi.SetResponse{Prefix: &gnmi.Path{}}
+	emptySetReq := &gpb.SetRequest{}
+	emptySetResp := &gpb.SetResponse{Prefix: &gpb.Path{}}
 
-	validSetReq := &gnmi.SetRequest{
-		Update: []*gnmi.Update{
+	validSetReq := &gpb.SetRequest{
+		Update: []*gpb.Update{
 			{
-				Path: &gnmi.Path{
-					Elem: []*gnmi.PathElem{
+				Path: &gpb.Path{
+					Elem: []*gpb.PathElem{
 						{Name: "interfaces"},
 						{Name: "interface", Key: map[string]string{"name": "veth3"}},
 						{Name: "config"},
 						{Name: "health-indicator"},
 					},
 				},
-				Val: &gnmi.TypedValue{
-					Value: &gnmi.TypedValue_StringVal{StringVal: "GOOD"},
+				Val: &gpb.TypedValue{
+					Value: &gpb.TypedValue_StringVal{StringVal: "GOOD"},
 				},
 			},
 		},
 	}
 
-	invalidSetReq := &gnmi.SetRequest{
-		Update: []*gnmi.Update{
+	invalidSetReq := &gpb.SetRequest{
+		Update: []*gpb.Update{
 			{
-				Path: &gnmi.Path{
-					Elem: []*gnmi.PathElem{
+				Path: &gpb.Path{
+					Elem: []*gpb.PathElem{
 						{Name: "interfaces"},
 						{Name: "interface", Key: map[string]string{"name": "veth3"}},
 						{Name: "config"},
 						{Name: "health-indic"},
 					},
 				},
-				Val: &gnmi.TypedValue{
-					Value: &gnmi.TypedValue_StringVal{StringVal: "GOOD"},
+				Val: &gpb.TypedValue{
+					Value: &gpb.TypedValue_StringVal{StringVal: "GOOD"},
 				},
 			},
 		},
 	}
 
-	validSetResp := &gnmi.SetResponse{
-		Prefix: &gnmi.Path{},
-		Response: []*gnmi.UpdateResult{
+	validSetResp := &gpb.SetResponse{
+		Prefix: &gpb.Path{},
+		Response: []*gpb.UpdateResult{
 			{
-				Path: &gnmi.Path{
-					Elem: []*gnmi.PathElem{
+				Path: &gpb.Path{
+					Elem: []*gpb.PathElem{
 						{Name: "interfaces"},
 						{Name: "interface", Key: map[string]string{"name": "veth3"}},
 						{Name: "config"},
 						{Name: "health-indicator"},
 					},
 				},
-				Op: gnmi.UpdateResult_UPDATE},
+				Op: gpb.UpdateResult_UPDATE},
 		},
 	}
 
-	InitGNMI(TestTarget)
+	gnmi.Init(TestTarget)
 	type args struct {
 		target *tg.Target
-		sreq   *gnmi.SetRequest
-		sresp  *gnmi.SetResponse
+		sreq   *gpb.SetRequest
+		sresp  *gpb.SetResponse
 	}
 	tests := []struct {
 		name string
@@ -224,35 +225,35 @@ func TestProcessSetRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessSetRequest(tt.args.sreq, tt.args.sresp); got != tt.want {
+			if got := gnmi.ProcessSetRequest(tt.args.sreq, tt.args.sresp); got != tt.want {
 				t.Errorf("ProcessSetRequest() = %v, want %v", got, tt.want)
 			}
 		})
 	}
-	TearDownGNMI()
+	gnmi.TearDown()
 }
 
 func TestProcessSubscribeRequest(t *testing.T) {
 	resultChan := make(chan bool, 1)
-	emptySubReq := &gnmi.SubscribeRequest{}
-	emptySubResp := []*gnmi.SubscribeResponse{}
-	emptySetReq := &gnmi.SetRequest{}
-	emptySetResp := &gnmi.SetResponse{Prefix: &gnmi.Path{}}
+	emptySubReq := &gpb.SubscribeRequest{}
+	emptySubResp := []*gpb.SubscribeResponse{}
+	emptySetReq := &gpb.SetRequest{}
+	emptySetResp := &gpb.SetResponse{Prefix: &gpb.Path{}}
 
-	invalidSubReq := &gnmi.SubscribeRequest{
-		Request: &gnmi.SubscribeRequest_Subscribe{
-			Subscribe: &gnmi.SubscriptionList{
-				Subscription: []*gnmi.Subscription{
+	invalidSubReq := &gpb.SubscribeRequest{
+		Request: &gpb.SubscribeRequest_Subscribe{
+			Subscribe: &gpb.SubscriptionList{
+				Subscription: []*gpb.Subscription{
 					{
-						Path: &gnmi.Path{
-							Elem: []*gnmi.PathElem{
+						Path: &gpb.Path{
+							Elem: []*gpb.PathElem{
 								{Name: "interfaces"},
 								{Name: "interface", Key: map[string]string{"name": "veth3"}},
 								{Name: "config"},
 								{Name: "health-indator"},
 							},
 						},
-						Mode: gnmi.SubscriptionMode_ON_CHANGE,
+						Mode: gpb.SubscriptionMode_ON_CHANGE,
 					},
 				},
 				UpdatesOnly: true,
@@ -260,43 +261,43 @@ func TestProcessSubscribeRequest(t *testing.T) {
 		},
 	}
 
-	validSubReq := &gnmi.SubscribeRequest{
-		Request: &gnmi.SubscribeRequest_Subscribe{
-			Subscribe: &gnmi.SubscriptionList{
-				Subscription: []*gnmi.Subscription{
+	validSubReq := &gpb.SubscribeRequest{
+		Request: &gpb.SubscribeRequest_Subscribe{
+			Subscribe: &gpb.SubscriptionList{
+				Subscription: []*gpb.Subscription{
 					{
-						Path: &gnmi.Path{
-							Elem: []*gnmi.PathElem{
+						Path: &gpb.Path{
+							Elem: []*gpb.PathElem{
 								{Name: "interfaces"},
 								{Name: "interface", Key: map[string]string{"name": "veth3"}},
 								{Name: "config"},
 								{Name: "health-indicator"},
 							},
 						},
-						Mode: gnmi.SubscriptionMode_ON_CHANGE,
+						Mode: gpb.SubscriptionMode_ON_CHANGE,
 					},
 				},
 				UpdatesOnly: true,
 			},
 		},
 	}
-	validSubResp := []*gnmi.SubscribeResponse{
+	validSubResp := []*gpb.SubscribeResponse{
 		{
-			Response: &gnmi.SubscribeResponse_Update{
-				Update: &gnmi.Notification{
+			Response: &gpb.SubscribeResponse_Update{
+				Update: &gpb.Notification{
 					Timestamp: 1234567890123456789,
-					Update: []*gnmi.Update{
+					Update: []*gpb.Update{
 						{
-							Path: &gnmi.Path{
-								Elem: []*gnmi.PathElem{
+							Path: &gpb.Path{
+								Elem: []*gpb.PathElem{
 									{Name: "interfaces"},
 									{Name: "interface", Key: map[string]string{"name": "veth3"}},
 									{Name: "config"},
 									{Name: "health-indicator"},
 								},
 							},
-							Val: &gnmi.TypedValue{
-								Value: &gnmi.TypedValue_StringVal{StringVal: "GOOD"},
+							Val: &gpb.TypedValue{
+								Value: &gpb.TypedValue_StringVal{StringVal: "GOOD"},
 							},
 						},
 					},
@@ -304,26 +305,26 @@ func TestProcessSubscribeRequest(t *testing.T) {
 			},
 		},
 		{
-			Response: &gnmi.SubscribeResponse_SyncResponse{
+			Response: &gpb.SubscribeResponse_SyncResponse{
 				SyncResponse: true,
 			},
 		},
 		{
-			Response: &gnmi.SubscribeResponse_Update{
-				Update: &gnmi.Notification{
+			Response: &gpb.SubscribeResponse_Update{
+				Update: &gpb.Notification{
 					Timestamp: 1234567890123456789,
-					Update: []*gnmi.Update{
+					Update: []*gpb.Update{
 						{
-							Path: &gnmi.Path{
-								Elem: []*gnmi.PathElem{
+							Path: &gpb.Path{
+								Elem: []*gpb.PathElem{
 									{Name: "interfaces"},
 									{Name: "interface", Key: map[string]string{"name": "veth3"}},
 									{Name: "config"},
 									{Name: "health-indicator"},
 								},
 							},
-							Val: &gnmi.TypedValue{
-								Value: &gnmi.TypedValue_StringVal{StringVal: "BAD"},
+							Val: &gpb.TypedValue{
+								Value: &gpb.TypedValue_StringVal{StringVal: "BAD"},
 							},
 						},
 					},
@@ -331,21 +332,21 @@ func TestProcessSubscribeRequest(t *testing.T) {
 			},
 		},
 		{
-			Response: &gnmi.SubscribeResponse_Update{
-				Update: &gnmi.Notification{
+			Response: &gpb.SubscribeResponse_Update{
+				Update: &gpb.Notification{
 					Timestamp: 1234567890123456789,
-					Update: []*gnmi.Update{
+					Update: []*gpb.Update{
 						{
-							Path: &gnmi.Path{
-								Elem: []*gnmi.PathElem{
+							Path: &gpb.Path{
+								Elem: []*gpb.PathElem{
 									{Name: "interfaces"},
 									{Name: "interface", Key: map[string]string{"name": "veth3"}},
 									{Name: "config"},
 									{Name: "health-indicator"},
 								},
 							},
-							Val: &gnmi.TypedValue{
-								Value: &gnmi.TypedValue_StringVal{StringVal: "GOOD"},
+							Val: &gpb.TypedValue{
+								Value: &gpb.TypedValue_StringVal{StringVal: "GOOD"},
 							},
 						},
 					},
@@ -353,63 +354,63 @@ func TestProcessSubscribeRequest(t *testing.T) {
 			},
 		},
 	}
-	setReq1 := &gnmi.SetRequest{
-		Update: []*gnmi.Update{
+	setReq1 := &gpb.SetRequest{
+		Update: []*gpb.Update{
 			{
-				Path: &gnmi.Path{
-					Elem: []*gnmi.PathElem{
+				Path: &gpb.Path{
+					Elem: []*gpb.PathElem{
 						{Name: "interfaces"},
 						{Name: "interface", Key: map[string]string{"name": "veth3"}},
 						{Name: "config"},
 						{Name: "health-indicator"},
 					},
 				},
-				Val: &gnmi.TypedValue{
-					Value: &gnmi.TypedValue_StringVal{StringVal: "BAD"},
+				Val: &gpb.TypedValue{
+					Value: &gpb.TypedValue_StringVal{StringVal: "BAD"},
 				},
 			},
 		},
 	}
-	setReq2 := &gnmi.SetRequest{
-		Update: []*gnmi.Update{
+	setReq2 := &gpb.SetRequest{
+		Update: []*gpb.Update{
 			{
-				Path: &gnmi.Path{
-					Elem: []*gnmi.PathElem{
+				Path: &gpb.Path{
+					Elem: []*gpb.PathElem{
 						{Name: "interfaces"},
 						{Name: "interface", Key: map[string]string{"name": "veth3"}},
 						{Name: "config"},
 						{Name: "health-indicator"},
 					},
 				},
-				Val: &gnmi.TypedValue{
-					Value: &gnmi.TypedValue_StringVal{StringVal: "GOOD"},
+				Val: &gpb.TypedValue{
+					Value: &gpb.TypedValue_StringVal{StringVal: "GOOD"},
 				},
 			},
 		},
 	}
-	setResp := &gnmi.SetResponse{
-		Prefix: &gnmi.Path{},
-		Response: []*gnmi.UpdateResult{
+	setResp := &gpb.SetResponse{
+		Prefix: &gpb.Path{},
+		Response: []*gpb.UpdateResult{
 			{
-				Path: &gnmi.Path{
-					Elem: []*gnmi.PathElem{
+				Path: &gpb.Path{
+					Elem: []*gpb.PathElem{
 						{Name: "interfaces"},
 						{Name: "interface", Key: map[string]string{"name": "veth3"}},
 						{Name: "config"},
 						{Name: "health-indicator"},
 					},
 				},
-				Op: gnmi.UpdateResult_UPDATE},
+				Op: gpb.UpdateResult_UPDATE},
 		},
 	}
-	InitGNMI(TestTarget)
+	gnmi.Init(TestTarget)
 	type args struct {
 		target     *tg.Target
-		subreq     *gnmi.SubscribeRequest
-		subresp    []*gnmi.SubscribeResponse
-		setreq1    *gnmi.SetRequest
-		setreq2    *gnmi.SetRequest
-		setresp    *gnmi.SetResponse
+		subreq     *gpb.SubscribeRequest
+		subresp    []*gpb.SubscribeResponse
+		setreq1    *gpb.SetRequest
+		setreq2    *gpb.SetRequest
+		setresp    *gpb.SetResponse
 		resultChan chan bool
 	}
 	tests := []struct {
@@ -459,9 +460,9 @@ func TestProcessSubscribeRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			go ProcessSubscribeRequest(tt.args.subreq, tt.args.subresp, tt.args.resultChan)
+			go gnmi.ProcessSubscribeRequest(tt.args.subreq, tt.args.subresp, tt.args.resultChan)
 			time.Sleep(2 * time.Millisecond)
-			if got := ProcessSetRequest(tt.args.setreq1, tt.args.setresp) && ProcessSetRequest(tt.args.setreq2, tt.args.setresp); got != true {
+			if got := gnmi.ProcessSetRequest(tt.args.setreq1, tt.args.setresp) && gnmi.ProcessSetRequest(tt.args.setreq2, tt.args.setresp); got != true {
 				t.Errorf("ProcessSetRequest() = %v, want %v", got, tt.want)
 			}
 			if got := <-tt.args.resultChan; got != tt.want {
@@ -469,10 +470,10 @@ func TestProcessSubscribeRequest(t *testing.T) {
 			}
 		})
 	}
-	TearDownGNMI()
+	gnmi.TearDown()
 }
 
-func TestInitGNMI(t *testing.T) {
+func TestInit(t *testing.T) {
 	type args struct {
 		target *tg.Target
 	}
@@ -491,7 +492,7 @@ func TestInitGNMI(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			InitGNMI(tt.args.target)
+			gnmi.Init(tt.args.target)
 		})
 	}
 }
