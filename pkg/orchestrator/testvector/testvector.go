@@ -4,11 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package orchestrator
+package testvector
 
 import (
+	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/action"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/expectation"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
+
+var log = logger.NewLogger()
 
 //ProcessTestVector will parse test vector
 func ProcessTestVector(tv1 *tv.TestVector) bool {
@@ -23,11 +28,11 @@ func ProcessTestVector(tv1 *tv.TestVector) bool {
 //ProcessTestCase will go through each test case and execute
 func ProcessTestCase(tc *tv.TestCase) bool {
 	log.Infof("Test Case ID: %s\n", tc.TestCaseId)
-	return ProcessActionGroups(tc.GetActionGroups()) && ProcessExpectations(tc.GetExpectations())
+	return processActionGroups(tc.GetActionGroups()) && processExpectations(tc.GetExpectations())
 }
 
-//ProcessActionGroups processes sequential, parallel or random actions, combines the results and returns true or false.
-func ProcessActionGroups(ags []*tv.ActionGroup) bool {
+//processActionGroups processes sequential, parallel or random actions, combines the results and returns true or false.
+func processActionGroups(ags []*tv.ActionGroup) bool {
 	actionResult := true
 	for _, ag := range ags {
 		log.Infof("Action Group ID: %s\n", ag.ActionGroupId)
@@ -35,13 +40,13 @@ func ProcessActionGroups(ags []*tv.ActionGroup) bool {
 		switch {
 		case ag.GetSequentialActionGroup() != nil:
 			sag := ag.GetSequentialActionGroup()
-			currentResult = ProcessSequentialActionGroup(sag)
+			currentResult = action.ProcessSequentialActionGroup(sag)
 		case ag.GetParallelActionGroup() != nil:
 			pag := ag.GetParallelActionGroup()
-			currentResult = ProcessParallelActionGroup(pag)
+			currentResult = action.ProcessParallelActionGroup(pag)
 		case ag.GetRandomizedActionGroup() != nil:
 			rag := ag.GetRandomizedActionGroup()
-			currentResult = ProcessRandomizedActionGroup(rag)
+			currentResult = action.ProcessRandomizedActionGroup(rag)
 
 		default:
 			log.Infof("Empty Action Group\n")
@@ -51,8 +56,8 @@ func ProcessActionGroups(ags []*tv.ActionGroup) bool {
 	return actionResult
 }
 
-//ProcessExpectations processes expectations and combines the results to return true or false.
-func ProcessExpectations(exps []*tv.Expectation) bool {
+//processExpectations processes expectations and combines the results to return true or false.
+func processExpectations(exps []*tv.Expectation) bool {
 	expectationResult := true
 	for _, exp := range exps {
 		log.Infof("Expectation ID: %s\n", exp.ExpectationId)
@@ -60,16 +65,16 @@ func ProcessExpectations(exps []*tv.Expectation) bool {
 		switch {
 		case exp.GetConfigExpectation() != nil:
 			ce := exp.GetConfigExpectation()
-			currentResult = ProcessConfigExpectation(ce)
+			currentResult = expectation.ProcessConfigExpectation(ce)
 		case exp.GetControlPlaneExpectation() != nil:
 			cpe := exp.GetControlPlaneExpectation()
-			currentResult = ProcessControlPlaneExpectation(cpe)
+			currentResult = expectation.ProcessControlPlaneExpectation(cpe)
 		case exp.GetDataPlaneExpectation() != nil:
 			dpe := exp.GetDataPlaneExpectation()
-			currentResult = ProcessDataPlaneExpectation(dpe)
+			currentResult = expectation.ProcessDataPlaneExpectation(dpe)
 		case exp.GetTelemetryExpectation() != nil:
 			te := exp.GetTelemetryExpectation()
-			currentResult = ProcessTelemetryExpectation(te)
+			currentResult = expectation.ProcessTelemetryExpectation(te)
 		default:
 			log.Infof("Empty expectation\n")
 		}

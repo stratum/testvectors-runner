@@ -4,26 +4,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package orchestrator
+package expectation_test
 
 import (
 	"testing"
 
-	"github.com/openconfig/gnmi/proto/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
+	gpb "github.com/openconfig/gnmi/proto/gnmi"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/expectation"
+	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
 
+var TestTarget = &tg.Target{Address: "localhost:50001"}
+
 func TestProcessConfigExpectation(t *testing.T) {
-	framework.InitGNMI(TestTarget)
-	defer framework.TearDownGNMI()
+	gnmi.Init(TestTarget)
+	defer gnmi.TearDown()
 	var (
 		emptyConfigExpectation = &tv.ConfigExpectation{}
 		validConfigExpectation = &tv.ConfigExpectation{
-			GnmiGetRequest: &gnmi.GetRequest{
-				Path: []*gnmi.Path{
+			GnmiGetRequest: &gpb.GetRequest{
+				Path: []*gpb.Path{
 					{
-						Elem: []*gnmi.PathElem{
+						Elem: []*gpb.PathElem{
 							{Name: "interfaces"},
 							{Name: "interface", Key: map[string]string{"name": "veth1"}},
 							{Name: "state"},
@@ -31,24 +36,24 @@ func TestProcessConfigExpectation(t *testing.T) {
 						},
 					},
 				},
-				Encoding: gnmi.Encoding_PROTO,
+				Encoding: gpb.Encoding_PROTO,
 			},
-			GnmiGetResponse: &gnmi.GetResponse{
-				Notification: []*gnmi.Notification{
+			GnmiGetResponse: &gpb.GetResponse{
+				Notification: []*gpb.Notification{
 					{
 						Timestamp: 1234567890123456789,
-						Update: []*gnmi.Update{
+						Update: []*gpb.Update{
 							{
-								Path: &gnmi.Path{
-									Elem: []*gnmi.PathElem{
+								Path: &gpb.Path{
+									Elem: []*gpb.PathElem{
 										{Name: "interfaces"},
 										{Name: "interface", Key: map[string]string{"name": "veth1"}},
 										{Name: "state"},
 										{Name: "name"},
 									},
 								},
-								Val: &gnmi.TypedValue{
-									Value: &gnmi.TypedValue_StringVal{StringVal: "veth1"},
+								Val: &gpb.TypedValue{
+									Value: &gpb.TypedValue_StringVal{StringVal: "veth1"},
 								},
 							},
 						},
@@ -78,7 +83,7 @@ func TestProcessConfigExpectation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessConfigExpectation(tt.args.ce); got != tt.want {
+			if got := expectation.ProcessConfigExpectation(tt.args.ce); got != tt.want {
 				t.Errorf("ProcessConfigExpectation() = %v, want %v", got, tt.want)
 			}
 		})
@@ -129,7 +134,7 @@ func TestProcessControlPlaneExpectation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessControlPlaneExpectation(tt.args.cpe); got != tt.want {
+			if got := expectation.ProcessControlPlaneExpectation(tt.args.cpe); got != tt.want {
 				t.Errorf("ProcessControlPlaneExpectation() = %v, want %v", got, tt.want)
 			}
 		})
@@ -160,7 +165,7 @@ func TestProcessDataPlaneExpectation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessDataPlaneExpectation(tt.args.dpe); got != tt.want {
+			if got := expectation.ProcessDataPlaneExpectation(tt.args.dpe); got != tt.want {
 				t.Errorf("ProcessDataPlaneExpectation() = %v, want %v", got, tt.want)
 			}
 		})
@@ -168,15 +173,15 @@ func TestProcessDataPlaneExpectation(t *testing.T) {
 }
 
 func TestProcessTelemetryExpectation(t *testing.T) {
-	framework.InitGNMI(TestTarget)
-	framework.Init(TestTarget)
-	defer framework.TearDown()
-	defer framework.TearDownGNMI()
+	gnmi.Init(TestTarget)
+	p4rt.Init(TestTarget)
+	defer gnmi.TearDown()
+	defer p4rt.TearDown()
 	var (
 		telemetryExpectation = &tv.TelemetryExpectation{
-			GnmiSubscribeRequest:  &gnmi.SubscribeRequest{},
+			GnmiSubscribeRequest:  &gpb.SubscribeRequest{},
 			ActionGroup:           &tv.ActionGroup{},
-			GnmiSubscribeResponse: []*gnmi.SubscribeResponse{},
+			GnmiSubscribeResponse: []*gpb.SubscribeResponse{},
 		}
 	)
 	type args struct {
@@ -195,7 +200,7 @@ func TestProcessTelemetryExpectation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ProcessTelemetryExpectation(tt.args.tme); got != tt.want {
+			if got := expectation.ProcessTelemetryExpectation(tt.args.tme); got != tt.want {
 				t.Errorf("ProcessTelemetryExpectation() = %v, want %v", got, tt.want)
 			}
 		})

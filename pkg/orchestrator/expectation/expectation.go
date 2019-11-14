@@ -4,19 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package orchestrator
+package expectation
 
 import (
 	"time"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/action"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
 
+var log = logger.NewLogger()
+
 //ProcessConfigExpectation will execute config expectations
 func ProcessConfigExpectation(ce *tv.ConfigExpectation) bool {
-	return framework.ProcessGetRequest(ce.GetGnmiGetRequest(), ce.GetGnmiGetResponse())
+	return gnmi.ProcessGetRequest(ce.GetGnmiGetRequest(), ce.GetGnmiGetResponse())
 }
 
 //ProcessControlPlaneExpectation will execute control plane expectations
@@ -27,7 +32,7 @@ func ProcessControlPlaneExpectation(cpe *tv.ControlPlaneExpectation) bool {
 		//TODO
 	case cpe.GetPacketInExpectation() != nil:
 		log.Traceln("In Get Packet In Expectation")
-		return framework.ProcessPacketIn(cpe.GetPacketInExpectation().GetP4PacketIn())
+		return p4rt.ProcessPacketIn(cpe.GetPacketInExpectation().GetP4PacketIn())
 	case cpe.GetPipelineConfigExpectation() != nil:
 		log.Traceln("In Get Pipeline Config Expectation")
 		//TODO
@@ -56,16 +61,16 @@ func ProcessDataPlaneExpectation(dpe *tv.DataPlaneExpectation) bool {
 func ProcessTelemetryExpectation(tme *tv.TelemetryExpectation) bool {
 	resultChan := make(chan bool, 1)
 	var subResult, actionResult bool
-	go framework.ProcessSubscribeRequest(tme.GetGnmiSubscribeRequest(), tme.GetGnmiSubscribeResponse(), resultChan)
+	go gnmi.ProcessSubscribeRequest(tme.GetGnmiSubscribeRequest(), tme.GetGnmiSubscribeResponse(), resultChan)
 	time.Sleep(2 * time.Second)
 	if ag := tme.GetActionGroup(); ag != nil {
 		switch {
 		case ag.GetSequentialActionGroup() != nil:
-			actionResult = ProcessSequentialActionGroup(ag.GetSequentialActionGroup())
+			actionResult = action.ProcessSequentialActionGroup(ag.GetSequentialActionGroup())
 		case ag.GetParallelActionGroup() != nil:
-			actionResult = ProcessParallelActionGroup(ag.GetParallelActionGroup())
+			actionResult = action.ProcessParallelActionGroup(ag.GetParallelActionGroup())
 		case ag.GetRandomizedActionGroup() != nil:
-			actionResult = ProcessRandomizedActionGroup(ag.GetRandomizedActionGroup())
+			actionResult = action.ProcessRandomizedActionGroup(ag.GetRandomizedActionGroup())
 		default:
 			log.Traceln("Empty Action Group")
 			actionResult = false
