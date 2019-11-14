@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
 
@@ -46,7 +47,7 @@ func ProcessDataPlaneExpectation(dpe *tv.DataPlaneExpectation) bool {
 			payload := pkt.GetPayload()
 			payloads = append(payloads, payload)
 		}
-		return framework.ProcessTrafficExpectation(payloads, dpe.GetTrafficExpectation().GetPorts())
+		return dataplane.ProcessTrafficExpectation(payloads, dpe.GetTrafficExpectation().GetPorts())
 	}
 	return false
 }
