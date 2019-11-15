@@ -14,26 +14,28 @@ import (
 	"github.com/openconfig/gnmi/proto/gnmi"
 	"github.com/openconfig/ygot/testutil"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/common"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
-var log = logger.NewLogger()
-
 var (
-	gnmiContext context.Context
-	gnmiClient  gnmi.GNMIClient
-	gnmiError   error
-	gnmiCancel  context.CancelFunc
+	log      = logger.NewLogger()
+	gnmiConn connection
 )
+
+//Connection description
+type connection struct {
+	ctx       context.Context
+	client    gnmi.GNMIClient
+	connError error
+	cancel    context.CancelFunc
+}
 
 //Init starts a gNMI client connection to switch under test
 func Init(target *tg.Target) {
-	gnmiContext = context.Background()
-	gnmiClient, gnmiCancel, gnmiError = common.Connect(gnmiContext, target)
-	if gnmiError != nil {
-		log.Errorln(gnmiError)
+	gnmiConn = connect(target)
+	if gnmiConn.connError != nil {
+		log.Errorln(gnmiConn.connError)
 		log.Fatalln("Unable to get a gnmi client")
 	}
 }
@@ -41,13 +43,14 @@ func Init(target *tg.Target) {
 //TearDown closes the gNMI connection
 func TearDown() {
 	log.Traceln("In gnmi_oper tear down")
-	gnmiCancel()
+	gnmiConn.cancel()
 }
 
 //ProcessGetRequest sends a request to SUT and gives the response
 func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
 	log.Infoln("Sending get request")
-	resp, err := gnmiClient.Get(gnmiContext, greq)
+	ctx := context.Background()
+	resp, err := gnmiConn.client.Get(ctx, greq)
 	if err != nil {
 		log.Errorln(err)
 		return false
@@ -66,7 +69,9 @@ func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
 func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
 	log.Traceln("In ProcessSetRequest")
 	log.Infoln("Sending set request")
-	resp, err := gnmiClient.Set(gnmiContext, sreq)
+	ctx := context.Background()
+
+	resp, err := gnmiConn.client.Set(ctx, sreq)
 	if err != nil {
 		log.Errorln(err)
 		return false
@@ -94,7 +99,7 @@ func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
 //ProcessSubscribeRequest opens a subscription channel and verifies the response
 func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, resultChan chan bool) {
 	ctx := context.Background()
-	subcl, err := gnmiClient.Subscribe(ctx)
+	subcl, err := gnmiConn.client.Subscribe(ctx)
 	if err != nil {
 		log.Infoln(err)
 	}
