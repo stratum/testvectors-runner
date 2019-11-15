@@ -757,7 +757,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 	}
 }
 
-func TestMasterArbitration(t *testing.T) {
+/*func TestMasterArbitration(t *testing.T) {
 	log.Infoln(strings.Repeat("*", 100))
 	log.Infoln("Start of TestMasterArbitration")
 	setupTest()
@@ -856,4 +856,4 @@ func TestLowElectionMasterArbitration(t *testing.T) {
 	}
 	tearDownTest()
 	log.Infoln("End of TestLowElectionMasterArbitration")
-}
+}*/
