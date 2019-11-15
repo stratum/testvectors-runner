@@ -31,6 +31,9 @@ linters: # @HELP examines Go source code and reports coding problems
 gofmt: # @HELP run the Go format validation
 	bash -c "diff -u <(echo -n) <(gofmt -d pkg/ cmd/ tests/)"
 
-test: build deps linters
+license_check: # @HELP examine and ensure license headers exist
+	./build/licensing/boilerplate.py -v
+
+test: build deps linters license_check
 	CGO_ENABLED=1 go test -race -v github.com/opennetworkinglab/testvectors-runner/pkg/framework/...
 	CGO_ENABLED=1 go test -race -v github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/...
