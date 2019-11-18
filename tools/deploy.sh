@@ -5,21 +5,16 @@
 # SPDX-License-Identifier: Apache-2.0
 # 
 
-PLATFORM=tofino
-REMOTE_TV_RUNNER_DIR="~/tv_runner"
-TV_RUNNER_BIN=../cmd/main/tv_runner
+REMOTE_TVRUNNER_DIR="~/testvectors-runner"
+TVRUNNER_BIN=../build/_output/tvrunner
 
-# Create tv_runner directory on remote node
+# Create tvrunner directory on remote node
 ssh -tt $1 "
-	[ -d $REMOTE_TV_RUNNER_DIR ] || mkdir $REMOTE_TV_RUNNER_DIR
-	[ -d $REMOTE_TV_RUNNER_DIR/tools/$PLATFORM ] || mkdir -p $REMOTE_TV_RUNNER_DIR/tools/$PLATFORM
+	[ -d $REMOTE_TVRUNNER_DIR ] || mkdir $REMOTE_TVRUNNER_DIR
+	[ -d $REMOTE_TVRUNNER_DIR/build/_output ] || mkdir -p $REMOTE_TVRUNNER_DIR/build/_output
+	[ -d $REMOTE_TVRUNNER_DIR/tools ] || mkdir -p $REMOTE_TVRUNNER_DIR/tools
 "
 
-# Copy tv_runner binary and other files to remote node
-scp $TV_RUNNER_BIN $1:$REMOTE_TV_RUNNER_DIR/tv_runner
-scp ./Makefile $1:$REMOTE_TV_RUNNER_DIR
-scp ./$PLATFORM/port-map.json $1:$REMOTE_TV_RUNNER_DIR/tools/$PLATFORM
-
-# Change platform name in Makefile
-ssh -tt $1 "sed -i '/PLATFORM :=/c\PLATFORM := $PLATFORM' $REMOTE_TV_RUNNER_DIR/Makefile"
-
+# Copy tvrunner binary and other files to remote node
+scp $TVRUNNER_BIN $1:$REMOTE_TVRUNNER_DIR/build/_output/tvrunner
+scp ./Makefile $1:$REMOTE_TVRUNNER_DIR/tools

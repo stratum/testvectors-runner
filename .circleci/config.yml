@@ -43,10 +43,10 @@ jobs:
           command: git clone https://github.com/stratum/testvectors.git
       - run:
           name: Copy testvectors to runner
-          command: docker cp /home/circleci/project/testvectors/bmv2/ tvrunner:/root/tv/
+          command: docker cp /home/circleci/project/testvectors/bmv2/. tvrunner:/root/testvectors/
       - run:
           name: Run tests
-          command: docker exec -it tvrunner /bin/bash -c "make tests"
+          command: docker exec -it tvrunner /bin/bash -c "cd tools; make tests"
   publish:
     docker:
       - image: circleci/ruby:2.4.1

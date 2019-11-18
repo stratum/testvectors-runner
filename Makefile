@@ -4,21 +4,34 @@
 # SPDX-License-Identifier: Apache-2.0
 # 
 TV_DIR := $$HOME/testvectors/bmv2
-TV_RUNNER_DIR := $$PWD
+TVRUNNER_DIR := $$PWD
+DOCKER_TV_DIR := /root/testvectors
+DOCKER_TVRUNNER_DIR := /root/testvectors-runner
+DOCKER_RUN := docker run --rm -it
+DOCKER_RUN_BMV2 := ${DOCKER_RUN} --network=container:bmv2
+DOCKER_RUN_HW := ${DOCKER_RUN} --network=host
+TVRUNNER_DEV_IMAGE := stratumproject/tvrunner:dev
+TVRUNNER_BIN_IMAGE := stratumproject/tvrunner:binary
 
 .PHONY: build
 
 build:
-	CGO_ENABLED=1 go build -o build/_output/tv_runner ./cmd/main
+	CGO_ENABLED=1 go build -o build/_output/tvrunner ./cmd/main
 
 bmv2:
-	docker run --privileged --rm -it -p50001:50001 --name bmv2  stratumproject/tvrunner:bmv2
+	${DOCKER_RUN} --privileged -p50001:50001 --name bmv2  stratumproject/tvrunner:bmv2
 
-tv-runner-dev: #WIP
-	docker run --rm -it --network=container:bmv2 -v ${TV_RUNNER_DIR}:/root/testvectors-runner -v ${TV_DIR}:/root/tv/bmv2 stratumproject/tvrunner:dev
+tvrunner-bmv2-dev: #WIP
+	${DOCKER_RUN_BMV2} -v ${TVRUNNER_DIR}:${DOCKER_TVRUNNER_DIR} -v ${TV_DIR}:${DOCKER_TV_DIR} ${TVRUNNER_DEV_IMAGE}
 
-tv-runner:
-	docker run --rm -it --network=container:bmv2 -v ${TV_DIR}:/root/tv/bmv2 stratumproject/tvrunner:binary
+tvrunner-hw-dev: #WIP
+	${DOCKER_RUN_HW} -v ${TVRUNNER_DIR}:${DOCKER_TVRUNNER_DIR} -v ${TV_DIR}:${DOCKER_TV_DIR} ${TVRUNNER_DEV_IMAGE}
+
+tvrunner-bmv2:
+	${DOCKER_RUN_BMV2} -v ${TV_DIR}:${DOCKER_TV_DIR} ${TVRUNNER_BIN_IMAGE}
+
+tvrunner-hw:
+	${DOCKER_RUN_HW} -v ${TV_DIR}:${DOCKER_TV_DIR} ${TVRUNNER_BIN_IMAGE}
 
 deps: # @HELP ensure that the required dependencies are in place
 	go build -v ./...

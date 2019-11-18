@@ -3,31 +3,30 @@
 # 
 # SPDX-License-Identifier: Apache-2.0
 # 
-PLATFORM := bmv2
-TV_DIR := $$HOME/tv/${PLATFORM}/
+TVRUNNER_BIN := ../build/_output/tvrunner
+TV_DIR := $$HOME/testvectors/
 TV_SUITE := p4runtime/
 TV_NAME := RedirectDataplaneToDataplaneTest
 TV_FILE := ${TV_DIR}${TV_SUITE}${TV_NAME}.pb.txt
 TG_FILE := ${TV_DIR}target.pb.txt
-PORT_MAP_FILE := tools/${PLATFORM}/port-map.json
+PORT_MAP_FILE := ${TV_DIR}port-map.json
 LOG_LEVEL := fatal
-
-switch:
-	./tools/bmv2/start_bmv2.sh
+RUN_TVRUNNER := ${TVRUNNER_BIN} -test.v
+ARGS := -tgFile=${TG_FILE} -portMapFile=${PORT_MAP_FILE} -logLevel=${LOG_LEVEL}
 
 pipeline:
-	./tv_runner -test.v -tvFiles=${TV_DIR}PipelineConfig.pb.txt -tgFile=${TG_FILE} -portMapFile=${PORT_MAP_FILE} -logLevel=${LOG_LEVEL}
+	${RUN_TVRUNNER} -tvFiles=${TV_DIR}PipelineConfig.pb.txt ${ARGS}
 
 test:
-	./tv_runner -test.v -tvFiles=${TV_FILE} -tgFile=${TG_FILE} -portMapFile=${PORT_MAP_FILE} -logLevel=${LOG_LEVEL}
+	${RUN_TVRUNNER} -tvFiles=${TV_FILE} ${ARGS}
 
 gnmi:
-	./tv_runner -test.v -tvDir=${TV_DIR}gnmi/ -tgFile=${TG_FILE} -portMapFile=${PORT_MAP_FILE} -logLevel=${LOG_LEVEL}
+	${RUN_TVRUNNER} -tvDir=${TV_DIR}gnmi/ ${ARGS}
 
 p4runtime:
-	./tv_runner -test.v -tvDir=${TV_DIR}p4runtime/ -tgFile=${TG_FILE} -portMapFile=${PORT_MAP_FILE} -logLevel=${LOG_LEVEL}
+	${RUN_TVRUNNER} -tvDir=${TV_DIR}p4runtime/ ${ARGS}
 
 e2e:
-	./tv_runner -test.v -tvDir=${TV_DIR}e2e/ -tgFile=${TG_FILE} -portMapFile=${PORT_MAP_FILE} -logLevel=${LOG_LEVEL}
+	${RUN_TVRUNNER} -tvDir=${TV_DIR}e2e/ ${ARGS}
 
 tests: pipeline gnmi e2e p4runtime

@@ -19,7 +19,7 @@ COPY . .
 RUN make build
 
 
-# Docker image to run tv_runner with stratum_bmv2 switch
+# Docker image to run tvrunner with stratum_bmv2 switch
 # Use "make switch" to start the switch and "make test" to run tests
 
 FROM ubuntu:18.04
@@ -30,13 +30,13 @@ RUN apt-get update \
 
 WORKDIR /root
 
-COPY --from=builder /root/testvectors-runner/build/_output/tv_runner ./tv_runner
-COPY ./tools/Makefile ./Makefile
+RUN mkdir -p ./build/_output
+COPY --from=builder /root/testvectors-runner/build/_output/tvrunner ./build/_output/tvrunner
 
 RUN mkdir ./tools
-COPY ./tools/bmv2 ./tools/bmv2/
+COPY ./tools/Makefile ./tools/Makefile
 
-RUN mkdir -p tv/bmv2
+RUN mkdir -p testvectors
 
 WORKDIR /root
 
