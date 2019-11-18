@@ -7,7 +7,7 @@
 FROM golang:1.12.7
 
 RUN apt-get update \
-  && apt-get install -y vim libpcap-dev\
+  && apt-get install -y vim libpcap-dev python3\
   && rm -rf /var/lib/apt/lists/*
 
 RUN curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.21.0
