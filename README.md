@@ -6,7 +6,7 @@ This project is a reference implementation of a Test Vector runner which execute
 Build status (master): [![CircleCI](https://circleci.com/gh/opennetworkinglab/testvectors-runner/tree/master.svg?style=svg&circle-token=73bcc1fad5ddc6b34aede6a16f4b6bedc0630fc2)](https://circleci.com/gh/opennetworkinglab/testvectors-runner/tree/master)
 
 - [Testing Workflow](#testing-workflow)
-  * [Testing in Docker environment](#testing-in-docker-environment)
+  * [Testing with testvectors-runner Docker image](#testing-with-testvectors-runner-docker-image)
     + [Testing bmv2 switches](#testing-bmv2-switches)
     + [Testing hardware switches](#testing-hardware-switches)
   * [Testing with testvectors-runner binary](#testing-with-testvectors-runner-binary)
@@ -23,7 +23,7 @@ Build status (master): [![CircleCI](https://circleci.com/gh/opennetworkinglab/te
 
 This section describes workflows for running testvectors-runner as a tester.
 
-### Testing in Docker environment
+### Testing with testvectors-runner Docker image
 
 testvectors-runner works with various switch targets including bmv2 switches and hardware switches. For running with bmv2 switch we provide a docker image which deploys the bmv2 switch inside a docker container and another docker image for testvectors-runner binary. For running with hardware switches the same testvectors-runner container could also be deployed on a server which has both gPRC and data plane connections to the hardware switch under test. In both cases you'll need to point testvectors-runner to the correct Test Vector files either downloaded from [Test Vectors repo](https://github.com/opennetworkinglab/testvectors) or created on your own.
 
