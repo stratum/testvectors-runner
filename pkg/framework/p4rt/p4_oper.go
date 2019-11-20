@@ -19,6 +19,9 @@ import (
 
 var log = logger.NewLogger()
 
+//PktTimeout for receiving all packets
+const PktTimeout = 3 * time.Second
+
 var (
 	//SCV Description
 	scv      streamChannel
@@ -138,7 +141,7 @@ func ProcessPacketIn(exp *v1.PacketIn) bool {
 			log.Warningf("Packets don't match\nExpected: % x\nActual  : % x\n", exp.GetPayload(), ret.GetPayload())
 		}
 		return packetMatched
-	case <-time.After(3 * time.Second):
+	case <-time.After(PktTimeout):
 		log.Errorln("Timed out")
 	}
 

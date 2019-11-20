@@ -23,6 +23,11 @@ var (
 	gnmiConn connection
 )
 
+const (
+	//SubTimeout for receiving subscription acknowledgement
+	SubTimeout = 5 * time.Second
+)
+
 //Connection description
 type connection struct {
 	ctx       context.Context
@@ -68,7 +73,7 @@ func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
 //ProcessSetRequest sends a set request to SUT and gives the response
 func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
 	log.Traceln("In ProcessSetRequest")
-	log.Infoln("Sending set request")
+	log.Infof("Sending set request: %s", sreq)
 	ctx := context.Background()
 
 	resp, err := gnmiConn.client.Set(ctx, sreq)
@@ -97,7 +102,7 @@ func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
 }
 
 //ProcessSubscribeRequest opens a subscription channel and verifies the response
-func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, resultChan chan bool) {
+func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, firstRespChan chan struct{}, resultChan chan bool) {
 	ctx := context.Background()
 	subcl, err := gnmiConn.client.Subscribe(ctx)
 	if err != nil {
@@ -109,45 +114,57 @@ func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.Subscrib
 			log.Warnln("Error closing subscription client: ", err)
 		}
 	}()
-	result := true
-	waitc := make(chan struct{})
 	log.Tracef("Length of expected result: %d\n\n", len(sresp))
-	go func() {
-		for _, exp := range sresp {
-			in, err := subcl.Recv()
-			if err != nil {
-				log.Fatalf("Failed to receive a subscription response : %v", err)
-				result = result && false
-			}
-			if in.GetUpdate() != nil && testutil.NotificationSetEqual([]*gnmi.Notification{exp.GetUpdate()}, []*gnmi.Notification{in.GetUpdate()}, testutil.IgnoreTimestamp{}) {
-				log.Traceln("In GetUpdate condition")
-				log.Infoln("Subscription responses are equal")
-				log.Debugf("Subscription response: %s\n", in)
-				result = result && true
-			} else if testutil.SubscribeResponseEqual(exp, in) {
-				//continue
-				log.Infoln("Subscription responses are equal")
-				log.Debugf("Subscription response: %s\n", in)
-				result = result && true
-			} else {
-				log.Warnf("Subscription responses are unequal expected:\n%s \nactual:\n%s", exp, in)
-				result = result && false
-			}
-		}
-		close(waitc)
-	}()
+	var result bool
+	subRespChan := make(chan *gnmi.SubscribeResponse)
+	go recvSubRespChan(subcl, subRespChan)
+	go verifySubResponses(subRespChan, sresp, firstRespChan, resultChan)
 	log.Infoln("Sending subscription request")
 	err = subcl.Send(sreq)
+
 	if err != nil {
 		log.Errorln(err)
-		result = false
-	}
-	select {
-	case <-waitc:
-		resultChan <- result
-	case <-time.After(15 * time.Second):
-		log.Errorln("Timed out")
 		resultChan <- false
 	}
 
+	select {
+	case result = <-resultChan:
+		resultChan <- result
+	case <-time.After(SubTimeout):
+		log.Errorln("Process subscribe request Timed out")
+		resultChan <- false
+	}
+
+}
+
+func verifySubResponses(actRespChan chan *gnmi.SubscribeResponse, expResp []*gnmi.SubscribeResponse, firstRespChan chan struct{}, resultChan chan bool) {
+	result, firstRespBool := true, true
+	if len(expResp) == 0 {
+		close(firstRespChan)
+	} else {
+		for _, exp := range expResp {
+			log.Traceln("In for loop")
+			act := <-actRespChan
+			if firstRespBool {
+				firstRespBool = false
+				close(firstRespChan)
+			}
+			log.Traceln("In for loop after receiving subResp")
+			if act.GetUpdate() != nil && testutil.NotificationSetEqual([]*gnmi.Notification{act.GetUpdate()}, []*gnmi.Notification{exp.GetUpdate()}, testutil.IgnoreTimestamp{}) {
+				log.Traceln("In GetUpdate condition")
+				log.Infoln("Subscription responses are equal")
+				log.Debugf("Subscription response: %s\n", act)
+				result = result && true
+			} else if testutil.SubscribeResponseEqual(exp, act) {
+				//continue
+				log.Infoln("Subscription responses are equal")
+				log.Debugf("Subscription response: %s\n", act)
+				result = result && true
+			} else {
+				log.Warnf("Subscription responses are unequal expected:\n%s \nactual:\n%s", exp, act)
+				result = result && false
+			}
+		}
+	}
+	resultChan <- result
 }
