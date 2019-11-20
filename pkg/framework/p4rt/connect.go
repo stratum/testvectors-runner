@@ -20,6 +20,9 @@ import (
 	tvb "github.com/stratum/testvectors/proto/target"
 )
 
+//CtxTimeout for contexts
+const CtxTimeout = 3 * time.Second
+
 // connect opens a new gRPC connection to the target speciifed by the
 // ConnectionArgs. It returns the p4runtime Client connection, and a function
 // which can be called to close the connection. If an error is encountered
@@ -29,7 +32,7 @@ func connect(tg *tvb.Target) connection {
 		return connection{connError: errors.New("an address must be specified")}
 	}
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, CtxTimeout)
 	defer cancel()
 
 	conn, err := grpc.DialContext(ctx, tg.Address, grpc.WithInsecure())
@@ -128,7 +131,7 @@ func getMasterArbitrationLock(scv streamChannel, deviceID uint64, electionID *v1
 			log.Infoln("Master lock not achieved")
 			log.Errorln(ret.Status)
 		}
-	case <-time.After(3 * time.Second):
+	case <-time.After(CtxTimeout):
 		log.Errorln("Timed out")
 	}
 	return lockAchieved

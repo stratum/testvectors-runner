@@ -234,7 +234,7 @@ func TestProcessSetRequest(t *testing.T) {
 }
 
 func TestProcessSubscribeRequest(t *testing.T) {
-	resultChan := make(chan bool, 1)
+	resultChan := make(chan bool)
 	emptySubReq := &gpb.SubscribeRequest{}
 	emptySubResp := []*gpb.SubscribeResponse{}
 	emptySetReq := &gpb.SetRequest{}
@@ -460,14 +460,21 @@ func TestProcessSubscribeRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			go gnmi.ProcessSubscribeRequest(tt.args.subreq, tt.args.subresp, tt.args.resultChan)
-			time.Sleep(2 * time.Millisecond)
-			if got := gnmi.ProcessSetRequest(tt.args.setreq1, tt.args.setresp) && gnmi.ProcessSetRequest(tt.args.setreq2, tt.args.setresp); got != true {
-				t.Errorf("ProcessSetRequest() = %v, want %v", got, tt.want)
+			firstRespChan := make(chan struct{})
+			go gnmi.ProcessSubscribeRequest(tt.args.subreq, tt.args.subresp, firstRespChan, tt.args.resultChan)
+
+			select {
+			case <-firstRespChan:
+				if got := gnmi.ProcessSetRequest(tt.args.setreq1, tt.args.setresp) && gnmi.ProcessSetRequest(tt.args.setreq2, tt.args.setresp); got != true {
+					t.Errorf("ProcessSetRequest() = %v, want %v", got, tt.want)
+				}
+				if got := <-tt.args.resultChan; got != tt.want {
+					t.Errorf("ProcessSubscribeRequest() = %v, want %v", got, tt.want)
+				}
+			case <-time.After(gnmi.SubTimeout):
+				t.Errorf("ProcessSubscribeRequest() = %v, want %v", false, tt.want)
 			}
-			if got := <-tt.args.resultChan; got != tt.want {
-				t.Errorf("ProcessSubscribeRequest() = %v, want %v", got, tt.want)
-			}
+
 		})
 	}
 	gnmi.TearDown()
