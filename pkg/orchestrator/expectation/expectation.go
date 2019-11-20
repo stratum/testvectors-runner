@@ -61,27 +61,34 @@ func ProcessDataPlaneExpectation(dpe *tv.DataPlaneExpectation) bool {
 func ProcessTelemetryExpectation(tme *tv.TelemetryExpectation) bool {
 	resultChan := make(chan bool, 1)
 	var subResult, actionResult bool
-	go gnmi.ProcessSubscribeRequest(tme.GetGnmiSubscribeRequest(), tme.GetGnmiSubscribeResponse(), resultChan)
-	time.Sleep(2 * time.Second)
-	if ag := tme.GetActionGroup(); ag != nil {
-		switch {
-		case ag.GetSequentialActionGroup() != nil:
-			actionResult = action.ProcessSequentialActionGroup(ag.GetSequentialActionGroup())
-		case ag.GetParallelActionGroup() != nil:
-			actionResult = action.ProcessParallelActionGroup(ag.GetParallelActionGroup())
-		case ag.GetRandomizedActionGroup() != nil:
-			actionResult = action.ProcessRandomizedActionGroup(ag.GetRandomizedActionGroup())
-		default:
-			log.Traceln("Empty Action Group")
-			actionResult = false
-		}
-	}
+	firstRespChan := make(chan struct{})
+	go gnmi.ProcessSubscribeRequest(tme.GetGnmiSubscribeRequest(), tme.GetGnmiSubscribeResponse(), firstRespChan, resultChan)
 	select {
-	case subResult = <-resultChan:
-		log.Traceln("In ProcessTelemetryExpectation, Case Sub Result")
-		return subResult && actionResult
-	case <-time.After(15 * time.Second):
-		log.Errorln("Timed out")
+	case <-firstRespChan:
+		if ag := tme.GetActionGroup(); ag != nil {
+			switch {
+			case ag.GetSequentialActionGroup() != nil:
+				actionResult = action.ProcessSequentialActionGroup(ag.GetSequentialActionGroup())
+			case ag.GetParallelActionGroup() != nil:
+				actionResult = action.ProcessParallelActionGroup(ag.GetParallelActionGroup())
+			case ag.GetRandomizedActionGroup() != nil:
+				actionResult = action.ProcessRandomizedActionGroup(ag.GetRandomizedActionGroup())
+			default:
+				log.Traceln("Empty Action Group")
+				actionResult = false
+			}
+		}
+		select {
+		case subResult = <-resultChan:
+			log.Traceln("In ProcessTelemetryExpectation, Case Sub Result")
+			return subResult && actionResult
+		case <-time.After(gnmi.SubTimeout):
+			log.Errorln("Timed out")
+			return false
+		}
+	case <-time.After(gnmi.SubTimeout):
+		log.Errorln("Timed out waiting for subscription response")
 		return false
 	}
+
 }
