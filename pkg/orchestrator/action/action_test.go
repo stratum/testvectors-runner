@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package action_test
+package action
 
 import (
 	"testing"
@@ -15,7 +15,6 @@ import (
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/action"
 )
 
 var (
@@ -112,7 +111,7 @@ func TestProcessSequentialActionGroup(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := action.ProcessSequentialActionGroup(tt.args.sag); got != tt.want {
+			if got := processSequentialActionGroup(tt.args.sag); got != tt.want {
 				t.Errorf("ProcessSequentialActionGroup() = %v, want %v", got, tt.want)
 			}
 		})
@@ -150,7 +149,7 @@ func TestProcessParallelActionGroup(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := action.ProcessParallelActionGroup(tt.args.pag); got != tt.want {
+			if got := processParallelActionGroup(tt.args.pag); got != tt.want {
 				t.Errorf("ProcessParallelActionGroup() = %v, want %v", got, tt.want)
 			}
 		})
@@ -178,7 +177,7 @@ func TestProcessRandomizedActionGroup(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := action.ProcessRandomizedActionGroup(tt.args.rag); got != tt.want {
+			if got := processRandomizedActionGroup(tt.args.rag); got != tt.want {
 				t.Errorf("ProcessRandomizedActionGroup() = %v, want %v", got, tt.want)
 			}
 		})
@@ -242,7 +241,7 @@ func TestProcessAction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := action.ProcessAction(tt.args.action); got != tt.want {
+			if got := processAction(tt.args.action); got != tt.want {
 				t.Errorf("ProcessAction() = %v, want %v", got, tt.want)
 			}
 		})

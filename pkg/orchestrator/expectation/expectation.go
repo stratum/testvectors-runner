@@ -19,13 +19,34 @@ import (
 
 var log = logger.NewLogger()
 
-//ProcessConfigExpectation will execute config expectations
-func ProcessConfigExpectation(ce *tv.ConfigExpectation) bool {
+//ProcessExpectation description
+func ProcessExpectation(exp *tv.Expectation) bool {
+	switch {
+	case exp.GetConfigExpectation() != nil:
+		ce := exp.GetConfigExpectation()
+		return processConfigExpectation(ce)
+	case exp.GetControlPlaneExpectation() != nil:
+		cpe := exp.GetControlPlaneExpectation()
+		return processControlPlaneExpectation(cpe)
+	case exp.GetDataPlaneExpectation() != nil:
+		dpe := exp.GetDataPlaneExpectation()
+		return processDataPlaneExpectation(dpe)
+	case exp.GetTelemetryExpectation() != nil:
+		te := exp.GetTelemetryExpectation()
+		return processTelemetryExpectation(te)
+	default:
+		log.Infof("Empty expectation\n")
+		return false
+	}
+}
+
+//processConfigExpectation extracts gnmi get requests and forwards it to framework
+func processConfigExpectation(ce *tv.ConfigExpectation) bool {
 	return gnmi.ProcessGetRequest(ce.GetGnmiGetRequest(), ce.GetGnmiGetResponse())
 }
 
-//ProcessControlPlaneExpectation will execute control plane expectations
-func ProcessControlPlaneExpectation(cpe *tv.ControlPlaneExpectation) bool {
+//processControlPlaneExpectation extracts get pipeline config, read or packet in expectations and forwards to framework.
+func processControlPlaneExpectation(cpe *tv.ControlPlaneExpectation) bool {
 	switch {
 	case cpe.GetReadExpectation() != nil:
 		log.Traceln("In Get Read Expectation")
@@ -40,8 +61,8 @@ func ProcessControlPlaneExpectation(cpe *tv.ControlPlaneExpectation) bool {
 	return false
 }
 
-//ProcessDataPlaneExpectation will execute data plane expectations
-func ProcessDataPlaneExpectation(dpe *tv.DataPlaneExpectation) bool {
+//processDataPlaneExpectation extracts packets to be sent to data plane ports and forwards to framework.
+func processDataPlaneExpectation(dpe *tv.DataPlaneExpectation) bool {
 	switch {
 	case dpe.GetTrafficExpectation() != nil:
 		log.Traceln("In Get Traffic Expectation")
@@ -57,29 +78,17 @@ func ProcessDataPlaneExpectation(dpe *tv.DataPlaneExpectation) bool {
 	return false
 }
 
-//ProcessTelemetryExpectation will execute subscribe expectations
-func ProcessTelemetryExpectation(tme *tv.TelemetryExpectation) bool {
+//processTelemetryExpectation executes subscribe expectations. These expectations contain gnmi subscribe request, set of actions to be performed after successful subscription and responses to be verfied.
+//Returns false if responses are not received with in timeout.
+func processTelemetryExpectation(tme *tv.TelemetryExpectation) bool {
 	resultChan := make(chan bool, 1)
-	var subResult, actionResult bool
 	firstRespChan := make(chan struct{})
 	go gnmi.ProcessSubscribeRequest(tme.GetGnmiSubscribeRequest(), tme.GetGnmiSubscribeResponse(), firstRespChan, resultChan)
 	select {
 	case <-firstRespChan:
-		if ag := tme.GetActionGroup(); ag != nil {
-			switch {
-			case ag.GetSequentialActionGroup() != nil:
-				actionResult = action.ProcessSequentialActionGroup(ag.GetSequentialActionGroup())
-			case ag.GetParallelActionGroup() != nil:
-				actionResult = action.ProcessParallelActionGroup(ag.GetParallelActionGroup())
-			case ag.GetRandomizedActionGroup() != nil:
-				actionResult = action.ProcessRandomizedActionGroup(ag.GetRandomizedActionGroup())
-			default:
-				log.Traceln("Empty Action Group")
-				actionResult = false
-			}
-		}
+		actionResult := action.ProcessActionGroup(tme.GetActionGroup())
 		select {
-		case subResult = <-resultChan:
+		case subResult := <-resultChan:
 			log.Traceln("In ProcessTelemetryExpectation, Case Sub Result")
 			return subResult && actionResult
 		case <-time.After(gnmi.SubTimeout):
