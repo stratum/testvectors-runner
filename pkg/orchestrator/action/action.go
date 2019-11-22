@@ -18,18 +18,37 @@ import (
 
 var log = logger.NewLogger()
 
-//ProcessSequentialActionGroup will execute actions sequentially
-func ProcessSequentialActionGroup(sag *tv.SequentialActionGroup) bool {
+//ProcessActionGroup decodes the action group and executes actions sequentially, in parallel or randomly based on the type of underlying action group.
+func ProcessActionGroup(ag *tv.ActionGroup) bool {
+	switch {
+	case ag.GetSequentialActionGroup() != nil:
+		sag := ag.GetSequentialActionGroup()
+		return processSequentialActionGroup(sag)
+	case ag.GetParallelActionGroup() != nil:
+		pag := ag.GetParallelActionGroup()
+		return processParallelActionGroup(pag)
+	case ag.GetRandomizedActionGroup() != nil:
+		rag := ag.GetRandomizedActionGroup()
+		return processRandomizedActionGroup(rag)
+
+	default:
+		log.Infof("Empty Action Group\n")
+		return false
+	}
+}
+
+//processSequentialActionGroup executes actions sequentially, combines all the results and returns a boolean value.
+func processSequentialActionGroup(sag *tv.SequentialActionGroup) bool {
 	result := true
 	log.Traceln("In ProcessSequentialActionGroup")
 	for _, action := range sag.Actions {
-		result = ProcessAction(action) && result
+		result = processAction(action) && result
 	}
 	return result
 }
 
-//ProcessParallelActionGroup will execute actions Parallelly
-func ProcessParallelActionGroup(pag *tv.ParallelActionGroup) bool {
+//processParallelActionGroup executes actions parallelly, combines all the results and returns a boolean value.
+func processParallelActionGroup(pag *tv.ParallelActionGroup) bool {
 	result := true
 	log.Traceln("In ProcessParallelActionGroup")
 	//TODO - options
@@ -40,7 +59,7 @@ func ProcessParallelActionGroup(pag *tv.ParallelActionGroup) bool {
 	for _, action := range pag.Actions {
 		go func(action *tv.Action) {
 			defer wg.Done()
-			res := ProcessAction(action)
+			res := processAction(action)
 			resultChan <- res
 		}(action)
 	}
@@ -52,19 +71,20 @@ func ProcessParallelActionGroup(pag *tv.ParallelActionGroup) bool {
 	return result
 }
 
-//ProcessRandomizedActionGroup will execute actions in random order
-func ProcessRandomizedActionGroup(rag *tv.RandomizedActionGroup) bool {
+//processRandomizedActionGroup executes actions in random order, combines all the results and returns a boolean value.
+//TODO
+func processRandomizedActionGroup(rag *tv.RandomizedActionGroup) bool {
 	log.Traceln("In ProcessRandomizedActionGroup")
 	//TODO
 	return false
 }
 
 //ProcessAction decodes and executes actions
-func ProcessAction(action *tv.Action) bool {
+func processAction(action *tv.Action) bool {
 	switch {
 	case action.GetConfigOperation() != nil:
 		co := action.GetConfigOperation()
-		return gnmi.ProcessSetRequest(co.GnmiSetRequest, co.GnmiSetResponse)
+		return processConfigOperation(co)
 	case action.GetAlarmStimulus() != nil:
 		//TODO
 		as := action.GetAlarmStimulus()
@@ -91,7 +111,12 @@ func ProcessAction(action *tv.Action) bool {
 	return false
 }
 
-//ProcessControlPlaneOperation extracts pipeline config, write or packet out operations and forwards to framework.
+//processConfigOperation extracts gnmi set request and forwards to framework.
+func processConfigOperation(co *tv.ConfigOperation) bool {
+	return gnmi.ProcessSetRequest(co.GnmiSetRequest, co.GnmiSetResponse)
+}
+
+//processControlPlaneOperation extracts pipeline config, write or packet out operations and forwards to framework.
 func processControlPlaneOperation(cpo *tv.ControlPlaneOperation) bool {
 	switch {
 	case cpo.GetPipelineConfigOperation() != nil:
