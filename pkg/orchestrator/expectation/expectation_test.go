@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package expectation_test
+package expectation
 
 import (
 	"testing"
@@ -12,7 +12,6 @@ import (
 	gpb "github.com/openconfig/gnmi/proto/gnmi"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/expectation"
 	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
@@ -83,7 +82,7 @@ func TestProcessConfigExpectation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := expectation.ProcessConfigExpectation(tt.args.ce); got != tt.want {
+			if got := processConfigExpectation(tt.args.ce); got != tt.want {
 				t.Errorf("ProcessConfigExpectation() = %v, want %v", got, tt.want)
 			}
 		})
@@ -134,7 +133,7 @@ func TestProcessControlPlaneExpectation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := expectation.ProcessControlPlaneExpectation(tt.args.cpe); got != tt.want {
+			if got := processControlPlaneExpectation(tt.args.cpe); got != tt.want {
 				t.Errorf("ProcessControlPlaneExpectation() = %v, want %v", got, tt.want)
 			}
 		})
@@ -165,7 +164,7 @@ func TestProcessDataPlaneExpectation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := expectation.ProcessDataPlaneExpectation(tt.args.dpe); got != tt.want {
+			if got := processDataPlaneExpectation(tt.args.dpe); got != tt.want {
 				t.Errorf("ProcessDataPlaneExpectation() = %v, want %v", got, tt.want)
 			}
 		})
@@ -200,7 +199,7 @@ func TestProcessTelemetryExpectation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := expectation.ProcessTelemetryExpectation(tt.args.tme); got != tt.want {
+			if got := processTelemetryExpectation(tt.args.tme); got != tt.want {
 				t.Errorf("ProcessTelemetryExpectation() = %v, want %v", got, tt.want)
 			}
 		})
