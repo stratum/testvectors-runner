@@ -15,8 +15,8 @@ import (
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
-	tg "github.com/stratum/testvectors/proto/target"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/test/setup"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/test/teardown"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,9 +67,9 @@ updates: <
 )
 
 // PktIoOutDirectToDataPlaneTest sends packets directly out of a physical port. It Skips the ingress pipeline and any processing.
-func (st Test) PktIoOutDirectToDataPlaneTest(t *testing.T, target *tg.Target) {
+func (st Test) PktIoOutDirectToDataPlaneTest(t *testing.T) {
 	// Start packet capturing
-	test.SetUpTestCase(t, target)
+	setup.TestCase()
 
 	// Build packet-out
 	pktOut := &v1.PacketOut{}
@@ -88,13 +88,13 @@ func (st Test) PktIoOutDirectToDataPlaneTest(t *testing.T, target *tg.Target) {
 	assert.True(t, result, "Unexpected packet received on port 2")
 
 	// Stop packet capturing
-	test.TearDownTestCase(t, target)
+	teardown.TestCase()
 }
 
 // PktIoOutToIngressPipelineACLRedirectToPortTest sends packets out through the ingress pipeline and redirect it to a port via an ACL rule.
-func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T, target *tg.Target) {
+func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T) {
 	// Start packet capturing
-	test.SetUpTestCase(t, target)
+	setup.TestCase()
 
 	// Build write request
 	request := &v1.WriteRequest{}
@@ -125,5 +125,5 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T, targ
 	// TODO: Delete table entry
 
 	// Stop packet capturing
-	test.TearDownTestCase(t, target)
+	teardown.TestCase()
 }
