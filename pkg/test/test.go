@@ -8,14 +8,18 @@ package test
 
 import (
 	"io"
+	"io/ioutil"
+	"os"
+	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
-
+	"github.com/golang/protobuf/proto"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/test/setup"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/test/teardown"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/test/testsuite"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/test/tvsuite"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
@@ -33,42 +37,67 @@ func (Deps) StopTestLog() error                          { return nil }
 func (Deps) WriteHeapProfile(io.Writer) error            { return nil }
 func (Deps) WriteProfileTo(string, io.Writer, int) error { return nil }
 
-//SetUpSuite includes steps for setting up test suite
-func SetUpSuite(target *tg.Target) {
-	log.Infoln("Setting up test suite...")
-	log.Infof("Target: %s", target)
-
-	gnmi.Init(target)
-	p4rt.Init(target)
+//TestSuite description
+type Suite interface {
+	Create() []testing.InternalTest
 }
 
-//TearDownSuite includes steps for tearing down test suite
-func TearDownSuite() {
-	log.Infoln("Tearing down test suite...")
-	gnmi.TearDown()
-	p4rt.TearDown()
+//CreateSuite description
+func CreateSuite(testNames string, tvDir string, tvFiles string) []testing.InternalTest {
+	var testSuite Suite
+	switch {
+	case testNames != "":
+		var ts testsuite.IntTestSuite
+		ts.TestNames = strings.Split(testNames, ",")
+		testSuite = ts
+	case tvDir != "":
+		var tvs tvsuite.TVSuite
+		tvs.TvFiles = getFiles(tvDir)
+		testSuite = tvs
+	case tvFiles != "":
+		var tvs tvsuite.TVSuite
+		tvs.TvFiles = strings.Split(tvFiles, ",")
+		testSuite = tvs
+	}
+	return testSuite.Create()
 }
 
-//SetUpTest includes steps for setting up a test
-func SetUpTest() {
-	log.Infoln("Setting up test...")
+func getFiles(tvDir string) []string {
+	var tvFilesSlice []string
+	tvFiles, err := ioutil.ReadDir(tvDir)
+	if err != nil {
+		log.InvalidDir(tvDir, err)
+	}
+	for _, file := range tvFiles {
+		if file.IsDir() {
+			log.Infof("Ignoring directory %s", file.Name())
+			continue
+		}
+		tvFilesSlice = append(tvFilesSlice, tvDir+file.Name())
+	}
+	return tvFilesSlice
 }
 
-//TearDownTest includes steps for tearing down a test
-func TearDownTest() {
-	log.Infoln("Tearing down test...")
+func getTarget(fileName string) *tg.Target {
+	// Read Target file
+	tgdata, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.InvalidFile("Target File: "+fileName, err)
+	}
+	target := &tg.Target{}
+	if err = proto.UnmarshalText(string(tgdata), target); err != nil {
+		log.InvalidProtoUnmarshal(reflect.TypeOf(target), err)
+	}
+	log.Infoln("Target: ", target)
+	return target
 }
 
-//SetUpTestCase includes steps for setting up a test case
-func SetUpTestCase(t *testing.T, target *tg.Target) {
-	log.Debugln("Setting up test case...")
-	// FIXME: only start packet capture if needed
-	dataplane.Capture()
-}
-
-//TearDownTestCase includes steps for tearing down a test case
-func TearDownTestCase(t *testing.T, target *tg.Target) {
-	log.Debugln("Tearing down test case...")
-	dataplane.Stop()
-	log.Infoln(strings.Repeat("*", 100))
+//Run description
+func Run(tgFile string, testSuite []testing.InternalTest) {
+	target := getTarget(tgFile)
+	setup.Suite(target)
+	var match Deps
+	code := testing.MainStart(match, testSuite, nil, nil).Run()
+	teardown.Suite()
+	os.Exit(code)
 }

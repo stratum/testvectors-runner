@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	tg "github.com/stratum/testvectors/proto/target"
 	"gotest.tools/assert"
 )
 
@@ -35,8 +34,7 @@ func TestCase2(t *testing.T) {
 }
 
 //Test0 is a sample test case
-func (st Test) Test0(t *testing.T, target *tg.Target) {
-	log.Infoln(target.Address)
+func (st Test) Test0(t *testing.T) {
 	t.Run("Test Case 1", TestCase1)
 	t.Run("Test Case 2", TestCase2)
 }
