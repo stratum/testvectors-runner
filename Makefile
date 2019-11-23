@@ -21,10 +21,10 @@ build:
 bmv2:
 	${DOCKER_RUN} --privileged -p50001:50001 --name bmv2  stratumproject/tvrunner:bmv2
 
-tvrunner-bmv2-dev: #WIP
+tvrunner-bmv2-dev:
 	${DOCKER_RUN_BMV2} -v ${TVRUNNER_DIR}:${DOCKER_TVRUNNER_DIR} -v ${TV_DIR}:${DOCKER_TV_DIR} ${TVRUNNER_DEV_IMAGE}
 
-tvrunner-hw-dev: #WIP
+tvrunner-hw-dev:
 	${DOCKER_RUN_HW} -v ${TVRUNNER_DIR}:${DOCKER_TVRUNNER_DIR} -v ${TV_DIR}:${DOCKER_TV_DIR} ${TVRUNNER_DEV_IMAGE}
 
 tvrunner-bmv2:
