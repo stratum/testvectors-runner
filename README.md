@@ -34,7 +34,7 @@ Start `stratum-bmv2` switch with two dataplane ports for testing by running:
 make bmv2
 ```
 
-Then start `tvrunner` container by mounting the test vectors directory:
+Then start `tvrunner` container by mounting the Test Vectors directory:
 ```bash
 make tvrunner-bmv2 TV_DIR=<PATH_TO_BMV2_TV>
 ```
@@ -56,12 +56,12 @@ Or run each test category separately by `make pipeline` first and then `make p4r
 
 For now we only support deploying testvectors-runner on a server (hereinafter called the `test node`) connected to the switch under test. The test node should be able to talk to the switch via gRPC as well as have physical connections to the switch ports for data plane verification scenarios. We'll be supporting deployment directly on the switch under test soon.
 
-Download this repo on the test node and start `tvrunner` container by mounting the test vectors directory:
+Download this repo on the test node and start `tvrunner` container by mounting the Test Vectors directory:
 ```bash
 make tvrunner-hw TV_DIR=<PATH_TO_TV>
 ```
 
-> Note: replace `<PATH_TO_TV>` with your hardware Test Vectors path.
+> Note: replace `<PATH_TO_TV>` with your hardware Test Vectors path. For example, the current Test Vectors repo provides Test Vector files for Tofino switches under `testvectors/tofino/`. Also check the configurations in `target.pb.txt` and `port-map.json` in the same directory to make sure they match your testing environment. `target.pb.txt` stores the IP and port that your switch under test is using, and `port-map.json` stores a mapping between the switch port number used in Test Vectors and name of the interface on the test node that is physically connected to the switch port.
 
 Then follow the same steps as described in [Testing bmv2 switches](#testing-bmv2-switches) section above to execute the tests against the switch under test.
 
@@ -92,7 +92,7 @@ Start `stratum-bmv2` switch as a container by running:
 make bmv2
 ```
 
-Then start a container for testvectors-runner development by mounting the test vectors directory:
+Then start a container for testvectors-runner development by mounting the Test Vectors directory:
 ```bash
 make tvrunner-bmv2-dev TV_DIR=<PATH_TO_BMV2_TV>
 ```
@@ -112,7 +112,7 @@ Then follow the same steps as described in [Testing bmv2 switches](#testing-bmv2
 
 Assuming a test node is set up as described in [Testing hardware switches](#testing-hardware-switches) section above.
 
-Download this repo on the test node and start `tvrunner` container by mounting the test vectors directory:
+Download this repo on the test node and start `tvrunner` container by mounting the Test Vectors directory:
 ```bash
 make tvrunner-hw-dev TV_DIR=<PATH_TO_TV>
 ```
