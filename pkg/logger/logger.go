@@ -4,12 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package logger implements utilities to instantiate and manipulate a new logger
+*/
 package logger
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path"
 	"reflect"
+	"runtime"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -47,12 +54,22 @@ var (
 func NewLogger() *StandardLogger {
 	var standardLogger = &StandardLogger{logger}
 	//TODO - write inputs to config file and parse
-	//output folder - default "logs" folder under testvectors-runner
+	//output folder - default /tmp
 	//also log to stdout - default true
 	//log level - default warn
 
+	//To display calling file and function
+	standardLogger.SetReportCaller(true)
+	formatter := &logrus.TextFormatter{
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			filename := path.Base(f.File)
+			s := strings.Split(f.Function, ".")
+			funcname := s[len(s)-1]
+			return fmt.Sprintf("%s()", funcname), fmt.Sprintf("%s:%d", filename, f.Line)
+		},
+	}
+
 	//Timestamp setting
-	formatter := new(logrus.TextFormatter)
 	formatter.TimestampFormat = "2006-01-02T15:04:05.999Z07:00"
 
 	//alternatively,
