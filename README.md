@@ -10,7 +10,6 @@ Build status (master): [![CircleCI](https://circleci.com/gh/opennetworkinglab/te
     + [Testing bmv2 switches](#testing-bmv2-switches)
     + [Testing hardware switches](#testing-hardware-switches)
   * [Testing with testvectors-runner binary](#testing-with-testvectors-runner-binary)
-    + [Testing bmv2 switches with testvectors-runner binary](#testing-bmv2-switches-with-testvectors-runner-binary)
     + [Testing hardware switches with testvectors-runner binary](#testing-hardware-switches-with-testvectors-runner-binary)
 - [Development Workflow](#development-workflow)
   * [Development in Docker environment](#development-in-docker-environment)
@@ -66,10 +65,6 @@ make tvrunner-hw TV_DIR=<PATH_TO_TV>
 Then follow the same steps as described in [Testing bmv2 switches](#testing-bmv2-switches) section above to execute the tests against the switch under test.
 
 ### Testing with testvectors-runner binary
-
-#### Testing bmv2 switches with testvectors-runner binary
-
-[TODO] Prerequisites for testing on local machine.
 
 #### Testing hardware switches with testvectors-runner binary
 
