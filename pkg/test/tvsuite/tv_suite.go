@@ -27,6 +27,9 @@ type TVSuite struct {
 	TvFiles []string
 }
 
+// Create builds and returns a slice of testing.InternalTest from a slice of Test Vector files.
+// It iterates through Test Vector files and for each test case it wraps around ProcessTestCase
+// to build anonymous functions for testing.InternalTest.
 func (tv TVSuite) Create() []testing.InternalTest {
 	testSuite := []testing.InternalTest{}
 	// Read TV files and add them to the test suite
@@ -56,6 +59,7 @@ func (tv TVSuite) Create() []testing.InternalTest {
 	return testSuite
 }
 
+// getTVFromFile reads Test Vector file with given file name and returns Test Vectors.
 func getTVFromFile(fileName string) *tv.TestVector {
 	tvdata, err := ioutil.ReadFile(fileName)
 	if err != nil {
