@@ -39,6 +39,8 @@ type directDataPlane struct {
 	wg sync.WaitGroup
 }
 
+// createDirectDataPlane creates a data plane instance which utilizes gopacket to
+// send/receive packets directly to physical interfaces on the host.
 func createDirectDataPlane(portMap map[string]string, match Match) *directDataPlane {
 	ddp := directDataPlane{}
 	ddp.portMap = portMap

@@ -42,6 +42,9 @@ type dataPlane interface {
 
 var dp dataPlane
 
+// CreateDataPlane takes the dataplane mode, packet match type and port-map file name as arguments
+// and creates one dataplane instance (only direct dataplane is supported at the moment, loopback
+// mode support coming soon) for packet sending/receiving/verification.
 func CreateDataPlane(mode string, matchType string, portMapFile string) {
 	var match Match
 	switch matchType {

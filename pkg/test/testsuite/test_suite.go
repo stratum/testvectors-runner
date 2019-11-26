@@ -22,8 +22,9 @@ type IntTestSuite struct {
 	TestNames []string
 }
 
-//type Test struct{}
-
+// Create builds and returns a slice of testing.InternalTest from a slice of test names.
+// It looks for methods whose names exactly match given test names and wraps around the
+// methods to build anonymous functions for testing.InternalTest.
 func (ts IntTestSuite) Create() []testing.InternalTest {
 	testSuite := []testing.InternalTest{}
 	for _, testName := range ts.TestNames {
