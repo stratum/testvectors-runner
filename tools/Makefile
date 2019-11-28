@@ -12,21 +12,21 @@ TG_FILE := ${TV_DIR}target.pb.txt
 PORT_MAP_FILE := ${TV_DIR}port-map.json
 LOG_LEVEL := fatal
 RUN_TVRUNNER := ${TVRUNNER_BIN} -test.v
-ARGS := -tgFile=${TG_FILE} -portMapFile=${PORT_MAP_FILE} -logLevel=${LOG_LEVEL}
+ARGS := -target ${TG_FILE} -port-map ${PORT_MAP_FILE} -log-level ${LOG_LEVEL}
 
 pipeline:
-	${RUN_TVRUNNER} -tvFiles=${TV_DIR}PipelineConfig.pb.txt ${ARGS}
+	${RUN_TVRUNNER} -tv-name ${TV_DIR}PipelineConfig.pb.txt ${ARGS}
 
 test:
-	${RUN_TVRUNNER} -tvFiles=${TV_FILE} ${ARGS}
+	${RUN_TVRUNNER} -tv-name ${TV_FILE} ${ARGS}
 
 gnmi:
-	${RUN_TVRUNNER} -tvDir=${TV_DIR}gnmi/ ${ARGS}
+	${RUN_TVRUNNER} -tv-dir ${TV_DIR}gnmi/ ${ARGS}
 
 p4runtime:
-	${RUN_TVRUNNER} -tvDir=${TV_DIR}p4runtime/ ${ARGS}
+	${RUN_TVRUNNER} -tv-dir ${TV_DIR}p4runtime/ ${ARGS}
 
 e2e:
-	${RUN_TVRUNNER} -tvDir=${TV_DIR}e2e/ ${ARGS}
+	${RUN_TVRUNNER} -tv-dir=${TV_DIR}e2e/ ${ARGS}
 
 tests: pipeline gnmi e2e p4runtime
