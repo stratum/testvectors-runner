@@ -21,15 +21,15 @@ var log = logger.NewLogger()
 // To run with Test Vectors, specify Test Vector files using either tvFiles or tvDir flag, otherwise specify test function
 // names using testNames flag. A target file (tgfile) and a port-map file (portMapFile) are mandatory in both cases.
 func main() {
-	testNames := flag.String("testNames", "", "Names of the tests to run, separated by comma")
-	tvFiles := flag.String("tvFiles", "", "Path to the Test Vector files, separated by comma")
-	tvDir := flag.String("tvDir", "", "Directory of Test Vector files")
-	tgFile := flag.String("tgFile", "", "Path to the Target file")
-	portMapFile := flag.String("portMapFile", "tools/bmv2/port-map.json", "Path to the port-map file")
-	dpMode := flag.String("dpMode", "direct", "Data plane mode: 'direct' or 'loopback'")
-	matchType := flag.String("matchType", "exact", "Data plane match type: 'exact' or 'in'")
-	logDir := flag.String("logDir", "/tmp", "Location to store logs")
-	level := flag.String("logLevel", "warn", "Log Level")
+	testNames := flag.String("test-names", "", "Names of the tests to run, separated by comma")
+	tvName := flag.String("tv-name", ".*", "Path to the Test Vector files, separated by comma")
+	tvDir := flag.String("tv-dir", "", "Directory of Test Vector files")
+	tgFile := flag.String("target", "", "Path to the Target file")
+	portMapFile := flag.String("port-map", "tools/bmv2/port-map.json", "Path to the port-map file")
+	dpMode := flag.String("dp-mode", "direct", "Data plane mode: 'direct' or 'loopback'")
+	matchType := flag.String("match-type", "exact", "Data plane match type: 'exact' or 'in'")
+	logDir := flag.String("log-dir", "/tmp", "Location to store logs")
+	level := flag.String("log-level", "warn", "Log Level")
 	flag.Parse()
 
 	setupLog(*logDir, *level)
@@ -37,7 +37,7 @@ func main() {
 	// Create data plane
 	dataplane.CreateDataPlane(*dpMode, *matchType, *portMapFile)
 
-	testSuiteSlice := test.CreateSuite(*testNames, *tvDir, *tvFiles)
+	testSuiteSlice := test.CreateSuite(*testNames, *tvDir, *tvName)
 	test.Run(*tgFile, testSuiteSlice)
 }
 
