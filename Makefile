@@ -19,7 +19,7 @@ build:
 	CGO_ENABLED=1 go build -o build/_output/tvrunner ./cmd/main
 
 bmv2:
-	${DOCKER_RUN} --privileged -p50001:50001 --name bmv2  stratumproject/tvrunner:bmv2
+	${DOCKER_RUN} --privileged -p50001:50001 --name bmv2 --network=host stratumproject/tvrunner:bmv2
 
 tvrunner-bmv2-dev:
 	${DOCKER_RUN_BMV2} -v ${TVRUNNER_DIR}:${DOCKER_TVRUNNER_DIR} -v ${TV_DIR}:${DOCKER_TV_DIR} ${TVRUNNER_DEV_IMAGE}
