@@ -18,18 +18,18 @@ var log = logger.NewLogger()
 
 // main reads test data and utilize testing package to drive the tests. Currently two types of test data are supported.
 // One is Test Vectors (see README for more details) and the other is Go function based tests (see examples under tests folder)
-// To run with Test Vectors, specify Test Vector files using either tvFiles or tvDir flag, otherwise specify test function
+// To run with Test Vectors, specify Test Vector files using tvDir and tvName (optional) flag, otherwise specify test function
 // names using testNames flag. A target file (tgfile) and a port-map file (portMapFile) are mandatory in both cases.
 func main() {
 	testNames := flag.String("test-names", "", "Names of the tests to run, separated by comma")
-	tvName := flag.String("tv-name", ".*", "Path to the Test Vector files, separated by comma")
+	tvName := flag.String("tv-name", ".*", "Test Vector name specified by regular expression")
 	tvDir := flag.String("tv-dir", "", "Directory of Test Vector files")
 	tgFile := flag.String("target", "", "Path to the Target file")
-	portMapFile := flag.String("port-map", "tools/bmv2/port-map.json", "Path to the port-map file")
-	dpMode := flag.String("dp-mode", "direct", "Data plane mode: 'direct' or 'loopback'")
-	matchType := flag.String("match-type", "exact", "Data plane match type: 'exact' or 'in'")
-	logDir := flag.String("log-dir", "/tmp", "Location to store logs")
-	level := flag.String("log-level", "warn", "Log Level")
+	portMapFile := flag.String("port-map", "", "Path to the port-map file")
+	dpMode := flag.String("dp-mode", "direct", "Data plane mode: 'direct' or 'loopback'. Default is 'direct'")
+	matchType := flag.String("match-type", "exact", "Data plane match type: 'exact' or 'in'. Default is 'exact'")
+	logDir := flag.String("log-dir", "/tmp", "Location to store logs. Default is '/tmp'")
+	level := flag.String("log-level", "warn", "Log Level. Default is 'warn'")
 	flag.Parse()
 
 	setupLog(*logDir, *level)
