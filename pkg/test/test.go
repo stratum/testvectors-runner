@@ -10,7 +10,9 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -43,7 +45,7 @@ type Suite interface {
 }
 
 //CreateSuite description
-func CreateSuite(testNames string, tvDir string, tvFiles string) []testing.InternalTest {
+func CreateSuite(testNames string, tvDir string, tvName string) []testing.InternalTest {
 	var testSuite Suite
 	switch {
 	case testNames != "":
@@ -52,28 +54,29 @@ func CreateSuite(testNames string, tvDir string, tvFiles string) []testing.Inter
 		testSuite = ts
 	case tvDir != "":
 		var tvs tvsuite.TVSuite
-		tvs.TvFiles = getFiles(tvDir)
-		testSuite = tvs
-	case tvFiles != "":
-		var tvs tvsuite.TVSuite
-		tvs.TvFiles = strings.Split(tvFiles, ",")
+		re, _ := regexp.Compile("^" + tvName + "\\.pb.txt$")
+		log.Debugf("Test Vectors file regex: %s", re)
+		tvs.TvFiles = getFiles(tvDir, re)
+		log.Debugf("Test Vectors to run: %s", tvs.TvFiles)
 		testSuite = tvs
 	}
 	return testSuite.Create()
 }
 
-func getFiles(tvDir string) []string {
+func getFiles(tvDir string, re *regexp.Regexp) []string {
 	var tvFilesSlice []string
-	tvFiles, err := ioutil.ReadDir(tvDir)
+	err := filepath.Walk(tvDir,
+		func(filePath string, fileInfo os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if re.MatchString(fileInfo.Name()) {
+				tvFilesSlice = append(tvFilesSlice, filePath)
+			}
+			return nil
+		})
 	if err != nil {
-		log.InvalidDir(tvDir, err)
-	}
-	for _, file := range tvFiles {
-		if file.IsDir() {
-			log.Infof("Ignoring directory %s", file.Name())
-			continue
-		}
-		tvFilesSlice = append(tvFilesSlice, tvDir+file.Name())
+		log.Fatal(err)
 	}
 	return tvFilesSlice
 }

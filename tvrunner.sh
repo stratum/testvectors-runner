@@ -39,9 +39,10 @@ Usage: $0
                                         default is $NETWORK
 
 Examples:
-    $0 --target target.pb.txt --port-map port-map.json --tv-dir testvectors
-    $0 --target target.pb.txt --port-map port-map.json --tv-dir testvectors --tv-name PktIo.*
-    $0 --target target.pb.txt --port-map port-map.json --tv-dir testvectors --image image:name --network none
+    $0 --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2/p4runtime
+    $0 --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2 --tv-name PipelineConfig
+    $0 --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2/p4runtime --tv-name PktIo.*
+    $0 --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2/p4runtime --image image:name --network none
 
 EOF
 }
@@ -75,7 +76,7 @@ do
         shift 2
         ;;
     --tv-name)
-        TV_NAMES="$2"
+        TV_NAME="$2"
         shift 2
         ;;
     --dp-mode)
@@ -111,6 +112,7 @@ BINARY="build/_output/tvrunner "
 TMP_TV_DIR=/tmp/tv_files
 
 #make temporary directory
+rm -rf $TMP_TV_DIR || true
 mkdir -p $TMP_TV_DIR
 
 #copy input files, folders
@@ -132,7 +134,7 @@ CMD="docker run $DOCKER_RUN_OPTIONS $ENTRY_POINT -ti $IMAGE_NAME"
 TV_RUN_OPTIONS="-test.v --target $TG_FILE_MOUNT --port-map $PM_FILE_MOUNT --tv-dir $TV_DIR_MOUNT"
 
 if [ -n "$TV_NAME" ]; then
-    TV_RUN_OPTIONS="$TV_RUN_OPTIONS --tv-files $TV_NAME"
+    TV_RUN_OPTIONS="$TV_RUN_OPTIONS --tv-name $TV_NAME"
 fi
 
 if [ -n "$DP_MODE" ]; then
