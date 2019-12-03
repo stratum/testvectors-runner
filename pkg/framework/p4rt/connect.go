@@ -23,10 +23,9 @@ import (
 //CtxTimeout for contexts
 const CtxTimeout = 3 * time.Second
 
-// connect opens a new gRPC connection to the target speciifed by the
-// ConnectionArgs. It returns the p4runtime Client connection, and a function
-// which can be called to close the connection. If an error is encountered
-// during opening the connection, it is returned.
+//connect starts a gRPC connection to the target specified.
+//It returns connection struct with P4Runtime client, close function
+//If an error is encountered during opening the connection, it is returned.
 func connect(tg *tvb.Target) connection {
 	if tg.Address == "" {
 		return connection{connError: errors.New("an address must be specified")}
@@ -45,10 +44,13 @@ func connect(tg *tvb.Target) connection {
 //receiveStreamChannel runs a loop to continuously monitor stream channel client and sorts received messages to appropriate channels
 func receiveStreamChannel(sc v1.P4Runtime_StreamChannelClient, pktInChan chan *v1.PacketIn, masterArbitrationRecvChan chan *v1.MasterArbitrationUpdate, genericStreamMessageChannel chan *v1.StreamMessageResponse) {
 	for {
+		if sc == nil {
+			log.Tracef("Stream channel is nil or closed")
+			return
+		}
 		smr, err := sc.Recv()
 		if err != nil {
 			log.Tracef("Failed to receive a message : %v\n", err)
-			//close(waitc)
 			return
 		}
 

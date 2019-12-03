@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package setup implements suite, test and test case setup functions
+*/
 package setup
 
 import (
@@ -17,7 +20,7 @@ import (
 
 var log = logger.NewLogger()
 
-//Suite includes steps for setting up test suite
+//Suite includes steps for setting up a test suite
 func Suite(target *tg.Target) {
 	log.Infoln("Setting up test suite...")
 	log.Infof("Target: %s", target)

@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package test implements functions to create and run go tests
+*/
 package test
 
 import (
@@ -39,12 +42,12 @@ func (Deps) StopTestLog() error                          { return nil }
 func (Deps) WriteHeapProfile(io.Writer) error            { return nil }
 func (Deps) WriteProfileTo(string, io.Writer, int) error { return nil }
 
-//TestSuite description
+//Suite interface defines Create method for converting tv files, test names to go test type
 type Suite interface {
 	Create() []testing.InternalTest
 }
 
-//CreateSuite description
+//CreateSuite returns a slice of InternalTest based on go test names or testvector directory name.
 func CreateSuite(testNames string, tvDir string, tvName string) []testing.InternalTest {
 	var testSuite Suite
 	switch {
@@ -63,6 +66,7 @@ func CreateSuite(testNames string, tvDir string, tvName string) []testing.Intern
 	return testSuite.Create()
 }
 
+//getFiles walks through given directory and returns list of all files in the directory
 func getFiles(tvDir string, re *regexp.Regexp) []string {
 	var tvFilesSlice []string
 	err := filepath.Walk(tvDir,
@@ -81,6 +85,8 @@ func getFiles(tvDir string, re *regexp.Regexp) []string {
 	return tvFilesSlice
 }
 
+//getTarget reads the given file and converts it to target proto.
+//panics if file is invalid
 func getTarget(fileName string) *tg.Target {
 	// Read Target file
 	tgdata, err := ioutil.ReadFile(fileName)
@@ -95,7 +101,7 @@ func getTarget(fileName string) *tg.Target {
 	return target
 }
 
-//Run description
+//Run calls suite setup, teardown and runs all tests in the testSuite against given target
 func Run(tgFile string, testSuite []testing.InternalTest) {
 	target := getTarget(tgFile)
 	setup.Suite(target)

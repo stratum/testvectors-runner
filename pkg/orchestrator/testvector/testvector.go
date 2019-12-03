@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package testvector implements functions to extract and run each test case from testvectors.
+*/
 package testvector
 
 import (
@@ -15,7 +18,7 @@ import (
 
 var log = logger.NewLogger()
 
-//ProcessTestVector will parse test vector
+//ProcessTestVector parses test vector and calls ProcessTestCase for each test case
 func ProcessTestVector(tv1 *tv.TestVector) bool {
 	result := true
 	//log.Infof("Target ID: %s, Target Address: %s\n", target.TargetId, target.Address)
@@ -25,7 +28,7 @@ func ProcessTestVector(tv1 *tv.TestVector) bool {
 	return result
 }
 
-//ProcessTestCase will go through each test case and combine the results from processActionGroups and processExpectations to return true or false.
+//ProcessTestCase combine the results from processActionGroups and processExpectations to return true or false.
 func ProcessTestCase(tc *tv.TestCase) bool {
 	log.Infof("Test Case ID: %s\n", tc.TestCaseId)
 	return processActionGroups(tc.GetActionGroups()) && processExpectations(tc.GetExpectations())

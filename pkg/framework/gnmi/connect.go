@@ -21,7 +21,9 @@ import (
 //CtxTimeout for contexts
 const CtxTimeout = 3 * time.Second
 
-//Connect description
+//connect starts a gRPC connection to the target specified.
+//It returns connection struct with gNMI client, close function
+//If an error is encountered during opening the connection, it is returned.
 func connect(tg *tvb.Target) connection {
 
 	if tg.Address == "" {
@@ -38,6 +40,8 @@ func connect(tg *tvb.Target) connection {
 	return connection{ctx: ctx, client: gnmi.NewGNMIClient(conn), cancel: func() { conn.Close() }}
 }
 
+//recvSubRespChan runs a loop to continuously receive subscription responses from client and sends to specified channel.
+//This method is called as go routine.
 func recvSubRespChan(subcl gnmi.GNMI_SubscribeClient, subRespChan chan *gnmi.SubscribeResponse) {
 	for {
 		log.Traceln("In recvSubRespChan for loop")

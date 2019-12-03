@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package expectation implements functions to extract and run various expectations supported by testvectors.
+*/
 package expectation
 
 import (
@@ -19,7 +22,7 @@ import (
 
 var log = logger.NewLogger()
 
-//ProcessExpectation description
+//ProcessExpectation decodes and executes expectations
 func ProcessExpectation(exp *tv.Expectation) bool {
 	switch {
 	case exp.GetConfigExpectation() != nil:
@@ -40,7 +43,7 @@ func ProcessExpectation(exp *tv.Expectation) bool {
 	}
 }
 
-//processConfigExpectation extracts gnmi get requests and forwards it to framework
+//processConfigExpectation extracts gnmi get and forwards it to framework
 func processConfigExpectation(ce *tv.ConfigExpectation) bool {
 	return gnmi.ProcessGetRequest(ce.GetGnmiGetRequest(), ce.GetGnmiGetResponse())
 }
