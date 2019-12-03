@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package testsuite implements Create function to get go tests based on test names
+*/
 package testsuite
 
 import (
@@ -18,6 +21,7 @@ import (
 
 var log = logger.NewLogger()
 
+//IntTestSuite struct stores the list of all the go test names
 type IntTestSuite struct {
 	TestNames []string
 }

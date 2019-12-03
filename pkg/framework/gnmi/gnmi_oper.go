@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package gnmi implements gnmi get, set and subscribe functions
+*/
 package gnmi
 
 import (
@@ -28,7 +31,7 @@ const (
 	SubTimeout = 5 * time.Second
 )
 
-//Connection description
+//Connection struct stores the gNMI client connection, context and cancel function.
 type connection struct {
 	ctx       context.Context
 	client    gnmi.GNMIClient
@@ -51,7 +54,7 @@ func TearDown() {
 	gnmiConn.cancel()
 }
 
-//ProcessGetRequest sends a request to SUT and gives the response
+//ProcessGetRequest sends a request to switch and compares the response
 func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
 	log.Infoln("Sending get request")
 	ctx := context.Background()
@@ -70,7 +73,7 @@ func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
 	return isEqual
 }
 
-//ProcessSetRequest sends a set request to SUT and gives the response
+//ProcessSetRequest sends a set request to switch and compares the response
 func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
 	log.Traceln("In ProcessSetRequest")
 	log.Infof("Sending set request: %s", sreq)
@@ -101,7 +104,7 @@ func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
 	return isEqual
 }
 
-//ProcessSubscribeRequest opens a subscription channel and verifies the response
+//ProcessSubscribeRequest opens a subscription channel to switch and processes the responses
 func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.SubscribeResponse, firstRespChan chan struct{}, resultChan chan bool) {
 	ctx := context.Background()
 	subcl, err := gnmiConn.client.Subscribe(ctx)
@@ -137,6 +140,7 @@ func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.Subscrib
 
 }
 
+//verifySubResponses compares the responses from subscription channel with expected responses
 func verifySubResponses(actRespChan chan *gnmi.SubscribeResponse, expResp []*gnmi.SubscribeResponse, firstRespChan chan struct{}, resultChan chan bool) {
 	result, firstRespBool := true, true
 	if len(expResp) == 0 {

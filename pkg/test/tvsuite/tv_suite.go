@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package tvsuite implements Create function to convert testvector files to go tests
+*/
 package tvsuite
 
 import (
@@ -23,6 +26,7 @@ import (
 
 var log = logger.NewLogger()
 
+//TVSuite struct stores a list of testvector file names
 type TVSuite struct {
 	TvFiles []string
 }

@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package action implements functions to extract and run various actions supported by testvectors.
+*/
 package action
 
 import (
@@ -111,7 +114,7 @@ func processAction(action *tv.Action) bool {
 	return false
 }
 
-//processConfigOperation extracts gnmi set request and forwards to framework.
+//processConfigOperation extracts gnmi set and forwards to framework.
 func processConfigOperation(co *tv.ConfigOperation) bool {
 	return gnmi.ProcessSetRequest(co.GnmiSetRequest, co.GnmiSetResponse)
 }
