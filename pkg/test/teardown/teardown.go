@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package teardown implements suite, test and test case teardown functions
+*/
 package teardown
 
 import (
@@ -17,7 +20,7 @@ import (
 
 var log = logger.NewLogger()
 
-//Suite includes steps for tearing down test suite
+//Suite includes steps for tearing down a test suite
 func Suite() {
 	log.Infoln("Tearing down test suite...")
 	gnmi.TearDown()

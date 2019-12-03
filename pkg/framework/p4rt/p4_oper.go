@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package p4rt implements p4runtime functions
+*/
 package p4rt
 
 import (
@@ -23,11 +26,11 @@ var log = logger.NewLogger()
 const PktTimeout = 3 * time.Second
 
 var (
-	//SCV Description
 	scv      streamChannel
 	p4rtConn connection
 )
 
+//Connection struct stores the P4Runtime client connection, context and cancel function.
 type connection struct {
 	ctx       context.Context
 	client    v1.P4RuntimeClient
@@ -35,7 +38,7 @@ type connection struct {
 	cancel    context.CancelFunc
 }
 
-//StreamChannelVar definition
+//streamChannel struct stores stream channel client, cancel function and channels to receive stream messages
 type streamChannel struct {
 	sc                                   v1.P4Runtime_StreamChannelClient
 	scError                              error
@@ -65,7 +68,7 @@ func TearDown() {
 	p4rtConn.cancel()
 }
 
-//ProcessP4WriteRequest processes the write request
+//ProcessP4WriteRequest sends the write request to switch
 func ProcessP4WriteRequest(wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
 	log.Traceln("In ProcessP4WriteRequest")
 	if wreq == nil {
@@ -89,7 +92,7 @@ func ProcessP4WriteRequest(wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
 	return false
 }
 
-//ProcessP4PipelineConfigOperation processes the forwarding request.
+//ProcessP4PipelineConfigOperation sends SetForwardingPipelineConfigRequest to switch
 func ProcessP4PipelineConfigOperation(req *v1.SetForwardingPipelineConfigRequest, res *v1.SetForwardingPipelineConfigResponse) bool {
 	log.Traceln("In ProcessP4PipelineConfigOperation")
 	if req == nil {
