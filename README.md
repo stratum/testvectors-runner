@@ -22,20 +22,20 @@ make bmv2
 
 Download Test Vector files matching your SUT (tofino/bcm/bmv2) from [Test Vectors repo](https://github.com/opennetworkinglab/testvectors) or create your own Test Vectors.
 
-In addition to Test Vector files, a `target.pb.txt` file and a `port-map.json` file are mandatory for starting testvectors-runner. `target.pb.txt` stores the IP and port that your SUT is using, and `port-map.json` stores a mapping between the switch port number used in Test Vectors and name of the interface on the test node where testvectors-runner runs. Check [examples](https://github.com/stratum/testvectors/tree/master/tofino) in Test Vectors repo as well as the [readme](https://github.com/opennetworkinglab/testvectors) for more details.
+In addition to Test Vector files, a `target.pb.txt` file and a `port-map.json` file are mandatory for starting testvectors-runner. `target.pb.txt` stores the IP and port that your SUT is using, and `port-map.json` stores a mapping between the switch port number used in Test Vectors and name of the interface on the node where testvectors-runner runs. Check [examples](https://github.com/stratum/testvectors/tree/master/tofino) in Test Vectors repo as well as the [readme](https://github.com/stratum/testvectors/blob/master/README.md) for more details.
 
 ## Testing with testvectors-runner
 
-For running with bmv2 software switch, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed. For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the hardware SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon.
+For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon. For running with bmv2 software switch, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed.
 
-### Use existing tvrunner binary docker image
+### Use existing testvectors-runner binary docker image
 ```bash
 ./tvrunner.sh --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
 ```
 Above command uses [tvrunner](https://hub.docker.com/repository/docker/stratumproject/tvrunner/general) binary docker image, executes testvectors from `tv-dir` on switch running on `target`
 
-### Build and use local tvrunner binary docker image
-Build tvrunner binary image locally using below command:
+### Build and use local testvectors-runner binary docker image
+Build testvectors-runner binary image locally using below command:
 ```bash
 docker build -t <IMAGE_NAME> -f build/test/Dockerfile .
 ```
@@ -57,7 +57,7 @@ go run cmd/main/testvectors-runner.go --target <TARGET_FILE> --port-map <PORT_MA
 ```
 
 ### Build go binary, run tests
-Build tvrunner go binary using below command:
+Build testvectors-runner go binary using below command:
 ```bash
 go build -o build/_output/tvrunner ./cmd/main
 ```
@@ -69,3 +69,5 @@ build/_output/tvrunner --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-di
 ```
 >Note: For more optional arguments, run *go run cmd/main/testvectors-runner.go -h* or *build/_output/tvrunner*
 
+## Additional Documents
+* [Test Vectors Runner Architecture](docs/architecture.md)
