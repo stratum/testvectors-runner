@@ -26,6 +26,46 @@ In addition to Test Vector files, a `target.pb.txt` file and a `port-map.json` f
 
 ## Testing with testvectors-runner
 
-For running with bmv2 software switch, testvectors-runner needs to be deployed on the same node where the bmv2 container is deployed. For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the hardware SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon.
+For running with bmv2 software switch, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed. For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the hardware SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon.
 
 ### Use existing tvrunner binary docker image
+```bash
+./tvrunner.sh --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
+```
+Above command uses [tvrunner](https://hub.docker.com/repository/docker/stratumproject/tvrunner/general) binary docker image, executes testvectors from `tv-dir` on switch running on `target`
+
+### Build and use local tvrunner binary docker image
+Build tvrunner binary image locally using below command:
+```bash
+docker build -t <IMAGE_NAME> -f build/test/Dockerfile .
+```
+Run tests with below command:
+```bash
+./tvrunner.sh --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR> --image-name <IMAGE_NAME>
+```
+
+In both cases, `tvrunner.sh` runs docker container in `host` network. To run docker container in another container's network, use below command:
+```bash
+./tvrunner.sh --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR> --network <NETWORK>
+```
+
+>Note: For more optional arguments, run *./tvrunner.sh -h*
+
+### Use go run command to run tests
+```bash
+go run cmd/main/testvectors-runner.go --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
+```
+
+### Build go binary, run tests
+Build tvrunner go binary using below command:
+```bash
+go build -o build/_output/tvrunner ./cmd/main
+```
+>Note: Alternatively, you can use *make build* to build the go binary
+
+Use the executed binary to run tests
+```bash
+build/_output/tvrunner --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
+```
+>Note: For more optional arguments, run *go run cmd/main/testvectors-runner.go -h* or *build/_output/tvrunner*
+
