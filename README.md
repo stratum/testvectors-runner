@@ -5,120 +5,27 @@ This project is a reference implementation of a Test Vector runner which execute
 
 Build status (master): [![CircleCI](https://circleci.com/gh/opennetworkinglab/testvectors-runner/tree/master.svg?style=svg&circle-token=73bcc1fad5ddc6b34aede6a16f4b6bedc0630fc2)](https://circleci.com/gh/opennetworkinglab/testvectors-runner/tree/master)
 
-- [Testing Workflow](#testing-workflow)
-  * [Testing with testvectors-runner Docker image](#testing-with-testvectors-runner-docker-image)
-    + [Testing bmv2 switches](#testing-bmv2-switches)
-    + [Testing hardware switches](#testing-hardware-switches)
-  * [Testing with testvectors-runner binary](#testing-with-testvectors-runner-binary)
-    + [Testing hardware switches with testvectors-runner binary](#testing-hardware-switches-with-testvectors-runner-binary)
-- [Development Workflow](#development-workflow)
-  * [Development in Docker environment](#development-in-docker-environment)
-    + [Development with bmv2 switches](#development-with-bmv2-switches)
-    + [Development with hardware switches](#development-with-hardware-switches)
-  * [Development in Linux environment](#development-in-linux-environment)
+testvectors-runner works with various switch targets including hardware switches with Tofino/Tomahawk and bmv2 software switches. To get started, you'll first need to get a hardware or software switch running Stratum as Switch Under Test (SUT) and have corresponding Test Vectors downloaded or created on your own. Then you could either directly run a one-line command which downloads and runs a pre-built testvectors-runner docker image and executes specified Test Vectors against SUT, or make changes to the source code and build and run your own version of testvectors-runner. Check the following sections for detailed steps.
 
+## Get a Stratum Enabled Switch
 
-## Testing Workflow
+Currently Stratum supports Barefoot Tofino and Broadcom Tomahawk devices, as well as the bmv2 software switch. Check [Stratum Project](https://github.com/stratum/stratum) for details of how to get Stratum running on supported devices.
 
-This section describes workflows for running testvectors-runner as a tester.
-
-### Testing with testvectors-runner Docker image
-
-testvectors-runner works with various switch targets including bmv2 switches and hardware switches. For running with bmv2 switch we provide a docker image which deploys the bmv2 switch inside a docker container and another docker image for testvectors-runner binary. For running with hardware switches the same testvectors-runner container could also be deployed on a server which has both gPRC and data plane connections to the hardware switch under test. In both cases you'll need to point testvectors-runner to the correct Test Vector files either downloaded from [Test Vectors repo](https://github.com/opennetworkinglab/testvectors) or created on your own.
-
-#### Testing bmv2 switches
-
-Start `stratum-bmv2` switch with two dataplane ports for testing by running:
+We also provide a docker image which deploys the bmv2 software switch inside a docker container. To start `stratum-bmv2` switch with two dataplane ports for testing simply run:
 ```bash
 make bmv2
 ```
 
-Then start `tvrunner` container by mounting the Test Vectors directory:
-```bash
-make tvrunner-bmv2 TV_DIR=<PATH_TO_BMV2_TV>
-```
+> Note: `bmv2` container runs on `host` network and creates two veth pairs on host machine which are used for testing data plane scenarios. 
 
-> Note: replace `<PATH_TO_BMV2_TV>` with your bmv2 Test Vectors path.
+## Get Test Vectors
 
-> Note: the `tvrunner` container runs on `bmv2` container's network in order to access the data plane ports for testing.
+Download Test Vector files matching your SUT (tofino/bcm/bmv2) from [Test Vectors repo](https://github.com/opennetworkinglab/testvectors) or create your own Test Vectors.
 
-Inside the `tvrunner` container, go to `tools` folder where the Makefile for running integration tests is located and run all test suites by
-```bash
-make tests
-```
+In addition to Test Vector files, a `target.pb.txt` file and a `port-map.json` file are mandatory for starting testvectors-runner. `target.pb.txt` stores the IP and port that your SUT is using, and `port-map.json` stores a mapping between the switch port number used in Test Vectors and name of the interface on the test node where testvectors-runner runs. Check [examples](https://github.com/stratum/testvectors/tree/master/tofino) in Test Vectors repo as well as the [readme](https://github.com/opennetworkinglab/testvectors) for more details.
 
-Or run each test category separately by `make pipeline` first and then `make p4runtime` or `make gnmi` or `make e2e`.
+## Testing with testvectors-runner
 
-> Note: restarting `tvrunner` container is needed if `bmv2` container is restarted as both containers need to run in the same network.
+For running with bmv2 software switch, testvectors-runner needs to be deployed on the same node where the bmv2 container is deployed. For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the hardware SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon.
 
-#### Testing hardware switches
-
-For now we only support deploying testvectors-runner on a server (hereinafter called the `test node`) connected to the switch under test. The test node should be able to talk to the switch via gRPC as well as have physical connections to the switch ports for data plane verification scenarios. We'll be supporting deployment directly on the switch under test soon.
-
-Download this repo on the test node and start `tvrunner` container by mounting the Test Vectors directory:
-```bash
-make tvrunner-hw TV_DIR=<PATH_TO_TV>
-```
-
-> Note: replace `<PATH_TO_TV>` with your hardware Test Vectors path. For example, the current Test Vectors repo provides Test Vector files for Tofino switches under `testvectors/tofino/`. Also check the configurations in `target.pb.txt` and `port-map.json` in the same directory to make sure they match your testing environment. `target.pb.txt` stores the IP and port that your switch under test is using, and `port-map.json` stores a mapping between the switch port number used in Test Vectors and name of the interface on the test node that is physically connected to the switch port.
-
-Then follow the same steps as described in [Testing bmv2 switches](#testing-bmv2-switches) section above to execute the tests against the switch under test.
-
-### Testing with testvectors-runner binary
-
-#### Testing hardware switches with testvectors-runner binary
-
-Assuming a test node is set up as described in [Testing hardware switches](#testing-hardware-switches) section above and testvectors-runner binary is already downloaded or built, go to `tools` directory and run `deploy.sh <USER@TEST_NODE_IP>` to copy the binary and Makefile to the test node.
-> Note: modify the `REMOTE_TVRUNNER_DIR` and `TVRUNNER_BIN` variables in `deploy.sh` as needed.
-
-Once testvectors-runner binary is deployed, login to the test node and use the Makefile located under `REMOTE_TVRUNNER_DIR/tools` to start the tests the same way as the docker environment.
-> Note: make sure to download Test Vectors on the test node and point the Makefile to those files by modifying `TV_DIR` variable.
-
-## Development Workflow
-
-This section describes workflows for building and running testvectors-runner as a developer.
-
-### Development in Docker environment
-
-#### Development with bmv2 switches
-
-Start `stratum-bmv2` switch as a container by running:
-```bash
-make bmv2
-```
-
-Then start a container for testvectors-runner development by mounting the Test Vectors directory:
-```bash
-make tvrunner-bmv2-dev TV_DIR=<PATH_TO_BMV2_TV>
-```
-
-> Note: replace `<PATH_TO_BMV2_TV>` with your bmv2 Test Vectors path.
-
-Inside the `tvrunner` container, build `go` binary by running below command:
-```bash
-make build
-```
-
-Then follow the same steps as described in [Testing bmv2 switches](#testing-bmv2-switches) section above to execute the tests with the new testvectors-runner binary you just built.
-
-> Note: restarting `tvrunner` container is needed if `bmv2` container is restarted as both containers need to run in the same network.
-
-#### Development with hardware switches
-
-Assuming a test node is set up as described in [Testing hardware switches](#testing-hardware-switches) section above.
-
-Download this repo on the test node and start `tvrunner` container by mounting the Test Vectors directory:
-```bash
-make tvrunner-hw-dev TV_DIR=<PATH_TO_TV>
-```
-
-> Note: replace `<PATH_TO_TV>` with your hardware Test Vectors path.
-
-Then follow the steps in [Development with bmv2 switches](#development-with-bmv2-switches) section to build `go` binary and run tests with the new testvectors-runner binary you just built against the switch under test.
-
-### Development in Linux environment
-
-[TODO] Prerequisites for buiding on local machine.
-
-## Additional Documents
-* [Test Vectors Runner Architecture](docs/architecture.md)
+### Use existing tvrunner binary docker image
