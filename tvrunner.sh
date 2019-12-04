@@ -109,29 +109,31 @@ if [[ -z $TG_FILE || -z $PM_FILE || -z $TV_DIR ]]; then
 fi
 
 BINARY="build/_output/tvrunner "
-TMP_TV_DIR=/tmp/tv_files
+TMP_TV_TESTS=/tmp/tv/tests
+TMP_TV_SETUP=/tmp/tv/setup
 
-#make temporary directory
-rm -rf $TMP_TV_DIR || true
-mkdir -p $TMP_TV_DIR
+#make temporary directories
+rm -rf $TMP_TV_TESTS || true
+mkdir -p $TMP_TV_TESTS
+rm -rf $TMP_TV_SETUP || true
+mkdir -p $TMP_TV_SETUP
 
 #copy input files, folders
-cp $TG_FILE $TMP_TV_DIR
-cp $PM_FILE $TMP_TV_DIR
-cp -rf $TV_DIR $TMP_TV_DIR
+cp $TG_FILE $TMP_TV_SETUP
+cp $PM_FILE $TMP_TV_SETUP
+cp -rf $TV_DIR $TMP_TV_TESTS
 
 #
-TG_FILE_MOUNT=$TMP_TV_DIR/${TG_FILE##*/}
-PM_FILE_MOUNT=$TMP_TV_DIR/${PM_FILE##*/}
-TV_DIR_MOUNT=$TMP_TV_DIR/${TV_DIR##*/}
+TG_FILE_MOUNT=$TMP_TV_SETUP/${TG_FILE##*/}
+PM_FILE_MOUNT=$TMP_TV_SETUP/${PM_FILE##*/}
+TV_DIR_MOUNT=$TMP_TV_TESTS/${TV_DIR##*/}
 
 DOCKER_RUN_OPTIONS="--rm -v /tmp:/tmp --network $NETWORK"
 ENTRY_POINT="--entrypoint /root/$BINARY"
 
 CMD="docker run $DOCKER_RUN_OPTIONS $ENTRY_POINT -ti $IMAGE_NAME"
 
-
-TV_RUN_OPTIONS="-test.v --target $TG_FILE_MOUNT --port-map $PM_FILE_MOUNT --tv-dir $TV_DIR_MOUNT"
+TV_RUN_OPTIONS="--target $TG_FILE_MOUNT --port-map $PM_FILE_MOUNT --tv-dir $TV_DIR_MOUNT"
 
 if [ -n "$TV_NAME" ]; then
     TV_RUN_OPTIONS="$TV_RUN_OPTIONS --tv-name $TV_NAME"

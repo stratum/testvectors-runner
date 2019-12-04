@@ -67,7 +67,7 @@ Use the executed binary to run tests
 ```bash
 build/_output/tvrunner --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
 ```
->Note: For more optional arguments, run *go run cmd/main/testvectors-runner.go -h* or *build/_output/tvrunner*
+>Note: For more optional arguments, run *go run cmd/main/testvectors-runner.go -h* or *build/_output/tvrunner -h*
 
 ## Additional Documents
 * [Test Vectors Runner Architecture](docs/architecture.md)
