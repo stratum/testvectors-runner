@@ -34,18 +34,21 @@ func main() {
 	logLevel := flag.String("log-level", "warn", "Log Level")
 	help := flag.Bool("help", false, "Help")
 	h := flag.Bool("h", false, "Help")
+	//Add -test.v to list of arguments for verbose go test output
+	os.Args = append(os.Args, "-test.v")
 
 	flag.Parse()
 	flag.Usage = usage
+
 	if *tgFile == "" || *portMapFile == "" || *tvDir == "" {
 		flag.Usage()
 		os.Exit(3)
 	}
-
 	if *help || *h {
 		flag.Usage()
 		os.Exit(0)
 	}
+
 	setupLog(*logDir, *logLevel)
 
 	// Create data plane

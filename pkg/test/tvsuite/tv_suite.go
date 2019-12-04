@@ -67,7 +67,7 @@ func (tv TVSuite) Create() []testing.InternalTest {
 func getTVFromFile(fileName string) *tv.TestVector {
 	tvdata, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		log.InvalidFile("Target File: "+fileName, err)
+		log.InvalidFile("Test Vector File: "+fileName, err)
 	}
 	testvector := &tv.TestVector{}
 	if err = proto.UnmarshalText(string(tvdata), testvector); err != nil {

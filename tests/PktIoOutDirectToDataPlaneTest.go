@@ -64,6 +64,36 @@ updates: <
     >
   >
 >`
+	deleteWriteRequest = `
+device_id: 1
+election_id: <
+  low: 4
+>
+updates: <
+  type: DELETE
+  entity: <
+    table_entry: <
+      table_id: 33598026
+      priority: 10
+      match: <
+        field_id: 3
+        ternary: <
+          value: "\010\000"
+          mask: "\377\377"
+        >
+      >
+      action: <
+        action: <
+          action_id: 16820507
+          params: <
+            param_id: 1
+            value: "\000\002"
+          >
+        >
+      >
+    >
+  >
+>`
 )
 
 // PktIoOutDirectToDataPlaneTest sends packets directly out of a physical port. It Skips the ingress pipeline and any processing.
@@ -122,8 +152,15 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T) {
 	result = dataplane.ProcessTrafficExpectation([][]byte{}, []uint32{1})
 	assert.True(t, result, "Unexpected packet received on port 2")
 
-	// TODO: Delete table entry
+	// Build delete write request
+	request = &v1.WriteRequest{}
+	if err := proto.UnmarshalText(deleteWriteRequest, request); err != nil {
+		log.InvalidProtoUnmarshal(reflect.TypeOf(request), err)
+	}
 
+	// Delete table entry
+	result = p4rt.ProcessP4WriteRequest(request, nil)
+	assert.True(t, result, "Write request failed")
 	// Stop packet capturing
 	teardown.TestCase()
 }
