@@ -15,7 +15,9 @@ We also provide a docker image which deploys the bmv2 software switch inside a d
 make bmv2
 ```
 
-> Note: `bmv2` container runs on `host` network and creates two veth pairs on host machine which are used for testing data plane scenarios. 
+> Note: The `bmv2` container runs on the `host` network and creates two veth pairs on host machine which are used for testing data plane scenarios. 
+
+To start Stratum on hardware switches, including devices with Barefoot Tofino and Broadcom Tomahawk, visit the [Stratum Project repo](https://github.com/stratum/stratum) for details of how to get Stratum running on supported devices.
 
 ## Get Test Vectors
 
