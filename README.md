@@ -9,7 +9,6 @@ Build status (master): [![CircleCI](https://circleci.com/gh/opennetworkinglab/te
 
 ## Start a Stratum Switch
 
-Currently Stratum supports Barefoot Tofino and Broadcom Tomahawk devices, as well as the bmv2 software switch. Check [Stratum Project](https://github.com/stratum/stratum) for details of how to get Stratum running on supported devices.
 
 We also provide a docker image which deploys the bmv2 software switch inside a docker container. To start `stratum-bmv2` switch with two dataplane ports for testing simply run:
 ```bash
