@@ -33,7 +33,17 @@ For running with hardware switches, testvectors-runner could be deployed on a se
 ```bash
 ./tvrunner.sh --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
 ```
-Above command uses [tvrunner](https://hub.docker.com/repository/docker/stratumproject/tvrunner/general) binary docker image, executes testvectors from `tv-dir` on switch running on `target`
+Above command uses [tvrunner](https://hub.docker.com/repository/docker/stratumproject/tvrunner/general) binary docker image, executes testvectors from `tv-dir` on switch running on `target`. In addition to `--tv-dir` argument, you can also use `--tv-name <TEST_NAME_REGEX>` to run tests matching provided regular expression from `tv-dir`.
+
+For example, assuming bmv2 container is deployed by `make bmv2` command and Test Vectors repo is downloaded to `~/testvectors`, first push a pipeline configuration to the bmv2 switch before running any tests:
+```bash
+./tvrunner.sh --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2 --tv-name PipelineConfig
+```
+
+Above command finds and executes Test Vector with name `PipelineConfig.pb.txt` under `~/testvectors/bmv2`. Then run `p4runtime` test suite by:
+```bash
+./tvrunner.sh --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2/p4runtime
+```
 
 ### Build and use local testvectors-runner binary docker image
 Build testvectors-runner binary image locally using below command:
