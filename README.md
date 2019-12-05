@@ -27,7 +27,7 @@ In addition to Test Vector files, a `target.pb.txt` file and a `port-map.json` f
 
 ## Testing with testvectors-runner
 
-For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon. For running with bmv2 software switch, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed.
+For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon. For running with `stratum-bmv2`, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed.
 
 ### Use existing testvectors-runner binary docker image
 ```bash
