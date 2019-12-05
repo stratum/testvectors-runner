@@ -5,7 +5,7 @@ This project is a reference implementation of a Test Vector runner which execute
 
 Build status (master): [![CircleCI](https://circleci.com/gh/opennetworkinglab/testvectors-runner/tree/master.svg?style=svg&circle-token=73bcc1fad5ddc6b34aede6a16f4b6bedc0630fc2)](https://circleci.com/gh/opennetworkinglab/testvectors-runner/tree/master)
 
-testvectors-runner works with various switch targets including hardware switches with Tofino/Tomahawk and bmv2 software switches. To get started, you'll first need to get a hardware or software switch running Stratum as Switch Under Test (SUT) and have corresponding Test Vectors downloaded or created on your own. Then you could either directly run a one-line command which downloads and runs a pre-built testvectors-runner docker image and executes specified Test Vectors against SUT, or make changes to the source code and build and run your own version of testvectors-runner. Check the following sections for detailed steps.
+`testvectors-runner` works with various switch targets that expose P4Runtime and gNMI, including [Stratum switches](https://github.com/stratum/stratum). To get started, you'll need Switch Under Test (SUT) and set of corresponding Test Vectors.```
 
 ## Get a Stratum Enabled Switch
 
