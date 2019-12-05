@@ -7,7 +7,7 @@ Build status (master): [![CircleCI](https://circleci.com/gh/opennetworkinglab/te
 
 `testvectors-runner` works with various switch targets that expose P4Runtime and gNMI, including [Stratum switches](https://github.com/stratum/stratum). To get started, you'll need Switch Under Test (SUT) and set of corresponding Test Vectors.```
 
-## Get a Stratum Enabled Switch
+## Start a Stratum Switch
 
 Currently Stratum supports Barefoot Tofino and Broadcom Tomahawk devices, as well as the bmv2 software switch. Check [Stratum Project](https://github.com/stratum/stratum) for details of how to get Stratum running on supported devices.
 
