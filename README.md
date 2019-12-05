@@ -25,7 +25,7 @@ Download Test Vector files matching your SUT (tofino/bcm/bmv2) from [Test Vector
 
 In addition to Test Vector files, a `target.pb.txt` file and a `port-map.json` file are mandatory for starting testvectors-runner. `target.pb.txt` stores the IP and port that your SUT is using, and `port-map.json` stores a mapping between the switch port number used in Test Vectors and name of the interface on the node where testvectors-runner runs. Check [examples](https://github.com/stratum/testvectors/tree/master/tofino) in Test Vectors repo as well as the [readme](https://github.com/stratum/testvectors/blob/master/README.md) for more details.
 
-## Testing with testvectors-runner
+## Test with testvectors-runner
 
 For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon. For running with `stratum-bmv2`, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed.
 
