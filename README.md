@@ -10,7 +10,7 @@ Build status (master): [![CircleCI](https://circleci.com/gh/opennetworkinglab/te
 ## Start a Stratum Switch
 
 
-We also provide a docker image which deploys the bmv2 software switch inside a docker container. To start `stratum-bmv2` switch with two dataplane ports for testing simply run:
+To start Stratum's behavioral model software switch (`stratum-bmv2`) in a Docker container for testing, run:
 ```bash
 make bmv2
 ```
