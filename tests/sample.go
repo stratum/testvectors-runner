@@ -22,13 +22,13 @@ var (
 
 //TestCase1 is a sample sub test
 func TestCase1(t *testing.T) {
-	log.Infoln("Starting TestCase1")
+	log.Info("Starting TestCase1")
 	assert.Equal(t, true, false)
 }
 
 //TestCase2 is a sample sub test
 func TestCase2(t *testing.T) {
-	log.Infoln("Starting TestCase2")
+	log.Info("Starting TestCase2")
 	t.Error("Fail this test")
 	t.Fail()
 }

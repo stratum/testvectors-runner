@@ -51,18 +51,19 @@ type streamChannel struct {
 
 //Init starts a P4Runtime client and runs go routines to send and receive stream channel messages from P4Runtime stream channel client
 func Init(target *tg.Target) {
+	log.Debug("In p4_oper Init")
 	p4rtConn = connect(target)
 	scv = getStreamChannel(p4rtConn.client)
 }
 
 //TearDown closes the stream channel client
 func TearDown() {
-	log.Traceln("In p4_oper tear down")
+	log.Debug("In p4_oper tear down")
 	scv.cancel()
 	if scv.sc != nil {
 		err := scv.sc.CloseSend()
 		if err != nil {
-			log.Warnln("Error closing the stream channel:", err)
+			log.Warn("Error closing the stream channel:", err)
 		}
 	}
 	p4rtConn.cancel()
@@ -70,7 +71,6 @@ func TearDown() {
 
 //ProcessP4WriteRequest sends the write request to switch
 func ProcessP4WriteRequest(wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
-	log.Traceln("In ProcessP4WriteRequest")
 	if wreq == nil {
 		return false
 	}
@@ -78,15 +78,16 @@ func ProcessP4WriteRequest(wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
 	lock := getMasterArbitrationLock(scv, wreq.DeviceId, wreq.ElectionId)
 
 	if lock {
-		log.Infoln("Sending P4 write request")
+		log.Info("Sending P4 write request")
 		log.Debugf("Write request: %s", wreq)
 		ctx := context.Background()
 		resp, err := p4rtConn.client.Write(ctx, wreq)
 		if err != nil {
-			log.Errorf("err:%s\n", err)
+			log.Errorf("Error sending P4 write request:%v", err)
 			return false
 		}
-		log.Debugf("resp:%s\n", resp)
+		log.Infof("Received P4 write response")
+		log.Debugf("P4 write response:%s", resp)
 		return true
 	}
 	return false
@@ -94,21 +95,21 @@ func ProcessP4WriteRequest(wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
 
 //ProcessP4PipelineConfigOperation sends SetForwardingPipelineConfigRequest to switch
 func ProcessP4PipelineConfigOperation(req *v1.SetForwardingPipelineConfigRequest, res *v1.SetForwardingPipelineConfigResponse) bool {
-	log.Traceln("In ProcessP4PipelineConfigOperation")
 	if req == nil {
 		return false
 	}
 	lock := getMasterArbitrationLock(scv, req.DeviceId, req.ElectionId)
 	if lock {
-		log.Infoln("Sending P4 pipeline config")
-		log.Tracef("Pipeline config: %s", req)
+		log.Info("Sending P4 pipeline config")
+		log.Debugf("Pipeline config: %s", req)
 		ctx := context.Background()
 		resp, err := p4rtConn.client.SetForwardingPipelineConfig(ctx, req)
 		if err != nil {
-			log.Errorf("err:%s\n", err)
+			log.Errorf("Error sending P4 pipeline config:%v", err)
 			return false
 		}
-		log.Debugf("resp:%s\n", resp)
+		log.Info("Received P4 pipeline config response")
+		log.Debugf("P4 set pipeline config response:%s\n", resp)
 		return true
 	}
 	return false
@@ -116,12 +117,11 @@ func ProcessP4PipelineConfigOperation(req *v1.SetForwardingPipelineConfigRequest
 
 //ProcessPacketOutOperation sends packet to stream channel client.
 func ProcessPacketOutOperation(po *v1.PacketOut) bool {
-	log.Traceln("In ProcessP4 Packet Out")
 	var deviceID uint64 = 1
 	electionID := &v1.Uint128{High: 1, Low: 5}
 	lock := getMasterArbitrationLock(scv, deviceID, electionID)
 	if lock {
-		log.Infoln("Sending packet")
+		log.Info("Sending packet")
 		log.Debugf("Packet info: %s", po)
 		scv.pktOutChan <- po
 		return true
@@ -135,17 +135,17 @@ func ProcessPacketIn(exp *v1.PacketIn) bool {
 
 	select {
 	case ret := <-scv.pktInChan:
-		log.Traceln("In ProcessPacketIn Case PktInChan")
+		log.Debug("In ProcessPacketIn Case PktInChan")
 		if bytes.Equal(ret.GetPayload(), exp.GetPayload()) {
 			packetMatched = true
 			log.Infof("Received packet matches")
 			log.Debugf("Packet info: %s", ret)
 		} else {
-			log.Warningf("Packets don't match\nExpected: % x\nActual  : % x\n", exp.GetPayload(), ret.GetPayload())
+			log.Warnf("Packets don't match\nExpected: % x\nActual  : % x\n", exp.GetPayload(), ret.GetPayload())
 		}
 		return packetMatched
 	case <-time.After(PktTimeout):
-		log.Errorln("Timed out")
+		log.Error("Timed out waiting for packet in")
 	}
 
 	return packetMatched

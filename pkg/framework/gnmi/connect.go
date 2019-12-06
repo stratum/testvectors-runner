@@ -25,7 +25,7 @@ const CtxTimeout = 3 * time.Second
 //It returns connection struct with gNMI client, close function
 //If an error is encountered during opening the connection, it is returned.
 func connect(tg *tvb.Target) connection {
-
+	log.Debug("In gnmi_oper connect")
 	if tg.Address == "" {
 		return connection{connError: errors.New("an address must be specified")}
 	}
@@ -44,11 +44,11 @@ func connect(tg *tvb.Target) connection {
 //This method is called as go routine.
 func recvSubRespChan(subcl gnmi.GNMI_SubscribeClient, subRespChan chan *gnmi.SubscribeResponse) {
 	for {
-		log.Traceln("In recvSubRespChan for loop")
+		log.Debug("In recvSubRespChan for loop")
 		subResp, err := subcl.Recv()
-		log.Traceln("In recvSubRespChan for loop after receiving message")
+		log.Debug("In recvSubRespChan for loop after receiving message")
 		if err != nil {
-			log.Tracef("Failed to receive a message : %v\n", err)
+			log.Debugf("Failed to receive a message : %v\n", err)
 			return
 		}
 		subRespChan <- subResp
