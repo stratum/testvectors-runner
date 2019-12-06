@@ -14,14 +14,14 @@ cat << EOF
 
 Runs testvector based tests in a docker container with tvrunner binary. 
 /tmp directory is mounted in the docker image to copy source files and logs.
-tvrunner binary takes three mandatory arguments: target, port-map, tv-dir. 
+tvrunner binary takes three mandatory arguments: target, portmap, tv-dir. 
 Docker container starts in host network using default tvrunner:binary image.
 The image name and network type can also be changed using additional arguments.
 
 Usage: $0
     ***tvrunner arguments***
     [--target <filename>]               run testvectors against the provided target proto file
-    [--port-map <filename>]             use the provided port mapping file
+    [--portmap <filename>]              use the provided port mapping file
     [--tv-dir <directory>]              run all the testvectors from provided directory
     [--tv-name <regex>]                 run all the testvectors matching provided regular expression
     [--dp-mode <mode>]                  run the testvectors in provided mode
@@ -41,10 +41,10 @@ Usage: $0
                                         default is $NETWORK
 
 Examples:
-    $0 --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2/p4runtime
-    $0 --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2 --tv-name PipelineConfig
-    $0 --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2/p4runtime --tv-name PktIo.*
-    $0 --target ~/testvectors/bmv2/target.pb.txt --port-map ~/testvectors/bmv2/port-map.json --tv-dir ~/testvectors/bmv2/p4runtime --image image:name --network none
+    $0 --target ~/testvectors/bmv2/target.pb.txt --portmap ~/testvectors/bmv2/portmap.pb.txt --tv-dir ~/testvectors/bmv2/p4runtime
+    $0 --target ~/testvectors/bmv2/target.pb.txt --portmap ~/testvectors/bmv2/portmap.pb.txt --tv-dir ~/testvectors/bmv2 --tv-name PipelineConfig
+    $0 --target ~/testvectors/bmv2/target.pb.txt --portmap ~/testvectors/bmv2/portmap.pb.txt --tv-dir ~/testvectors/bmv2/p4runtime --tv-name PktIo.*
+    $0 --target ~/testvectors/bmv2/target.pb.txt --portmap ~/testvectors/bmv2/portmap.pb.txt --tv-dir ~/testvectors/bmv2/p4runtime --image image:name --network none
 
 EOF
 }
@@ -73,7 +73,7 @@ do
         TG_FILE="$2"
         shift 2
         ;;
-    --port-map)
+    --portmap)
         PM_FILE="$2"
         shift 2
         ;;
@@ -144,7 +144,7 @@ ENTRY_POINT="--entrypoint /root/$BINARY"
 
 CMD="docker run $DOCKER_RUN_OPTIONS $ENTRY_POINT -ti $IMAGE_NAME"
 
-TV_RUN_OPTIONS="--target $TG_FILE_MOUNT --port-map $PM_FILE_MOUNT --tv-dir $TV_DIR_MOUNT"
+TV_RUN_OPTIONS="--target $TG_FILE_MOUNT --portmap $PM_FILE_MOUNT --tv-dir $TV_DIR_MOUNT"
 
 if [ -n "$TV_NAME" ]; then
     TV_RUN_OPTIONS="$TV_RUN_OPTIONS --tv-name $TV_NAME"

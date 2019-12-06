@@ -39,6 +39,8 @@ github.com/sirupsen/logrus v1.4.2 h1:SPIRibHv4MatM3XXNO2BJeFLZwZ2LvZgfQ5+UNI2im4
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/stratum/testvectors v0.0.0-20191022211948-521e6d3a7ee8 h1:leQns23xx0L+uPUxr+ETrv2cfidnuHKVPv1DUiR7u1w=
 github.com/stratum/testvectors v0.0.0-20191022211948-521e6d3a7ee8/go.mod h1:7Xxa7NhwZZA2OLDSCRWIqTsolUkB84m+IiNp9qcD5tU=
+github.com/stratum/testvectors v0.0.0-20200110200851-2ba79c1d46ff h1:HAgFdEHdxgx5cUzRIKuxmg/6HDhpHwk+6EnQAcjZ2GQ=
+github.com/stratum/testvectors v0.0.0-20200110200851-2ba79c1d46ff/go.mod h1:7Xxa7NhwZZA2OLDSCRWIqTsolUkB84m+IiNp9qcD5tU=
 github.com/stretchr/objx v0.1.1 h1:2vfRuCMp5sSVIDSqO8oNnWJq7mPa6KVP3iPIwFBuy8A=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=

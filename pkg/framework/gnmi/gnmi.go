@@ -94,7 +94,9 @@ func verifyGetResp(expected, actual *gnmi.GetResponse) bool {
 	case expected == nil || actual == nil:
 		log.Warnf("Get responses are unequal\nExpected: %s\nActual  : %s\n", expected, actual)
 		return false
-	case testutil.GetResponseEqual(expected, actual, testutil.IgnoreTimestamp{}):
+	//testutil.GetResonseEqual returns true if first response is empty
+	//TODO: Add new utilities for comparing gnmi, p4rt responses
+	case testutil.GetResponseEqual(actual, expected, testutil.IgnoreTimestamp{}):
 		log.Info("Get responses are equal")
 		log.Debugf("Get response: %s\n", actual)
 		return true

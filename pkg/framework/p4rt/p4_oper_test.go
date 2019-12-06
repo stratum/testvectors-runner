@@ -14,6 +14,7 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
@@ -23,7 +24,9 @@ var (
 )
 
 func setupTest() {
-	p4rt.Init(TestTarget)
+	portmap := &pm.PortMap{Entries: []*pm.Entry{{PortNumber: 1, InterfaceName: "veth0", PortType: pm.Entry_IN_OUT}, {PortNumber: 2, InterfaceName: "veth2", PortType: pm.Entry_IN_OUT}}}
+	dpMode := "direct"
+	p4rt.Init(TestTarget, dpMode, portmap)
 }
 
 func tearDownTest() {

@@ -17,6 +17,7 @@ import (
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	"github.com/golang/protobuf/proto"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/utils/common"
 	tvb "github.com/stratum/testvectors/proto/target"
 	"google.golang.org/grpc"
 )
@@ -134,7 +135,7 @@ func verifyPacketIn(expected, actual *v1.PacketIn) bool {
 		log.Debug("Both packets are empty")
 		return true
 	case expected == nil || actual == nil:
-		log.Warnf("Packets don't match\nExpected: % x\nActual  : % x\n", expected, actual)
+		log.Warnf("Packets don't match\nExpected: % s\nActual  : % s\n", expected, actual)
 		return false
 	case !bytes.Equal(expected.GetPayload(), actual.GetPayload()):
 		log.Warnf("Payloads don't match\nExpected: % x\nActual  : % x\n", expected.GetPayload(), actual.GetPayload())
@@ -158,15 +159,14 @@ func compareMetadata(m1, m2 []*v1.PacketMetadata) bool {
 		log.Debug("Metadata don't match")
 		return false
 	default:
-		return getInt(m1[0].Value) == getInt(m2[0].Value)
+		//TODO: verify complete metadata instead of only one
+		//return reflect.DeepEqual(m1, m2)
+		/*for i := 0; i < len(m1); i++ {
+			if m1[i].GetMetadataId() != m2[i].GetMetadataId() || common.GetInt(m1[i].GetValue()) != common.GetInt(m2[i].GetValue()) {
+				return false
+			}
+		}
+		return true*/
+		return common.GetInt(m1[0].Value) == common.GetInt(m2[0].Value)
 	}
-}
-
-func getInt(s []byte) int {
-	var res int
-	for _, v := range s {
-		res <<= 4
-		res |= int(v)
-	}
-	return res
 }
