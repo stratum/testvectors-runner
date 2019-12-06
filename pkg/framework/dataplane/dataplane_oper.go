@@ -67,6 +67,18 @@ func CreateDataPlane(mode string, matchType string, portMapFile string) {
 		}
 		log.Infof("Creating direct data plane with match type: %s and port map: %s\n", matchType, portMap)
 		dp = createDirectDataPlane(portMap, match)
+	case "loopback":
+		// Read port-map file
+		pmdata, err := ioutil.ReadFile(portMapFile)
+		if err != nil {
+			log.Fatalf("Error opening port map file: %s\n%s", portMapFile, err)
+		}
+		var portMap map[string]string
+		if err = json.Unmarshal(pmdata, &portMap); err != nil {
+			log.Fatalf("Error parsing json data of type %T from file %s\n%s", portMap, portMapFile, err)
+		}
+		log.Infof("Creating loopback data plane with match type: %s and port map: %s\n", matchType, portMap)
+		dp = createLoopbackDataPlane(portMap, match)
 	default:
 		log.Fatalf("Unknown data plane mode: %s", mode)
 	}
