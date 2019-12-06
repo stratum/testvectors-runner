@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-build/_output
+tvrunner
 
 # Test binary, build with `go test -c`
 *.test

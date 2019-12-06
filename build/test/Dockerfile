@@ -30,8 +30,8 @@ RUN apt-get update \
 
 WORKDIR /root
 
-RUN mkdir -p ./build/_output
-COPY --from=builder /root/testvectors-runner/build/_output/tvrunner ./build/_output/tvrunner
+
+COPY --from=builder /root/testvectors-runner/tvrunner ./tvrunner
 
 RUN mkdir ./tools
 COPY ./tools/Makefile ./tools/Makefile

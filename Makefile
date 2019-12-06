@@ -16,7 +16,7 @@ TVRUNNER_BIN_IMAGE := stratumproject/tvrunner:binary
 .PHONY: build
 
 build:
-	CGO_ENABLED=1 go build -o build/_output/tvrunner ./cmd/main
+	CGO_ENABLED=1 go build -o tvrunner ./cmd/main
 
 bmv2:
 	${DOCKER_RUN} --privileged -p50001:50001 --name bmv2 --network=host stratumproject/tvrunner:bmv2

@@ -70,15 +70,14 @@ go run cmd/main/testvectors-runner.go --target <TARGET_FILE> --port-map <PORT_MA
 ### Build go binary, run tests
 Build testvectors-runner go binary using below command:
 ```bash
-go build -o build/_output/tvrunner ./cmd/main
+make build
 ```
->Note: Alternatively, you can use *make build* to build the go binary
 
 Use the executed binary to run tests
 ```bash
-build/_output/tvrunner --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
+./tvrunner --target <TARGET_FILE> --port-map <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
 ```
->Note: For more optional arguments, run *go run cmd/main/testvectors-runner.go -h* or *build/_output/tvrunner -h*
+>Note: For more optional arguments, run *go run cmd/main/testvectors-runner.go -h* or *./tvrunner -h*
 
 ## Additional Documents
 * [Test Vectors Runner Architecture](docs/architecture.md)

@@ -108,7 +108,7 @@ if [[ -z $TG_FILE || -z $PM_FILE || -z $TV_DIR ]]; then
     exit 1
 fi
 
-BINARY="build/_output/tvrunner "
+BINARY="./tvrunner "
 TMP_TV_TESTS=/tmp/tv/tests
 TMP_TV_SETUP=/tmp/tv/setup
 
