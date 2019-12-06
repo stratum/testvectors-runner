@@ -14,7 +14,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -68,6 +67,7 @@ func CreateSuite(testNames string, tvDir string, tvName string) []testing.Intern
 
 //getFiles walks through given directory and returns list of all files in the directory
 func getFiles(tvDir string, re *regexp.Regexp) []string {
+	log.Debug("In getFiles")
 	var tvFilesSlice []string
 	err := filepath.Walk(tvDir,
 		func(filePath string, fileInfo os.FileInfo, err error) error {
@@ -80,7 +80,7 @@ func getFiles(tvDir string, re *regexp.Regexp) []string {
 			return nil
 		})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error opening directory: %s\n%s", tvDir, err)
 	}
 	return tvFilesSlice
 }
@@ -91,18 +91,19 @@ func getTarget(fileName string) *tg.Target {
 	// Read Target file
 	tgdata, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		log.InvalidFile("Target File: "+fileName, err)
+		log.Fatalf("Error opening target file: %s\n%s", fileName, err)
 	}
 	target := &tg.Target{}
 	if err = proto.UnmarshalText(string(tgdata), target); err != nil {
-		log.InvalidProtoUnmarshal(reflect.TypeOf(target), err)
+		log.Fatalf("Error parsing proto message of type %T from file %s\n%s", target, fileName, err)
 	}
-	log.Infoln("Target: ", target)
+	log.Info("Target: ", target)
 	return target
 }
 
 //Run calls suite setup, teardown and runs all tests in the testSuite against given target
 func Run(tgFile string, testSuite []testing.InternalTest) {
+	log.Debug("In Run")
 	target := getTarget(tgFile)
 	setup.Suite(target)
 	var match Deps

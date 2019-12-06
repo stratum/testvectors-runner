@@ -12,7 +12,6 @@ package dataplane
 import (
 	"encoding/json"
 	"io/ioutil"
-	"reflect"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 )
@@ -60,11 +59,11 @@ func CreateDataPlane(mode string, matchType string, portMapFile string) {
 		// Read port-map file
 		pmdata, err := ioutil.ReadFile(portMapFile)
 		if err != nil {
-			log.InvalidFile("Port Map File: "+portMapFile, err)
+			log.Fatalf("Error opening port map file: %s\n%s", portMapFile, err)
 		}
 		var portMap map[string]string
 		if err = json.Unmarshal(pmdata, &portMap); err != nil {
-			log.InvalidJSONUnmarshal(reflect.TypeOf(portMap), err)
+			log.Fatalf("Error parsing json data of type %T from file %s\n%s", portMap, portMapFile, err)
 		}
 		log.Infof("Creating direct data plane with match type: %s and port map: %s\n", matchType, portMap)
 		dp = createDirectDataPlane(portMap, match)
@@ -75,28 +74,29 @@ func CreateDataPlane(mode string, matchType string, portMapFile string) {
 
 //ProcessTrafficStimulus sends packets to specific ports
 func ProcessTrafficStimulus(pkts [][]byte, port uint32) bool {
+	log.Debug("In ProcessTrafficStimulus")
 	if dp == nil {
-		log.Errorln("data plane does not exist")
+		log.Error("data plane does not exist")
 		return false
 	}
-	log.Traceln("In ProcessTrafficStimulus")
 	return dp.send(pkts, port)
 }
 
 //ProcessTrafficExpectation verifies that packets arrived at specific ports
 func ProcessTrafficExpectation(pkts [][]byte, ports []uint32) bool {
+	log.Debug("In ProcessTrafficExpectation")
 	if dp == nil {
-		log.Errorln("data plane does not exist")
+		log.Error("data plane does not exist")
 		return false
 	}
-	log.Traceln("In ProcessTrafficExpectation")
 	return dp.verify(pkts, ports)
 }
 
 //Capture starts packet capturing
 func Capture() bool {
+	log.Debug("In Capture")
 	if dp == nil {
-		log.Errorln("data plane does not exist")
+		log.Error("data plane does not exist")
 		return false
 	}
 	return dp.capture()
@@ -104,8 +104,9 @@ func Capture() bool {
 
 //Stop stops packet capturing
 func Stop() bool {
+	log.Debug("In Stop")
 	if dp == nil {
-		log.Errorln("data plane does not exist")
+		log.Error("data plane does not exist")
 		return false
 	}
 	return dp.stop()

@@ -12,7 +12,6 @@ package tvsuite
 import (
 	"io/ioutil"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -35,10 +34,10 @@ type TVSuite struct {
 // It iterates through Test Vector files and for each test case it wraps around ProcessTestCase
 // to build anonymous functions for testing.InternalTest.
 func (tv TVSuite) Create() []testing.InternalTest {
+	log.Debug("In Create")
 	testSuite := []testing.InternalTest{}
 	// Read TV files and add them to the test suite
 	for _, tvFile := range tv.TvFiles {
-
 		tv := getTVFromFile(tvFile)
 		t := testing.InternalTest{
 			Name: strings.Replace(filepath.Base(tvFile), ".pb.txt", "", 1),
@@ -65,13 +64,14 @@ func (tv TVSuite) Create() []testing.InternalTest {
 
 // getTVFromFile reads Test Vector file with given file name and returns Test Vectors.
 func getTVFromFile(fileName string) *tv.TestVector {
+	log.Debug("In getTVFromFile")
 	tvdata, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		log.InvalidFile("Test Vector File: "+fileName, err)
+		log.Fatalf("Error opening test vector file: %s\n%s", fileName, err)
 	}
 	testvector := &tv.TestVector{}
 	if err = proto.UnmarshalText(string(tvdata), testvector); err != nil {
-		log.InvalidProtoUnmarshal(reflect.TypeOf(testvector), err)
+		log.Fatalf("Error parsing proto message of type %T from file %s\n%s", testvector, fileName, err)
 	}
 	return testvector
 }

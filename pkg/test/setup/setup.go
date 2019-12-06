@@ -22,7 +22,7 @@ var log = logger.NewLogger()
 
 //Suite includes steps for setting up a test suite
 func Suite(target *tg.Target) {
-	log.Infoln("Setting up test suite...")
+	log.Info("Setting up test suite...")
 	log.Infof("Target: %s", target)
 
 	gnmi.Init(target)
@@ -31,12 +31,12 @@ func Suite(target *tg.Target) {
 
 //Test includes steps for setting up a test
 func Test() {
-	log.Infoln("Setting up test...")
+	log.Info("Setting up test...")
 }
 
 //TestCase includes steps for setting up a test case
 func TestCase() {
-	log.Debugln("Setting up test case...")
+	log.Info("Setting up test case...")
 	// FIXME: only start packet capture if needed
 	dataplane.Capture()
 }

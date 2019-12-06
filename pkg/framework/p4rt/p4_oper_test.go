@@ -31,9 +31,9 @@ func tearDownTest() {
 }
 
 func TestProcessP4PipelineConfigOperation(t *testing.T) {
-	log.Infoln(strings.Repeat("*", 100))
-	log.Infoln("Start of TestProcessP4PipelineConfigOperation")
-	defer log.Infoln("End of TestProcessP4PipelineConfigOperation")
+	log.Info(strings.Repeat("*", 100))
+	log.Info("Start of TestProcessP4PipelineConfigOperation")
+	defer log.Info("End of TestProcessP4PipelineConfigOperation")
 	setupTest()
 	defer tearDownTest()
 	var (
@@ -502,7 +502,6 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//fmt.Println(proto.MarshalTextString(tt.args.req))
 			if got := p4rt.ProcessP4PipelineConfigOperation(tt.args.req, tt.args.res); got != tt.want {
 				t.Errorf("ProcessP4PipelineConfigOperation() = %v, want %v", got, tt.want)
 			}
@@ -511,9 +510,9 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 }
 
 func TestProcessP4WriteRequest(t *testing.T) {
-	log.Infoln(strings.Repeat("*", 100))
-	log.Infoln("Start of TestProcessP4WriteRequest")
-	defer log.Infoln("End of TestProcessP4WriteRequest")
+	log.Info(strings.Repeat("*", 100))
+	log.Info("Start of TestProcessP4WriteRequest")
+	defer log.Info("End of TestProcessP4WriteRequest")
 	setupTest()
 	defer tearDownTest()
 	var (
@@ -563,9 +562,9 @@ func TestProcessP4WriteRequest(t *testing.T) {
 }
 
 func TestProcessPacketIOOperation(t *testing.T) {
-	log.Infoln(strings.Repeat("*", 100))
-	log.Infoln("Start of TestProcessPacketIOOperation")
-	defer log.Infoln("End of TestProcessPacketIOOperation")
+	log.Info(strings.Repeat("*", 100))
+	log.Info("Start of TestProcessPacketIOOperation")
+	defer log.Info("End of TestProcessPacketIOOperation")
 	setupTest()
 	defer tearDownTest()
 	var (
@@ -758,8 +757,8 @@ func TestProcessPacketIOOperation(t *testing.T) {
 }
 
 /*func TestMasterArbitration(t *testing.T) {
-	log.Infoln(strings.Repeat("*", 100))
-	log.Infoln("Start of TestMasterArbitration")
+	log.Info(strings.Repeat("*", 100))
+	log.Info("Start of TestMasterArbitration")
 	setupTest()
 	var (
 		deviceID        uint64 = 1
@@ -814,12 +813,12 @@ func TestProcessPacketIOOperation(t *testing.T) {
 		})
 	}
 	tearDownTest()
-	log.Infoln("End of TestMasterArbitration")
+	log.Info("End of TestMasterArbitration")
 }
 
 func TestLowElectionMasterArbitration(t *testing.T) {
-	log.Infoln(strings.Repeat("*", 100))
-	log.Infoln("Start of TestLowElectionMasterArbitration")
+	log.Info(strings.Repeat("*", 100))
+	log.Info("Start of TestLowElectionMasterArbitration")
 	setupTest()
 	var (
 		deviceID      uint64 = 1
@@ -855,5 +854,5 @@ func TestLowElectionMasterArbitration(t *testing.T) {
 		})
 	}
 	tearDownTest()
-	log.Infoln("End of TestLowElectionMasterArbitration")
+	log.Info("End of TestLowElectionMasterArbitration")
 }*/

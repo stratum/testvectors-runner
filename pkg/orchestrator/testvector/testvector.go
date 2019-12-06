@@ -20,8 +20,8 @@ var log = logger.NewLogger()
 
 //ProcessTestVector parses test vector and calls ProcessTestCase for each test case
 func ProcessTestVector(tv1 *tv.TestVector) bool {
+	log.Debug("In ProcessTestVector")
 	result := true
-	//log.Infof("Target ID: %s, Target Address: %s\n", target.TargetId, target.Address)
 	for _, tc := range tv1.GetTestCases() {
 		result = ProcessTestCase(tc) && result
 	}
