@@ -77,7 +77,7 @@ func usage() {
 	[--match-type <type>]               	match packets based on the provided match-type
 						default is exact; acceptable modes <exact, in>
 	[--log-level <level>]               	run tvrunner binary with provided log level
-						default is error; acceptable levels are <panic, fatal, error, warn, info, debug, trace>
+						default is warn; acceptable levels are <panic, fatal, error, warn, info, debug>
 	[--log-dir <directory>]             	save logs to provided directory
 						default is /tmp
 `

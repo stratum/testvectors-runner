@@ -7,7 +7,6 @@
 package tests
 
 import (
-	"reflect"
 	"testing"
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
@@ -104,7 +103,7 @@ func (st Test) PktIoOutDirectToDataPlaneTest(t *testing.T) {
 	// Build packet-out
 	pktOut := &v1.PacketOut{}
 	if err := proto.UnmarshalText(pktOutToPort1, pktOut); err != nil {
-		log.InvalidProtoUnmarshal(reflect.TypeOf(pktOut), err)
+		log.Fatalf("Error parsing proto message of type %T\n%s", pktOut, err)
 	}
 	// Send packet-out
 	result := p4rt.ProcessPacketOutOperation(pktOut)
@@ -129,7 +128,7 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T) {
 	// Build write request
 	request := &v1.WriteRequest{}
 	if err := proto.UnmarshalText(writeRequest, request); err != nil {
-		log.InvalidProtoUnmarshal(reflect.TypeOf(request), err)
+		log.Fatalf("Error parsing proto message of type %T\n%s", request, err)
 	}
 
 	// Insert table entry
@@ -139,7 +138,7 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T) {
 	// Build packet-out
 	pktOut := &v1.PacketOut{}
 	if err := proto.UnmarshalText(pktOutToPort0, pktOut); err != nil {
-		log.InvalidProtoUnmarshal(reflect.TypeOf(pktOut), err)
+		log.Fatalf("Error parsing proto message of type %T\n%s", pktOut, err)
 	}
 	// Send packet-out
 	result = p4rt.ProcessPacketOutOperation(pktOut)
@@ -155,7 +154,7 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T) {
 	// Build delete write request
 	request = &v1.WriteRequest{}
 	if err := proto.UnmarshalText(deleteWriteRequest, request); err != nil {
-		log.InvalidProtoUnmarshal(reflect.TypeOf(request), err)
+		log.Fatalf("Error parsing proto message of type %T\n%s", request, err)
 	}
 
 	// Delete table entry

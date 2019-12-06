@@ -132,14 +132,14 @@ func (ddp *directDataPlane) sendOnInterface(iface string, pkt []byte) bool {
 	// Open the device for sending packet
 	handle, err := pcap.OpenLive(iface, ddp.snapshotLen, ddp.promiscuous, -1*time.Second)
 	if err != nil {
-		log.Errorln(err)
+		log.Error(err)
 		return false
 	}
 	defer handle.Close()
 	log.Infof("Sending packet to interface %s\n", iface)
 	log.Debugf("Packet info: % x\n", pkt)
 	if err := handle.WritePacketData(pkt); err != nil {
-		log.Errorln(err)
+		log.Error(err)
 		return false
 	}
 	return true
@@ -180,7 +180,7 @@ func (ddp *directDataPlane) verifyOnInterface(iface string, pkts [][]byte) bool 
 			// Open pcap file
 			handle, err := pcap.OpenOffline(pcapFile)
 			if err != nil {
-				log.Errorln(err)
+				log.Error(err)
 				return false
 			}
 			log.Debugf("Reading packet from %s...\n", pcapFile)
@@ -194,12 +194,12 @@ func (ddp *directDataPlane) verifyOnInterface(iface string, pkts [][]byte) bool 
 				packet, err := packetSource.NextPacket()
 				if err == io.EOF {
 					// We've reached the end of the pcap file but we expect more packets captured
-					log.Warnf("Expecting %d packets but only captured %d on interface %s...", len(pkts), matchedNum, iface)
+					log.Debugf("Expecting %d packets but only captured %d on interface %s...", len(pkts), matchedNum, iface)
 					// Recheck until timeout
 					result = false
 					goto recheck
 				} else if err != nil {
-					log.Errorln(err)
+					log.Error(err)
 					// Recheck until timeout
 					result = false
 					goto recheck

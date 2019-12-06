@@ -14,7 +14,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"reflect"
 	"runtime"
 	"strings"
 	"time"
@@ -36,19 +35,6 @@ var (
 type StandardLogger struct {
 	*logrus.Logger
 }
-
-//Event is a representation of user defined error id and message
-type Event struct {
-	id      int
-	message string
-}
-
-var (
-	invalidFileMessage    = Event{1, "Invalid file: %s"}
-	invalidDirMessage     = Event{2, "Invalid directory: %s"}
-	protoUnmarshalMessage = Event{3, "Error parsing proto message of type: %s"}
-	jsonUnmarshalMessage  = Event{4, "Error parsing json data of type: %s"}
-)
 
 //NewLogger method to initialize logger
 func NewLogger() *StandardLogger {
@@ -110,28 +96,4 @@ func (sl *StandardLogger) SetLogFolder(logDirPath string) {
 		writer = io.MultiWriter(os.Stdout, file)
 	}
 	sl.SetOutput(writer)
-}
-
-//InvalidFile log message
-func (sl *StandardLogger) InvalidFile(argName string, err error) {
-	sl.Errorf(invalidFileMessage.message, argName)
-	sl.Fatalln(err)
-}
-
-//InvalidDir log message
-func (sl *StandardLogger) InvalidDir(argName string, err error) {
-	sl.Errorf(invalidDirMessage.message, argName)
-	sl.Fatalln(err)
-}
-
-//InvalidProtoUnmarshal log message
-func (sl *StandardLogger) InvalidProtoUnmarshal(argName reflect.Type, err error) {
-	sl.Errorf(protoUnmarshalMessage.message, argName)
-	sl.Fatalln(err)
-}
-
-//InvalidJSONUnmarshal log message
-func (sl *StandardLogger) InvalidJSONUnmarshal(argName reflect.Type, err error) {
-	sl.Errorf(jsonUnmarshalMessage.message, argName)
-	sl.Fatalln(err)
 }

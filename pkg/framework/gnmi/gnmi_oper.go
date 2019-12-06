@@ -41,33 +41,33 @@ type connection struct {
 
 //Init starts a gNMI client connection to switch under test
 func Init(target *tg.Target) {
+	log.Debug("In gnmi_oper Init")
 	gnmiConn = connect(target)
 	if gnmiConn.connError != nil {
-		log.Errorln(gnmiConn.connError)
-		log.Fatalln("Unable to get a gnmi client")
+		log.Fatalf("Unable to get a gnmi client: %v", gnmiConn.connError)
 	}
 }
 
 //TearDown closes the gNMI connection
 func TearDown() {
-	log.Traceln("In gnmi_oper tear down")
+	log.Debug("In gnmi_oper TearDown")
 	gnmiConn.cancel()
 }
 
 //ProcessGetRequest sends a request to switch and compares the response
 func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
-	log.Infoln("Sending get request")
+	log.Info("Sending get request")
 	ctx := context.Background()
 	resp, err := gnmiConn.client.Get(ctx, greq)
 	if err != nil {
-		log.Errorln(err)
+		log.Error(err)
 		return false
 	}
 	isEqual := testutil.GetResponseEqual(resp, gresp, testutil.IgnoreTimestamp{})
 	if !isEqual {
-		log.Warningf("Get responses are unequal\nExpected: %s\nActual  : %s\n", gresp, resp)
+		log.Warnf("Get responses are unequal\nExpected: %s\nActual  : %s\n", gresp, resp)
 	} else {
-		log.Infoln("Get responses are equal")
+		log.Info("Get responses are equal")
 		log.Debugf("Get response: %s\n", resp)
 	}
 	return isEqual
@@ -75,13 +75,13 @@ func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
 
 //ProcessSetRequest sends a set request to switch and compares the response
 func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
-	log.Traceln("In ProcessSetRequest")
-	log.Infof("Sending set request: %s", sreq)
+	log.Info("Sending set request")
+	log.Debugf("Set request: %s", sreq)
 	ctx := context.Background()
 
 	resp, err := gnmiConn.client.Set(ctx, sreq)
 	if err != nil {
-		log.Errorln(err)
+		log.Errorf("Error sending set request: %v", err)
 		return false
 	}
 	//FIXME
@@ -92,10 +92,10 @@ func ProcessSetRequest(sreq *gnmi.SetRequest, sresp *gnmi.SetResponse) bool {
 	sresp.Timestamp = 0
 	isEqual := proto.Equal(resp, sresp)
 	if !isEqual {
-		log.Warningf("Set responses are unequal\nexpected: %s\nactual: %s\n", sresp, resp)
+		log.Warnf("Set responses are unequal\nexpected: %s\nactual: %s\n", sresp, resp)
 	} else {
-		log.Infoln("Set responses are equal")
-		log.Debugf("Set response: %s\n", resp)
+		log.Info("Set responses are equal")
+		log.Debugf("Set response: %s", resp)
 	}
 
 	//Reset timestamp to original value
@@ -109,24 +109,26 @@ func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.Subscrib
 	ctx := context.Background()
 	subcl, err := gnmiConn.client.Subscribe(ctx)
 	if err != nil {
-		log.Infoln(err)
+		log.Errorf("Error getting subscription client: %v", err)
+		resultChan <- false
 	}
 	defer func() {
 		err := subcl.CloseSend()
 		if err != nil {
-			log.Warnln("Error closing subscription client: ", err)
+			log.Warn("Error closing subscription client: ", err)
 		}
 	}()
-	log.Tracef("Length of expected result: %d\n\n", len(sresp))
+	log.Debugf("Length of expected result: %d\n\n", len(sresp))
 	var result bool
 	subRespChan := make(chan *gnmi.SubscribeResponse)
 	go recvSubRespChan(subcl, subRespChan)
 	go verifySubResponses(subRespChan, sresp, firstRespChan, resultChan)
-	log.Infoln("Sending subscription request")
+	log.Info("Sending subscription request")
+	log.Tracef("Subscription request: %s", sreq)
 	err = subcl.Send(sreq)
 
 	if err != nil {
-		log.Errorln(err)
+		log.Errorf("Error sending subscription request: %v", err)
 		resultChan <- false
 	}
 
@@ -134,7 +136,7 @@ func ProcessSubscribeRequest(sreq *gnmi.SubscribeRequest, sresp []*gnmi.Subscrib
 	case result = <-resultChan:
 		resultChan <- result
 	case <-time.After(SubTimeout):
-		log.Errorln("Process subscribe request Timed out")
+		log.Error("Process subscribe request Timed out")
 		resultChan <- false
 	}
 
@@ -147,21 +149,20 @@ func verifySubResponses(actRespChan chan *gnmi.SubscribeResponse, expResp []*gnm
 		close(firstRespChan)
 	} else {
 		for _, exp := range expResp {
-			log.Traceln("In for loop")
 			act := <-actRespChan
 			if firstRespBool {
 				firstRespBool = false
 				close(firstRespChan)
 			}
-			log.Traceln("In for loop after receiving subResp")
+			log.Debug("In for loop after receiving subResp")
 			if act.GetUpdate() != nil && testutil.NotificationSetEqual([]*gnmi.Notification{act.GetUpdate()}, []*gnmi.Notification{exp.GetUpdate()}, testutil.IgnoreTimestamp{}) {
-				log.Traceln("In GetUpdate condition")
-				log.Infoln("Subscription responses are equal")
+				log.Debug("In GetUpdate condition")
+				log.Info("Subscription responses are equal")
 				log.Debugf("Subscription response: %s\n", act)
 				result = result && true
 			} else if testutil.SubscribeResponseEqual(exp, act) {
 				//continue
-				log.Infoln("Subscription responses are equal")
+				log.Info("Subscription responses are equal")
 				log.Debugf("Subscription response: %s\n", act)
 				result = result && true
 			} else {

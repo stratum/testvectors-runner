@@ -22,19 +22,19 @@ var log = logger.NewLogger()
 
 //Suite includes steps for tearing down a test suite
 func Suite() {
-	log.Infoln("Tearing down test suite...")
+	log.Info("Tearing down test suite...")
 	gnmi.TearDown()
 	p4rt.TearDown()
 }
 
 //Test includes steps for tearing down a test
 func Test() {
-	log.Infoln("Tearing down test...")
+	log.Info("Tearing down test...")
 }
 
 //TestCase includes steps for tearing down a test case
 func TestCase() {
-	log.Debugln("Tearing down test case...")
+	log.Info("Tearing down test case...")
 	dataplane.Stop()
-	log.Infoln(strings.Repeat("*", 100))
+	log.Info(strings.Repeat("*", 100))
 }

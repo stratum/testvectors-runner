@@ -27,6 +27,7 @@ const CtxTimeout = 3 * time.Second
 //It returns connection struct with P4Runtime client, close function
 //If an error is encountered during opening the connection, it is returned.
 func connect(tg *tvb.Target) connection {
+	log.Debug("In p4_oper connect")
 	if tg.Address == "" {
 		return connection{connError: errors.New("an address must be specified")}
 	}
@@ -41,33 +42,33 @@ func connect(tg *tvb.Target) connection {
 	return connection{ctx: ctx, client: v1.NewP4RuntimeClient(conn), cancel: func() { conn.Close() }}
 }
 
-//receiveStreamChannel runs a loop to continuously monitor stream channel client and sorts received messages to appropriate channels
-func receiveStreamChannel(sc v1.P4Runtime_StreamChannelClient, pktInChan chan *v1.PacketIn, masterArbitrationRecvChan chan *v1.MasterArbitrationUpdate, genericStreamMessageChannel chan *v1.StreamMessageResponse) {
+//recvStreamChannel runs a loop to continuously monitor stream channel client and sorts received messages to appropriate channels
+func recvStreamChannel(sc v1.P4Runtime_StreamChannelClient, pktInChan chan *v1.PacketIn, masterArbitrationRecvChan chan *v1.MasterArbitrationUpdate, genericStreamMessageChannel chan *v1.StreamMessageResponse) {
 	for {
 		if sc == nil {
-			log.Tracef("Stream channel is nil or closed")
+			log.Debugf("Stream channel is nil or closed")
 			return
 		}
 		smr, err := sc.Recv()
 		if err != nil {
-			log.Tracef("Failed to receive a message : %v\n", err)
+			log.Debugf("Failed to receive a message : %v\n", err)
 			return
 		}
 
 		switch {
 		case smr == nil:
-			log.Traceln("Empty message received")
+			log.Debug("Empty message received")
 		case smr.GetPacket() != nil:
-			log.Traceln("Packet Received")
+			log.Debug("Packet Received")
 			pktInChan <- smr.GetPacket()
 		case smr.GetArbitration() != nil:
-			log.Traceln("Arbitration lock")
+			log.Debug("Arbitration lock")
 			masterArbitrationRecvChan <- smr.GetArbitration()
 		default:
 			genericStreamMessageChannel <- smr
-			log.Traceln("In Process packet in else block")
-			log.Tracef("%T\n", smr)
-			log.Traceln(smr)
+			log.Debug("In Process packet in else block")
+			log.Debugf("%T\n", smr)
+			log.Debug(smr)
 		}
 	}
 }
@@ -77,19 +78,19 @@ func sendStreamChannel(sc v1.P4Runtime_StreamChannelClient, pktOutChan chan *v1.
 	for {
 		select {
 		case pktOut := <-pktOutChan:
-			log.Traceln("In Send Stream Packet Out")
+			log.Debug("In Send Stream Packet Out")
 			smr := &v1.StreamMessageRequest{Update: &v1.StreamMessageRequest_Packet{Packet: pktOut}}
 			sendErr := sc.Send(smr)
 			if sendErr != nil {
 				log.Errorf("send err:%s\n", sendErr)
 			}
-			log.Traceln("sent packet")
+			log.Debug("sent packet")
 		case masterArbitrationReq := <-masterArbitrationSendChan:
-			log.Traceln("In Send Stream Master Arbitration")
+			log.Debug("In Send Stream Master Arbitration")
 			smr := &v1.StreamMessageRequest{Update: &v1.StreamMessageRequest_Arbitration{Arbitration: masterArbitrationReq}}
 			sendErr := sc.Send(smr)
 			if sendErr != nil {
-				log.Tracef("send err:%s\n", sendErr)
+				log.Debugf("send err:%s\n", sendErr)
 			}
 		}
 	}
@@ -107,17 +108,16 @@ func getStreamChannel(p4rtClient v1.P4RuntimeClient) streamChannel {
 	scContext, scv.cancel = context.WithCancel(scContext)
 	scv.sc, scv.scError = p4rtClient.StreamChannel(scContext)
 	if scv.scError != nil {
-		log.Errorln(scv.scError)
-		log.Fatalln("Unable to get a stream channel")
+		log.Error(scv.scError)
+		log.Fatal("Unable to get a stream channel")
 	}
-	go receiveStreamChannel(scv.sc, scv.pktInChan, scv.masterArbRecvChan, scv.genericStreamMessageChannel)
+	go recvStreamChannel(scv.sc, scv.pktInChan, scv.masterArbRecvChan, scv.genericStreamMessageChannel)
 	go sendStreamChannel(scv.sc, scv.pktOutChan, scv.masterArbSendChan)
 	return scv
 }
 
 //GetMasterArbitrationLock description
 func getMasterArbitrationLock(scv streamChannel, deviceID uint64, electionID *v1.Uint128) bool {
-	log.Traceln("In GetMasterArbitrationLock")
 	lockAchieved := false
 
 	arb := &v1.MasterArbitrationUpdate{}
@@ -127,14 +127,13 @@ func getMasterArbitrationLock(scv streamChannel, deviceID uint64, electionID *v1
 	select {
 	case ret := <-scv.masterArbRecvChan:
 		if ret.Status.Code == int32(scpb.Code_OK) {
-			log.Traceln("Master lock achieved")
+			log.Debug("Master lock achieved")
 			lockAchieved = true
 		} else {
-			log.Infoln("Master lock not achieved")
-			log.Errorln(ret.Status)
+			log.Errorf("Error getting master lock: %v", ret.Status)
 		}
 	case <-time.After(CtxTimeout):
-		log.Errorln("Timed out")
+		log.Error("Timed out waiting for master arbitration response")
 	}
 	return lockAchieved
 }
