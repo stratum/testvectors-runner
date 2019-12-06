@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
 )
@@ -21,13 +20,13 @@ var log = logger.NewLogger()
 // main reads test data and utilize testing package to drive the tests. Currently two types of test data are supported.
 // One is Test Vectors (see README for more details) and the other is Go function based tests (see examples under tests folder)
 // To run with Test Vectors, specify Test Vector files using tvDir and tvName (optional) flag, otherwise specify test function
-// names using testNames flag. A target file (tgfile) and a port-map file (portMapFile) are mandatory in both cases.
+// names using testNames flag. A target file (tgfile) and a portmap file (pmFile) are mandatory in both cases.
 func main() {
 	testNames := flag.String("test-names", "", "Names of the tests to run, separated by comma")
 	tvName := flag.String("tv-name", ".*", "Test Vector name specified by regular expression")
 	tvDir := flag.String("tv-dir", "", "Directory of Test Vector files")
 	tgFile := flag.String("target", "", "Path to the Target file")
-	portMapFile := flag.String("port-map", "", "Path to the port-map file")
+	pmFile := flag.String("portmap", "", "Path to the portmap file")
 	dpMode := flag.String("dp-mode", "direct", "Data plane mode: 'direct' or 'loopback'")
 	matchType := flag.String("match-type", "exact", "Data plane match type: 'exact' or 'in'")
 	logDir := flag.String("log-dir", "/tmp", "Location to store logs")
@@ -40,7 +39,7 @@ func main() {
 	flag.Parse()
 	flag.Usage = usage
 
-	if *tgFile == "" || *portMapFile == "" || *tvDir == "" {
+	if *tgFile == "" || *pmFile == "" || *tvDir == "" {
 		flag.Usage()
 		os.Exit(3)
 	}
@@ -50,12 +49,8 @@ func main() {
 	}
 
 	setupLog(*logDir, *logLevel)
-
-	// Create data plane
-	dataplane.CreateDataPlane(*dpMode, *matchType, *portMapFile)
-
 	testSuiteSlice := test.CreateSuite(*testNames, *tvDir, *tvName)
-	test.Run(*tgFile, testSuiteSlice)
+	test.Run(*tgFile, *dpMode, *matchType, *pmFile, testSuiteSlice)
 }
 
 func setupLog(logDir string, logLevel string) {
@@ -67,7 +62,7 @@ func usage() {
 	usage := `Usage:
 ***mandatory arguments***
 	[--target <filename>]               	run testvectors against the provided target proto file
-	[--port-map <filename>]             	use the provided port mapping file
+	[--portmap <filename>]             	use the provided port mapping file
 	[--tv-dir <directory>]              	run all the testvectors from provided directory
 
 ***optional arguments***

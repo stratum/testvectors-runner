@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
+	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
 
@@ -186,7 +187,9 @@ func TestProcessRandomizedActionGroup(t *testing.T) {
 
 func TestProcessAction(t *testing.T) {
 	gnmi.Init(TestTarget)
-	p4rt.Init(TestTarget)
+	portmap := &pm.PortMap{Entries: []*pm.Entry{{PortNumber: 1, InterfaceName: "veth0", PortType: pm.Entry_IN_OUT}, {PortNumber: 2, InterfaceName: "veth2", PortType: pm.Entry_IN_OUT}}}
+	dpMode := "direct"
+	p4rt.Init(TestTarget, dpMode, portmap)
 	defer p4rt.TearDown()
 	defer gnmi.TearDown()
 

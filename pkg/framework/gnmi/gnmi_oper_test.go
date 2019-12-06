@@ -98,7 +98,7 @@ func TestProcessGetRequest(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "Invalid Respnse",
+			name: "Invalid Response",
 			args: args{
 				target: TestTarget,
 				greq:   validGetReq,
