@@ -3,7 +3,7 @@
 # 
 # SPDX-License-Identifier: Apache-2.0
 # 
-TVRUNNER_BIN := ../build/_output/tvrunner
+TVRUNNER_BIN := ../tvrunner
 TV_DIR := $$HOME/testvectors/
 TV_SUITE := p4runtime/
 TV_NAME := RedirectDataplaneToDataplaneTest
