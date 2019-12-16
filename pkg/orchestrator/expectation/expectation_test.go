@@ -60,6 +60,43 @@ func TestProcessConfigExpectation(t *testing.T) {
 				},
 			},
 		}
+		invalidConfigExpectation = &tv.ConfigExpectation{
+			GnmiGetRequest: &gpb.GetRequest{
+				Path: []*gpb.Path{
+					{
+						Elem: []*gpb.PathElem{
+							{Name: "interfaces"},
+							{Name: "interface", Key: map[string]string{"name": "veth1"}},
+							{Name: "state"},
+							{Name: "name"},
+						},
+					},
+				},
+				Encoding: gpb.Encoding_PROTO,
+			},
+			GnmiGetResponse: &gpb.GetResponse{
+				Notification: []*gpb.Notification{
+					{
+						Timestamp: 1234567890123456789,
+						Update: []*gpb.Update{
+							{
+								Path: &gpb.Path{
+									Elem: []*gpb.PathElem{
+										{Name: "interfaces"},
+										{Name: "interface", Key: map[string]string{"name": "veth1"}},
+										{Name: "state"},
+										{Name: "name"},
+									},
+								},
+								Val: &gpb.TypedValue{
+									Value: &gpb.TypedValue_StringVal{StringVal: "veth"},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
 	)
 	type args struct {
 		ce *tv.ConfigExpectation
@@ -72,12 +109,17 @@ func TestProcessConfigExpectation(t *testing.T) {
 		{
 			name: "Empty Expectation",
 			args: args{ce: emptyConfigExpectation},
-			want: false,
+			want: true,
 		},
 		{
 			name: "Valid Expectation",
 			args: args{ce: validConfigExpectation},
 			want: true,
+		},
+		{
+			name: "Invalid Expectation",
+			args: args{ce: invalidConfigExpectation},
+			want: false,
 		},
 	}
 	for _, tt := range tests {

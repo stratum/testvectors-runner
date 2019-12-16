@@ -199,9 +199,9 @@ func TestProcessAction(t *testing.T) {
 		want bool
 	}{
 		{
-			name: "Config Action",
+			name: "Empty Config Action",
 			args: args{action: configAction},
-			want: false,
+			want: true,
 		},
 		{
 			name: "Control Plane Write Action",
