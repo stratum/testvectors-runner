@@ -7,6 +7,7 @@
 
 NETWORK=host
 IMAGE_NAME=stratumproject/tvrunner:binary
+PULL_DOCKER=NO
 
 print_help() {
 cat << EOF
@@ -33,6 +34,7 @@ Usage: $0
                                         default is /tmp
 
     ***docker arguments***
+    [--pull]                            get latest docker image
     [--image <name>]                    use the provided docker image
                                         default is $IMAGE_NAME
     [--network <name>]                  run tvrunner docker container in provided network
@@ -54,6 +56,10 @@ do
         -h|--help)
         print_help
         exit 0
+        ;;
+    --pull)
+        PULL_DOCKER=YES
+        shift
         ;;
     --network)
         NETWORK="$2"
@@ -106,6 +112,11 @@ done
 if [[ -z $TG_FILE || -z $PM_FILE || -z $TV_DIR ]]; then
     print_help
     exit 1
+fi
+
+if [ "$PULL_DOCKER" == YES ]; then
+    echo "pulling latest docker image"
+    docker pull $IMAGE_NAME
 fi
 
 BINARY="./tvrunner "
