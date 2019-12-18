@@ -10,8 +10,6 @@ Package p4rt implements p4runtime functions
 package p4rt
 
 import (
-	"bytes"
-	"context"
 	"time"
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
@@ -30,25 +28,6 @@ var (
 	p4rtConn connection
 )
 
-//Connection struct stores the P4Runtime client connection, context and cancel function.
-type connection struct {
-	ctx       context.Context
-	client    v1.P4RuntimeClient
-	connError error
-	cancel    context.CancelFunc
-}
-
-//streamChannel struct stores stream channel client, cancel function and channels to receive stream messages
-type streamChannel struct {
-	sc                                   v1.P4Runtime_StreamChannelClient
-	scError                              error
-	cancel                               context.CancelFunc
-	masterArbRecvChan, masterArbSendChan chan *v1.MasterArbitrationUpdate
-	pktInChan                            chan *v1.PacketIn
-	pktOutChan                           chan *v1.PacketOut
-	genericStreamMessageChannel          chan *v1.StreamMessageResponse
-}
-
 //Init starts a P4Runtime client and runs go routines to send and receive stream channel messages from P4Runtime stream channel client
 func Init(target *tg.Target) {
 	log.Debug("In p4_oper Init")
@@ -59,13 +38,7 @@ func Init(target *tg.Target) {
 //TearDown closes the stream channel client
 func TearDown() {
 	log.Debug("In p4_oper tear down")
-	scv.cancel()
-	if scv.sc != nil {
-		err := scv.sc.CloseSend()
-		if err != nil {
-			log.Warn("Error closing the stream channel:", err)
-		}
-	}
+	scv.Close()
 	p4rtConn.cancel()
 }
 
@@ -74,21 +47,9 @@ func ProcessP4WriteRequest(wreq *v1.WriteRequest, wres *v1.WriteResponse) bool {
 	if wreq == nil {
 		return false
 	}
-
-	lock := getMasterArbitrationLock(scv, wreq.DeviceId, wreq.ElectionId)
-
-	if lock {
-		log.Info("Sending P4 write request")
-		log.Debugf("Write request: %s", wreq)
-		ctx := context.Background()
-		resp, err := p4rtConn.client.Write(ctx, wreq)
-		if err != nil {
-			log.Errorf("Error sending P4 write request:%v", err)
-			return false
-		}
-		log.Infof("Received P4 write response")
-		log.Debugf("P4 write response:%s", resp)
-		return true
+	if scv.getMasterArbitrationLock(wreq.DeviceId, wreq.ElectionId) {
+		resp := p4rtConn.Write(wreq)
+		return verifyWriteResp(wres, resp)
 	}
 	return false
 }
@@ -98,19 +59,9 @@ func ProcessP4PipelineConfigOperation(req *v1.SetForwardingPipelineConfigRequest
 	if req == nil {
 		return false
 	}
-	lock := getMasterArbitrationLock(scv, req.DeviceId, req.ElectionId)
-	if lock {
-		log.Info("Sending P4 pipeline config")
-		log.Debugf("Pipeline config: %s", req)
-		ctx := context.Background()
-		resp, err := p4rtConn.client.SetForwardingPipelineConfig(ctx, req)
-		if err != nil {
-			log.Errorf("Error sending P4 pipeline config:%v", err)
-			return false
-		}
-		log.Info("Received P4 pipeline config response")
-		log.Debugf("P4 set pipeline config response:%s\n", resp)
-		return true
+	if scv.getMasterArbitrationLock(req.DeviceId, req.ElectionId) {
+		resp := p4rtConn.SetForwardingPipelineConfig(req)
+		return verifySetForwardingPipelineConfigResp(res, resp)
 	}
 	return false
 }
@@ -119,8 +70,7 @@ func ProcessP4PipelineConfigOperation(req *v1.SetForwardingPipelineConfigRequest
 func ProcessPacketOutOperation(po *v1.PacketOut) bool {
 	var deviceID uint64 = 1
 	electionID := &v1.Uint128{High: 1, Low: 5}
-	lock := getMasterArbitrationLock(scv, deviceID, electionID)
-	if lock {
+	if scv.getMasterArbitrationLock(deviceID, electionID) {
 		log.Info("Sending packet")
 		log.Debugf("Packet info: %s", po)
 		scv.pktOutChan <- po
@@ -131,22 +81,12 @@ func ProcessPacketOutOperation(po *v1.PacketOut) bool {
 
 //ProcessPacketIn verifies if the packet received is same as expected packet.
 func ProcessPacketIn(exp *v1.PacketIn) bool {
-	packetMatched := false
-
 	select {
 	case ret := <-scv.pktInChan:
 		log.Debug("In ProcessPacketIn Case PktInChan")
-		if bytes.Equal(ret.GetPayload(), exp.GetPayload()) {
-			packetMatched = true
-			log.Infof("Received packet matches")
-			log.Debugf("Packet info: %s", ret)
-		} else {
-			log.Warnf("Packets don't match\nExpected: % x\nActual  : % x\n", exp.GetPayload(), ret.GetPayload())
-		}
-		return packetMatched
+		return verifyPacketIn(ret, exp)
 	case <-time.After(PktTimeout):
 		log.Error("Timed out waiting for packet in")
+		return false
 	}
-
-	return packetMatched
 }
