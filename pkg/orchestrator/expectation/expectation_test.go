@@ -132,6 +132,11 @@ func TestProcessConfigExpectation(t *testing.T) {
 }
 
 func TestProcessControlPlaneExpectation(t *testing.T) {
+	portMap := make(map[string]string)
+	portMap["1"] = "veth0"
+	portMap["1"] = "veth2"
+	dpMode := "direct"
+	p4rt.Init(TestTarget, dpMode, portMap)
 	var (
 		readExpectation = &tv.ControlPlaneExpectation{
 			Expectations: &tv.ControlPlaneExpectation_ReadExpectation_{
@@ -215,7 +220,11 @@ func TestProcessDataPlaneExpectation(t *testing.T) {
 
 func TestProcessTelemetryExpectation(t *testing.T) {
 	gnmi.Init(TestTarget)
-	p4rt.Init(TestTarget)
+	portMap := make(map[string]string)
+	portMap["1"] = "veth0"
+	portMap["1"] = "veth2"
+	dpMode := "direct"
+	p4rt.Init(TestTarget, dpMode, portMap)
 	defer gnmi.TearDown()
 	defer p4rt.TearDown()
 	var (

@@ -186,7 +186,11 @@ func TestProcessRandomizedActionGroup(t *testing.T) {
 
 func TestProcessAction(t *testing.T) {
 	gnmi.Init(TestTarget)
-	p4rt.Init(TestTarget)
+	portMap := make(map[string]string)
+	portMap["1"] = "veth0"
+	portMap["1"] = "veth2"
+	dpMode := "direct"
+	p4rt.Init(TestTarget, dpMode, portMap)
 	defer p4rt.TearDown()
 	defer gnmi.TearDown()
 

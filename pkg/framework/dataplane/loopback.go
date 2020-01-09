@@ -116,10 +116,16 @@ func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
 		// The default case is only for passing CI and will be updated/removed once implemetation completes
 		default:
 			if len(pkts) > 0 {
-				pi := convertToPktIn(port, pkts[0])
-				return p4rt.ProcessPacketIn(pi)
+				result := true
+				for _, pkt := range pkts {
+					pi := convertToPktIn(port, pkt)
+					result = result && p4rt.ProcessPacketIn(pi)
+				}
+				return result
 			}
-			return true
+			//TODO: Check if this PacketIn is valid
+			pi := convertToPktIn(port, nil)
+			return p4rt.ProcessPacketIn(pi)
 			//time.Sleep(1 * time.Second)
 		}
 	}
@@ -178,6 +184,7 @@ func convertToPktIn(port uint32, pkt []byte) *v1.PacketIn {
 	pi.Payload = pkt
 	pi.Metadata = []*v1.PacketMetadata{
 		{MetadataId: 1, Value: common.GetUint32(port)},
+		//{MetadataId: 4, Value: common.GetUint32(port)},
 	}
 	return pi
 }

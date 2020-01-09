@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
 )
@@ -50,12 +49,8 @@ func main() {
 	}
 
 	setupLog(*logDir, *logLevel)
-
-	// Create data plane
-	dataplane.CreateDataPlane(*dpMode, *matchType, *portMapFile)
-
 	testSuiteSlice := test.CreateSuite(*testNames, *tvDir, *tvName)
-	test.Run(*tgFile, testSuiteSlice)
+	test.Run(*tgFile, *dpMode, *matchType, *portMapFile, testSuiteSlice)
 }
 
 func setupLog(logDir string, logLevel string) {
