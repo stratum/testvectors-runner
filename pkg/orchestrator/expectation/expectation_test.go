@@ -175,7 +175,7 @@ func TestProcessControlPlaneExpectation(t *testing.T) {
 		{
 			name: "Empty Packet In Expectation",
 			args: args{cpe: packetInExpectation},
-			want: false,
+			want: true,
 		},
 	}
 	for _, tt := range tests {
