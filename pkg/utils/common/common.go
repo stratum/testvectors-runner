@@ -6,9 +6,10 @@
 
 package common
 
-import "encoding/binary"
-
-import "strconv"
+import (
+        "encoding/binary"
+        "strconv"
+)
 
 func GetUint32(i uint32) []byte {
 	byteSlice := make([]byte, 4)
