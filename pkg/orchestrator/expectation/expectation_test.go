@@ -60,6 +60,43 @@ func TestProcessConfigExpectation(t *testing.T) {
 				},
 			},
 		}
+		invalidConfigExpectation = &tv.ConfigExpectation{
+			GnmiGetRequest: &gpb.GetRequest{
+				Path: []*gpb.Path{
+					{
+						Elem: []*gpb.PathElem{
+							{Name: "interfaces"},
+							{Name: "interface", Key: map[string]string{"name": "veth1"}},
+							{Name: "state"},
+							{Name: "name"},
+						},
+					},
+				},
+				Encoding: gpb.Encoding_PROTO,
+			},
+			GnmiGetResponse: &gpb.GetResponse{
+				Notification: []*gpb.Notification{
+					{
+						Timestamp: 1234567890123456789,
+						Update: []*gpb.Update{
+							{
+								Path: &gpb.Path{
+									Elem: []*gpb.PathElem{
+										{Name: "interfaces"},
+										{Name: "interface", Key: map[string]string{"name": "veth1"}},
+										{Name: "state"},
+										{Name: "name"},
+									},
+								},
+								Val: &gpb.TypedValue{
+									Value: &gpb.TypedValue_StringVal{StringVal: "veth"},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
 	)
 	type args struct {
 		ce *tv.ConfigExpectation
@@ -72,12 +109,17 @@ func TestProcessConfigExpectation(t *testing.T) {
 		{
 			name: "Empty Expectation",
 			args: args{ce: emptyConfigExpectation},
-			want: false,
+			want: true,
 		},
 		{
 			name: "Valid Expectation",
 			args: args{ce: validConfigExpectation},
 			want: true,
+		},
+		{
+			name: "Invalid Expectation",
+			args: args{ce: invalidConfigExpectation},
+			want: false,
 		},
 	}
 	for _, tt := range tests {
@@ -90,6 +132,11 @@ func TestProcessConfigExpectation(t *testing.T) {
 }
 
 func TestProcessControlPlaneExpectation(t *testing.T) {
+	portMap := make(map[string]string)
+	portMap["1"] = "veth0"
+	portMap["1"] = "veth2"
+	dpMode := "direct"
+	p4rt.Init(TestTarget, dpMode, portMap)
 	var (
 		readExpectation = &tv.ControlPlaneExpectation{
 			Expectations: &tv.ControlPlaneExpectation_ReadExpectation_{
@@ -128,7 +175,7 @@ func TestProcessControlPlaneExpectation(t *testing.T) {
 		{
 			name: "Empty Packet In Expectation",
 			args: args{cpe: packetInExpectation},
-			want: false,
+			want: true,
 		},
 	}
 	for _, tt := range tests {
@@ -173,7 +220,11 @@ func TestProcessDataPlaneExpectation(t *testing.T) {
 
 func TestProcessTelemetryExpectation(t *testing.T) {
 	gnmi.Init(TestTarget)
-	p4rt.Init(TestTarget)
+	portMap := make(map[string]string)
+	portMap["1"] = "veth0"
+	portMap["1"] = "veth2"
+	dpMode := "direct"
+	p4rt.Init(TestTarget, dpMode, portMap)
 	defer gnmi.TearDown()
 	defer p4rt.TearDown()
 	var (

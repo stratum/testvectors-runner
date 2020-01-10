@@ -21,12 +21,13 @@ import (
 var log = logger.NewLogger()
 
 //Suite includes steps for setting up a test suite
-func Suite(target *tg.Target) {
+func Suite(target *tg.Target, dpMode string, matchType string, portMap map[string]string) {
 	log.Info("Setting up test suite...")
 	log.Infof("Target: %s", target)
-
+	// Create data plane
+	dataplane.CreateDataPlane(dpMode, matchType, portMap)
 	gnmi.Init(target)
-	p4rt.Init(target)
+	p4rt.Init(target, dpMode, portMap)
 }
 
 //Test includes steps for setting up a test

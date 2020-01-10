@@ -8,7 +8,12 @@ package dataplane
 
 import (
 	//"bytes"
+
 	"time"
+
+	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/utils/common"
 )
 
 type loopbackDataPlane struct {
@@ -74,7 +79,9 @@ func (ldp *loopbackDataPlane) sendOnPort(port uint32, pkt []byte) bool {
 	log.Infof("Sending packet to port %d\n", port)
 	log.Debugf("Packet info: % x\n", pkt)
 	// TODO: send packet to some channel that sends it as a packet-out
-	return true
+	po := convertToPktOut(port, pkt)
+	return p4rt.ProcessPacketOutOperation(po)
+	//return true
 }
 
 // verifyOnPort verifies if packets captured on sepcific port are as expected.
@@ -108,7 +115,18 @@ func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
 			return result
 		// The default case is only for passing CI and will be updated/removed once implemetation completes
 		default:
-			time.Sleep(1 * time.Second)
+			if len(pkts) > 0 {
+				result := true
+				for _, pkt := range pkts {
+					pi := convertToPktIn(port, pkt)
+					result = result && p4rt.ProcessPacketIn(pi)
+				}
+				return result
+			}
+			//TODO: Check if this PacketIn is valid
+			pi := convertToPktIn(port, nil)
+			return p4rt.ProcessPacketIn(pi)
+			//time.Sleep(1 * time.Second)
 		}
 	}
 }
@@ -146,10 +164,27 @@ func (ldp *loopbackDataPlane) send(pkts [][]byte, port uint32) bool {
 
 //verify calls verifyOnPort for each port
 func (ldp *loopbackDataPlane) verify(pkts [][]byte, ports []uint32) bool {
-	result := true
+	result := false
 	for _, port := range ports {
 		log.Infof("Checking packets on port %d\n", port)
-		result = ldp.verifyOnPort(port, pkts) && result
+		result = result || ldp.verifyOnPort(port, pkts)
 	}
 	return result
+}
+
+func convertToPktOut(port uint32, pkt []byte) *v1.PacketOut {
+	po := &v1.PacketOut{}
+	po.Payload = pkt
+	po.Metadata = []*v1.PacketMetadata{{MetadataId: 1, Value: common.GetUint32(port)}}
+	return po
+}
+
+func convertToPktIn(port uint32, pkt []byte) *v1.PacketIn {
+	pi := &v1.PacketIn{}
+	pi.Payload = pkt
+	pi.Metadata = []*v1.PacketMetadata{
+		{MetadataId: 1, Value: common.GetUint32(port)},
+		//{MetadataId: 4, Value: common.GetUint32(port)},
+	}
+	return pi
 }

@@ -10,9 +10,6 @@ Package dataplane implements packet send/receive functions
 package dataplane
 
 import (
-	"encoding/json"
-	"io/ioutil"
-
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
 )
 
@@ -44,7 +41,7 @@ var dp dataPlane
 // CreateDataPlane takes the dataplane mode, packet match type and port-map file name as arguments
 // and creates one dataplane instance (only direct dataplane is supported at the moment, loopback
 // mode support coming soon) for packet sending/receiving/verification.
-func CreateDataPlane(mode string, matchType string, portMapFile string) {
+func CreateDataPlane(mode string, matchType string, portMap map[string]string) {
 	var match Match
 	switch matchType {
 	case "exact":
@@ -56,27 +53,9 @@ func CreateDataPlane(mode string, matchType string, portMapFile string) {
 	}
 	switch mode {
 	case "direct":
-		// Read port-map file
-		pmdata, err := ioutil.ReadFile(portMapFile)
-		if err != nil {
-			log.Fatalf("Error opening port map file: %s\n%s", portMapFile, err)
-		}
-		var portMap map[string]string
-		if err = json.Unmarshal(pmdata, &portMap); err != nil {
-			log.Fatalf("Error parsing json data of type %T from file %s\n%s", portMap, portMapFile, err)
-		}
 		log.Infof("Creating direct data plane with match type: %s and port map: %s\n", matchType, portMap)
 		dp = createDirectDataPlane(portMap, match)
 	case "loopback":
-		// Read port-map file
-		pmdata, err := ioutil.ReadFile(portMapFile)
-		if err != nil {
-			log.Fatalf("Error opening port map file: %s\n%s", portMapFile, err)
-		}
-		var portMap map[string]string
-		if err = json.Unmarshal(pmdata, &portMap); err != nil {
-			log.Fatalf("Error parsing json data of type %T from file %s\n%s", portMap, portMapFile, err)
-		}
 		log.Infof("Creating loopback data plane with match type: %s and port map: %s\n", matchType, portMap)
 		dp = createLoopbackDataPlane(portMap, match)
 	default:

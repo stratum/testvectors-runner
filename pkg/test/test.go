@@ -10,6 +10,7 @@ Package test implements functions to create and run go tests
 package test
 
 import (
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"os"
@@ -102,12 +103,28 @@ func getTarget(fileName string) *tg.Target {
 }
 
 //Run calls suite setup, teardown and runs all tests in the testSuite against given target
-func Run(tgFile string, testSuite []testing.InternalTest) {
+func Run(tgFile string, dpMode string, matchType string, portMapFile string, testSuite []testing.InternalTest) {
 	log.Debug("In Run")
 	target := getTarget(tgFile)
-	setup.Suite(target)
+	portMap := getPortMap(portMapFile)
+	setup.Suite(target, dpMode, matchType, portMap)
 	var match Deps
 	code := testing.MainStart(match, testSuite, nil, nil).Run()
 	teardown.Suite()
 	os.Exit(code)
+}
+
+//getPortMap reads the given file and converts it to portMap.
+//panics if file is invalid
+func getPortMap(fileName string) map[string]string {
+	// Read port-map file
+	pmdata, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Fatalf("Error opening port map file: %s\n%s", fileName, err)
+	}
+	var portMap map[string]string
+	if err = json.Unmarshal(pmdata, &portMap); err != nil {
+		log.Fatalf("Error parsing json data of type %T from file %s\n%s", portMap, fileName, err)
+	}
+	return portMap
 }
