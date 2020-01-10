@@ -7,8 +7,8 @@
 package common
 
 import (
-        "encoding/binary"
-        "strconv"
+	"encoding/binary"
+	"strconv"
 )
 
 func GetUint32(i uint32) []byte {
