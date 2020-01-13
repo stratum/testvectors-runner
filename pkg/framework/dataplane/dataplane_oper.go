@@ -11,6 +11,7 @@ package dataplane
 
 import (
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	pm "github.com/stratum/testvectors/proto/portmap"
 )
 
 var log = logger.NewLogger()
@@ -38,10 +39,9 @@ type dataPlane interface {
 
 var dp dataPlane
 
-// CreateDataPlane takes the dataplane mode, packet match type and port-map file name as arguments
-// and creates one dataplane instance (only direct dataplane is supported at the moment, loopback
-// mode support coming soon) for packet sending/receiving/verification.
-func CreateDataPlane(mode string, matchType string, portMap map[string]string) {
+// CreateDataPlane takes the dataplane mode, packet match type and portmap file name as arguments
+// and creates one dataplane instance for packet sending/receiving/verification.
+func CreateDataPlane(mode string, matchType string, portmap *pm.PortMap) {
 	var match Match
 	switch matchType {
 	case "exact":
@@ -53,14 +53,29 @@ func CreateDataPlane(mode string, matchType string, portMap map[string]string) {
 	}
 	switch mode {
 	case "direct":
-		log.Infof("Creating direct data plane with match type: %s and port map: %s\n", matchType, portMap)
-		dp = createDirectDataPlane(portMap, match)
+		log.Infof("Creating direct data plane with match type: %s and port map: %s\n", matchType, portmap)
+		dp = createDirectDataPlane(portmap, match)
 	case "loopback":
-		log.Infof("Creating loopback data plane with match type: %s and port map: %s\n", matchType, portMap)
-		dp = createLoopbackDataPlane(portMap, match)
+		log.Infof("Creating loopback data plane with match type: %s and port map: %s\n", matchType, portmap)
+		dp = createLoopbackDataPlane(portmap, match)
 	default:
 		log.Fatalf("Unknown data plane mode: %s", mode)
 	}
+}
+
+//getPortMapEntryByPortNumber looks up given portmap and returns the first entry that has the same port number as specified.
+//If none of the entries match it returns nil
+func getPortMapEntryByPortNumber(portmap *pm.PortMap, portNumber uint32) *pm.Entry {
+	if dp == nil {
+		log.Error("data plane does not exist")
+		return nil
+	}
+	for _, entry := range portmap.GetEntries() {
+		if entry.GetPortNumber() == portNumber {
+			return entry
+		}
+	}
+	return nil
 }
 
 //ProcessTrafficStimulus sends packets to specific ports

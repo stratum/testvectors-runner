@@ -7,8 +7,7 @@
 package dataplane
 
 import (
-	//"bytes"
-
+	pm "github.com/stratum/testvectors/proto/portmap"
 	"time"
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
@@ -17,7 +16,7 @@ import (
 )
 
 type loopbackDataPlane struct {
-	portMap map[string]string
+	portmap *pm.PortMap
 	match   Match
 	// Packet check timeout
 	pktCheckTimeout time.Duration
@@ -30,16 +29,16 @@ type loopbackDataPlane struct {
 
 // createLoopbackDataPlane creates a data plane instance which utilizes packet-out/packet-in to
 // mimic data plane packets sending/receiving
-func createLoopbackDataPlane(portMap map[string]string, match Match) *loopbackDataPlane {
+func createLoopbackDataPlane(portmap *pm.PortMap, match Match) *loopbackDataPlane {
 	ldp := loopbackDataPlane{}
-	ldp.portMap = portMap
+	ldp.portmap = portmap
 	ldp.match = match
 	ldp.pktCheckTimeout = 2 * time.Second
 	ldp.maxTimeout = 1 * time.Hour
 	return &ldp
 }
 
-// captureOnPort starts packet capturing on all ports specified in portMap.
+// captureOnPort starts packet capturing on all ports specified in portmap.
 // It saves packet-ins to a channel for future processing.
 // It takes as arguments a timeout which specifies the duration of the capture.
 // When timeout is set to -1*time.Second, it'll use maxTimeout instead.
@@ -133,9 +132,14 @@ func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
 
 //stop stops all captures
 func (ldp *loopbackDataPlane) stop() bool {
-	for _, port := range ldp.portMap {
-		log.Debugf("Stop packet capturing on port %s\n", port)
-		// TODO: delete the ACL rules installed for packet capturing
+	for _, entry := range ldp.portmap.GetEntries() {
+		portNumber := entry.GetPortNumber()
+		portType := entry.GetPortType()
+		if portType == pm.Entry_IN {
+			// We don't capture packets on this port
+			continue
+		}
+		log.Debugf("Stop packet capturing on port %d\n", portNumber)
 	}
 	// Stop packet capturing by resetting the capture timer
 	ldp.captureTimer.Reset(1 * time.Nanosecond)
@@ -144,9 +148,14 @@ func (ldp *loopbackDataPlane) stop() bool {
 
 //capture starts packet capturing
 func (ldp *loopbackDataPlane) capture() bool {
-	for _, port := range ldp.portMap {
-		log.Debugf("Capturing packets on port %s\n", port)
-		// TODO: install ACL rules to redirect packets received to CPU
+	for _, entry := range ldp.portmap.GetEntries() {
+		portNumber := entry.GetPortNumber()
+		portType := entry.GetPortType()
+		if portType == pm.Entry_IN {
+			// We don't capture packets on this port
+			continue
+		}
+		log.Debugf("Capturing packets on port %s\n", portNumber)
 	}
 	ldp.captureOnPorts(-1 * time.Second)
 	return true
@@ -156,6 +165,15 @@ func (ldp *loopbackDataPlane) capture() bool {
 func (ldp *loopbackDataPlane) send(pkts [][]byte, port uint32) bool {
 	log.Infof("Sending packets to port %d\n", port)
 	result := true
+	entry := getPortMapEntryByPortNumber(ldp.portmap, port)
+	if entry == nil {
+		log.Fatalf("Failed to find portmap entry that has port number %d", port)
+	}
+	portType := entry.GetPortType()
+	if portType == pm.Entry_OUT {
+		// We shouldn't send packets to this port
+		log.Fatalf("Port %d could only be used as egress to switch", port)
+	}
 	for _, pkt := range pkts {
 		result = ldp.sendOnPort(port, pkt) && result
 	}
@@ -167,7 +185,17 @@ func (ldp *loopbackDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 	result := false
 	for _, port := range ports {
 		log.Infof("Checking packets on port %d\n", port)
-		result = result || ldp.verifyOnPort(port, pkts)
+		entry := getPortMapEntryByPortNumber(ldp.portmap, port)
+		if entry != nil {
+			portType := entry.GetPortType()
+			if portType == pm.Entry_IN {
+				// We shouldn't capture packets on this port
+				log.Fatalf("Port %d could only be used as ingress to switch", port)
+			}
+			result = result || ldp.verifyOnPort(port, pkts)
+		} else {
+			log.Fatalf("Failed to find portmap entry that has port number %d", port)
+		}
 	}
 	return result
 }

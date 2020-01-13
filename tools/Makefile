@@ -8,10 +8,10 @@ TV_DIR := $$HOME/testvectors/
 TV_SUITE := p4runtime/
 TV_NAME := RedirectDataplaneToDataplaneTest
 TG_FILE := ${TV_DIR}target.pb.txt
-PORT_MAP_FILE := ${TV_DIR}port-map.json
+PORT_MAP_FILE := ${TV_DIR}portmap.pb.txt
 LOG_LEVEL := fatal
 RUN_TVRUNNER := ${TVRUNNER_BIN} -test.v
-ARGS := -target ${TG_FILE} -port-map ${PORT_MAP_FILE} -log-level ${LOG_LEVEL}
+ARGS := -target ${TG_FILE} -portmap ${PORT_MAP_FILE} -log-level ${LOG_LEVEL}
 
 pipeline:
 	${RUN_TVRUNNER} -tv-dir ${TV_DIR} -tv-name PipelineConfig ${ARGS}

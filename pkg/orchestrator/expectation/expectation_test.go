@@ -12,6 +12,7 @@ import (
 	gpb "github.com/openconfig/gnmi/proto/gnmi"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
@@ -132,11 +133,9 @@ func TestProcessConfigExpectation(t *testing.T) {
 }
 
 func TestProcessControlPlaneExpectation(t *testing.T) {
-	portMap := make(map[string]string)
-	portMap["1"] = "veth0"
-	portMap["1"] = "veth2"
+	portmap := &pm.PortMap{Entries: []*pm.Entry{{PortNumber: 1, InterfaceName: "veth0", PortType: pm.Entry_IN_OUT}, {PortNumber: 2, InterfaceName: "veth2", PortType: pm.Entry_IN_OUT}}}
 	dpMode := "direct"
-	p4rt.Init(TestTarget, dpMode, portMap)
+	p4rt.Init(TestTarget, dpMode, portmap)
 	var (
 		readExpectation = &tv.ControlPlaneExpectation{
 			Expectations: &tv.ControlPlaneExpectation_ReadExpectation_{
@@ -220,11 +219,9 @@ func TestProcessDataPlaneExpectation(t *testing.T) {
 
 func TestProcessTelemetryExpectation(t *testing.T) {
 	gnmi.Init(TestTarget)
-	portMap := make(map[string]string)
-	portMap["1"] = "veth0"
-	portMap["1"] = "veth2"
+	portmap := &pm.PortMap{Entries: []*pm.Entry{{PortNumber: 1, InterfaceName: "veth0", PortType: pm.Entry_IN_OUT}, {PortNumber: 2, InterfaceName: "veth2", PortType: pm.Entry_IN_OUT}}}
 	dpMode := "direct"
-	p4rt.Init(TestTarget, dpMode, portMap)
+	p4rt.Init(TestTarget, dpMode, portmap)
 	defer gnmi.TearDown()
 	defer p4rt.TearDown()
 	var (

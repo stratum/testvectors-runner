@@ -15,19 +15,20 @@ import (
 	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
 var log = logger.NewLogger()
 
 //Suite includes steps for setting up a test suite
-func Suite(target *tg.Target, dpMode string, matchType string, portMap map[string]string) {
+func Suite(target *tg.Target, dpMode string, matchType string, portmap *pm.PortMap) {
 	log.Info("Setting up test suite...")
 	log.Infof("Target: %s", target)
 	// Create data plane
-	dataplane.CreateDataPlane(dpMode, matchType, portMap)
+	dataplane.CreateDataPlane(dpMode, matchType, portmap)
 	gnmi.Init(target)
-	p4rt.Init(target, dpMode, portMap)
+	p4rt.Init(target, dpMode, portmap)
 }
 
 //Test includes steps for setting up a test

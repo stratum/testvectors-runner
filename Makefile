@@ -47,6 +47,6 @@ gofmt: # @HELP run the Go format validation
 license_check: # @HELP examine and ensure license headers exist
 	./build/licensing/boilerplate.py -v
 
-test: build deps linters license_check
+test: build linters license_check
 	CGO_ENABLED=1 go test -race -v github.com/opennetworkinglab/testvectors-runner/pkg/framework/...
 	CGO_ENABLED=1 go test -race -v github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/...

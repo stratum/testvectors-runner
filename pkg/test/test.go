@@ -10,7 +10,6 @@ Package test implements functions to create and run go tests
 package test
 
 import (
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"os"
@@ -25,6 +24,7 @@ import (
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test/teardown"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test/testsuite"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/test/tvsuite"
+	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
@@ -102,29 +102,29 @@ func getTarget(fileName string) *tg.Target {
 	return target
 }
 
+//getPortMap reads the given file and converts it to portmap proto.
+//panics if file is invalid
+func getPortMap(fileName string) *pm.PortMap {
+	// Read portmap file
+	pmdata, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Fatalf("Error opening portmap file: %s\n%s", fileName, err)
+	}
+	portmap := &pm.PortMap{}
+	if err = proto.UnmarshalText(string(pmdata), portmap); err != nil {
+		log.Fatalf("Error parsing proto message of type %T from file %s\n%s", portmap, fileName, err)
+	}
+	return portmap
+}
+
 //Run calls suite setup, teardown and runs all tests in the testSuite against given target
-func Run(tgFile string, dpMode string, matchType string, portMapFile string, testSuite []testing.InternalTest) {
+func Run(tgFile string, dpMode string, matchType string, pmFile string, testSuite []testing.InternalTest) {
 	log.Debug("In Run")
 	target := getTarget(tgFile)
-	portMap := getPortMap(portMapFile)
-	setup.Suite(target, dpMode, matchType, portMap)
+	portmap := getPortMap(pmFile)
+	setup.Suite(target, dpMode, matchType, portmap)
 	var match Deps
 	code := testing.MainStart(match, testSuite, nil, nil).Run()
 	teardown.Suite()
 	os.Exit(code)
-}
-
-//getPortMap reads the given file and converts it to portMap.
-//panics if file is invalid
-func getPortMap(fileName string) map[string]string {
-	// Read port-map file
-	pmdata, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Fatalf("Error opening port map file: %s\n%s", fileName, err)
-	}
-	var portMap map[string]string
-	if err = json.Unmarshal(pmdata, &portMap); err != nil {
-		log.Fatalf("Error parsing json data of type %T from file %s\n%s", portMap, fileName, err)
-	}
-	return portMap
 }

@@ -15,6 +15,7 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
@@ -34,7 +35,7 @@ type pktInInterface interface {
 }
 
 //Init starts a P4Runtime client and runs go routines to send and receive stream channel messages from P4Runtime stream channel client
-func Init(target *tg.Target, dpMode string, portMap map[string]string) {
+func Init(target *tg.Target, dpMode string, portmap *pm.PortMap) {
 	log.Debug("In p4_oper Init")
 	p4rtConn = connect(target)
 	scv = getStreamChannel(p4rtConn.client)
@@ -44,8 +45,13 @@ func Init(target *tg.Target, dpMode string, portMap map[string]string) {
 		s = &directPacketIn{scv}
 	case "loopback":
 		pktChans := make(map[string]chan *v1.PacketIn)
-		for k := range portMap {
-			pktChans[k] = make(chan *v1.PacketIn)
+		for _, entry := range portmap.GetEntries() {
+			portNumber := entry.GetPortNumber()
+			portType := entry.GetPortType()
+			// Only create channels for ports that are used as egress to switch
+			if portType == pm.Entry_OUT || portType == pm.Entry_IN_OUT {
+				pktChans[string(portNumber)] = make(chan *v1.PacketIn)
+			}
 		}
 		pktChans["generic"] = make(chan *v1.PacketIn)
 		s = &loopbackPacketIn{scv, pktChans}

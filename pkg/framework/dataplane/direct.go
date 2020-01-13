@@ -18,10 +18,11 @@ import (
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/pcapgo"
+	pm "github.com/stratum/testvectors/proto/portmap"
 )
 
 type directDataPlane struct {
-	portMap map[string]string
+	portmap *pm.PortMap
 	match   Match
 	// Packet check timeout
 	pktCheckTimeout time.Duration
@@ -41,9 +42,9 @@ type directDataPlane struct {
 
 // createDirectDataPlane creates a data plane instance which utilizes gopacket to
 // send/receive packets directly to physical interfaces on the host.
-func createDirectDataPlane(portMap map[string]string, match Match) *directDataPlane {
+func createDirectDataPlane(portmap *pm.PortMap, match Match) *directDataPlane {
 	ddp := directDataPlane{}
-	ddp.portMap = portMap
+	ddp.portmap = portmap
 	ddp.match = match
 	ddp.pktCheckTimeout = 2 * time.Second
 	ddp.snapshotLen = 2048
@@ -71,7 +72,7 @@ func (ddp *directDataPlane) captureOnInterface(iface string, timeout time.Durati
 	// Check if packet capturing on this interface has already started
 	if timer, ok := ddp.captures.Load(iface); ok {
 		// Update the timer and return it
-		log.Debugf("Packet capturing already started on %s\n", iface)
+		log.Debugf("Packet capturing already started on %s", iface)
 		timer.(*time.Timer).Reset(timeout)
 		return timer.(*time.Timer)
 	}
@@ -107,8 +108,8 @@ func (ddp *directDataPlane) captureOnInterface(iface string, timeout time.Durati
 			select {
 			case packet := <-packetSource.Packets():
 				// Save captured packets to file
-				log.Infof("Caught packet on interface %s\n", iface)
-				log.Debugf("Packet info: %s\n", packet)
+				log.Infof("Caught packet on interface %s", iface)
+				log.Debugf("Packet info: %s", packet)
 				if err := w.WritePacket(packet.Metadata().CaptureInfo, packet.Data()); err != nil {
 					log.Fatal(err)
 				}
@@ -136,8 +137,8 @@ func (ddp *directDataPlane) sendOnInterface(iface string, pkt []byte) bool {
 		return false
 	}
 	defer handle.Close()
-	log.Infof("Sending packet to interface %s\n", iface)
-	log.Debugf("Packet info: % x\n", pkt)
+	log.Infof("Sending packet to interface %s", iface)
+	log.Debugf("Packet info: % x", pkt)
 	if err := handle.WritePacketData(pkt); err != nil {
 		log.Error(err)
 		return false
@@ -160,7 +161,7 @@ func (ddp *directDataPlane) verifyOnInterface(iface string, pkts [][]byte) bool 
 	// TODO: read packets from buffer instead of file
 	// Also see TODO in captureOnInterface()
 	pcapFile := fmt.Sprintf("%s%s.pcap", ddp.pcapPath, iface)
-	log.Debugf("Expecting %d packets captured on interface %s\n", len(pkts), iface)
+	log.Debugf("Expecting %d packets captured on interface %s", len(pkts), iface)
 	result := false
 	for {
 		// Sleep between checks in the loop
@@ -183,7 +184,7 @@ func (ddp *directDataPlane) verifyOnInterface(iface string, pkts [][]byte) bool 
 				log.Error(err)
 				return false
 			}
-			log.Debugf("Reading packet from %s...\n", pcapFile)
+			log.Debugf("Reading packet from %s...", pcapFile)
 			packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 			capturedNum := 0
 			matchedNum := 0
@@ -209,19 +210,19 @@ func (ddp *directDataPlane) verifyOnInterface(iface string, pkts [][]byte) bool 
 					switch ddp.match {
 					case Exact:
 						// Packets don't match, check failed
-						log.Errorf("Payloads of packet #%d don't match\n", capturedNum)
-						log.Debugf("\nExpected payload: % x\nCaptured payload: % x\n", pkt, packet.Data())
+						log.Errorf("Payloads of packet #%d don't match", capturedNum)
+						log.Debugf("\nExpected payload: % x\nCaptured payload: % x", pkt, packet.Data())
 						// No need for recheck in this case
 						handle.Close()
 						return false
 					case In:
 						// Packets don't match, ignore it
-						log.Debugf("Ingoring unmached packet: % x\n", packet.Data())
+						log.Debugf("Ingoring unmached packet: % x", packet.Data())
 						goto nextpacket
 					}
 				} else {
 					// Packets match
-					log.Debugf("Payloads of packet #%d match\n", capturedNum)
+					log.Debugf("Payloads of packet #%d match", capturedNum)
 					matchedNum++
 				}
 			}
@@ -229,7 +230,7 @@ func (ddp *directDataPlane) verifyOnInterface(iface string, pkts [][]byte) bool 
 			case Exact:
 				// Check if there are more captured packets than expected
 				for packet := range packetSource.Packets() {
-					log.Debugf("Unexpected packet on interface %s: %s\n", iface, packet)
+					log.Debugf("Unexpected packet on interface %s: %s", iface, packet)
 					capturedNum++
 				}
 				if capturedNum > len(pkts) {
@@ -262,8 +263,18 @@ func (ddp *directDataPlane) stop() bool {
 
 //capture calls captureOnInterface for all ports in the port map.
 func (ddp *directDataPlane) capture() bool {
-	for _, intf := range ddp.portMap {
-		log.Debugf("Capturing packets on interface %s\n", intf)
+	for _, entry := range ddp.portmap.GetEntries() {
+		portNumber := entry.GetPortNumber()
+		portType := entry.GetPortType()
+		if portType == pm.Entry_IN {
+			// We don't capture packets on this port
+			continue
+		}
+		intf := entry.GetInterfaceName()
+		if intf == "" {
+			log.Fatalf("No interface specified for port %d", portNumber)
+		}
+		log.Debugf("Capturing packets on interface %s", intf)
 		ddp.captureOnInterface(intf, -1*time.Second)
 	}
 	return true
@@ -271,10 +282,23 @@ func (ddp *directDataPlane) capture() bool {
 
 //send finds the port in the port map and calls sendOnInterface with the port for each packet.
 func (ddp *directDataPlane) send(pkts [][]byte, port uint32) bool {
-	log.Infof("Sending packets to port %d\n", port)
+	log.Infof("Sending packets to port %d", port)
 	result := true
+	entry := getPortMapEntryByPortNumber(ddp.portmap, port)
+	if entry == nil {
+		log.Fatalf("Failed to find portmap entry that has port number %d", port)
+	}
+	portType := entry.GetPortType()
+	if portType == pm.Entry_OUT {
+		// We shouldn't send packets to this port
+		log.Fatalf("Port %d could only be used as egress to switch", port)
+	}
+	intf := entry.GetInterfaceName()
+	if intf == "" {
+		log.Fatalf("No interface specified for port %d", port)
+	}
 	for _, pkt := range pkts {
-		result = ddp.sendOnInterface(ddp.portMap[fmt.Sprint(port)], pkt) && result
+		result = ddp.sendOnInterface(intf, pkt) && result
 	}
 	return result
 }
@@ -283,8 +307,22 @@ func (ddp *directDataPlane) send(pkts [][]byte, port uint32) bool {
 func (ddp *directDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 	result := true
 	for _, port := range ports {
-		log.Infof("Checking packets on port %d\n", port)
-		result = ddp.verifyOnInterface(ddp.portMap[fmt.Sprint(port)], pkts) && result
+		log.Infof("Checking packets on port %d", port)
+		entry := getPortMapEntryByPortNumber(ddp.portmap, port)
+		if entry != nil {
+			portType := entry.GetPortType()
+			if portType == pm.Entry_IN {
+				// We shouldn't capture packets on this port
+				log.Fatalf("Port %d could only be used as ingress to switch", port)
+			}
+			intf := entry.GetInterfaceName()
+			if intf == "" {
+				log.Fatalf("No interface specified for port %d", port)
+			}
+			result = ddp.verifyOnInterface(intf, pkts) && result
+		} else {
+			log.Fatalf("Failed to find portmap entry that has port number %d", port)
+		}
 	}
 	return result
 }
