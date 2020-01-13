@@ -155,7 +155,7 @@ func (ldp *loopbackDataPlane) capture() bool {
 			// We don't capture packets on this port
 			continue
 		}
-		log.Debugf("Capturing packets on port %s\n", portNumber)
+		log.Debugf("Capturing packets on port %d\n", portNumber)
 	}
 	ldp.captureOnPorts(-1 * time.Second)
 	return true
