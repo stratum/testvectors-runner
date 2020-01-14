@@ -15,6 +15,7 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/utils/common"
 	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 )
@@ -47,11 +48,7 @@ func Init(target *tg.Target, dpMode string, portmap *pm.PortMap) {
 		pktChans := make(map[string]chan *v1.PacketIn)
 		for _, entry := range portmap.GetEntries() {
 			portNumber := entry.GetPortNumber()
-			portType := entry.GetPortType()
-			// Only create channels for ports that are used as egress to switch
-			if portType == pm.Entry_OUT || portType == pm.Entry_IN_OUT {
-				pktChans[string(portNumber)] = make(chan *v1.PacketIn)
-			}
+			pktChans[common.GetStr(portNumber)] = make(chan *v1.PacketIn)
 		}
 		pktChans["generic"] = make(chan *v1.PacketIn)
 		s = &loopbackPacketIn{scv, pktChans}

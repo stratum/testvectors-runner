@@ -310,11 +310,14 @@ func (ddp *directDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 		log.Infof("Checking packets on port %d", port)
 		entry := getPortMapEntryByPortNumber(ddp.portmap, port)
 		if entry != nil {
-			portType := entry.GetPortType()
-			if portType == pm.Entry_IN {
-				// We shouldn't capture packets on this port
-				log.Fatalf("Port %d could only be used as ingress to switch", port)
-			}
+			//Commented below section in order to verify that no packets are captured on ingress ports.
+			//To verify no packets are captured on ingress ports, traffic expectation should have port number and empty packet.
+			//verifyOnInterface should return true on time out if traffic expectation has empty packet or no packet
+			/*portType := entry.GetPortType()
+			 if portType == pm.Entry_IN {
+				 // We shouldn't capture packets on this port
+				 log.Fatalf("Port %d could only be used as ingress to switch", port)
+			 }*/
 			intf := entry.GetInterfaceName()
 			if intf == "" {
 				log.Fatalf("No interface specified for port %d", port)
