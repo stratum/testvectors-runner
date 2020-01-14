@@ -53,10 +53,10 @@ func (ldp *loopbackDataPlane) captureOnPorts(timeout time.Duration) {
 			select {
 			// TODO: replace the following commented block: get packet-ins from some channel
 			/*
-				case packet := <-packetSource.Packets():
-					log.Infof("Caught packet on port %s\n", port)
-					log.Debugf("Packet info: %s\n", packet)
-					// Save packet to channel, use different channels for different ports
+				 case packet := <-packetSource.Packets():
+					 log.Infof("Caught packet on port %s\n", port)
+					 log.Debugf("Packet info: %s\n", packet)
+					 // Save packet to channel, use different channels for different ports
 			*/
 			case <-ldp.captureTimer.C:
 				// Stop capturing on timeout
@@ -101,8 +101,8 @@ func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
 		select {
 		// TODO: read from buffer and compare packets
 		/*
-			if !bytes.Equal(pkt, packet) {
-			}
+		 if !bytes.Equal(pkt, packet) {
+		 }
 		*/
 		case <-timer:
 			log.Debugf("Timeout exceeded, stop checking packet on port %d...", port)
@@ -187,11 +187,14 @@ func (ldp *loopbackDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 		log.Infof("Checking packets on port %d\n", port)
 		entry := getPortMapEntryByPortNumber(ldp.portmap, port)
 		if entry != nil {
-			portType := entry.GetPortType()
-			if portType == pm.Entry_IN {
-				// We shouldn't capture packets on this port
-				log.Fatalf("Port %d could only be used as ingress to switch", port)
-			}
+			//Commented below section in order to verify that no packets are captured on ingress ports.
+			//To verify no packets are captured on ingress ports, traffic expectation should have port number and empty packet.
+			//verifyOnInterface should return true on time out if traffic expectation has empty packet or no packet
+			/*portType := entry.GetPortType()
+			 if portType == pm.Entry_IN {
+				 // We shouldn't capture packets on this port
+				 log.Fatalf("Port %d could only be used as ingress to switch", port)
+			 }*/
 			result = result || ldp.verifyOnPort(port, pkts)
 		} else {
 			log.Fatalf("Failed to find portmap entry that has port number %d", port)

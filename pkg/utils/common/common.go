@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+Package common implements generic functions used in the repo
+*/
 package common
 
 import (
@@ -11,12 +14,14 @@ import (
 	"strconv"
 )
 
+//GetUint32 converts uint32 to byte slice
 func GetUint32(i uint32) []byte {
 	byteSlice := make([]byte, 4)
 	binary.BigEndian.PutUint32(byteSlice, i)
 	return byteSlice
 }
 
+//GetInt converts byte slice to int
 func GetInt(s []byte) int {
 	var res int
 	for _, v := range s {
@@ -26,6 +31,16 @@ func GetInt(s []byte) int {
 	return res
 }
 
-func GetStr(s []byte) string {
-	return strconv.Itoa(GetInt(s))
+//GetStr converts various interfaces to string
+func GetStr(i interface{}) string {
+	switch v := i.(type) {
+	case uint32:
+		return strconv.Itoa(int(v))
+	case []byte:
+		return strconv.Itoa(GetInt(v))
+	case int:
+		return strconv.Itoa(v)
+	default:
+		return ""
+	}
 }
