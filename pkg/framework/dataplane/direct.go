@@ -265,11 +265,13 @@ func (ddp *directDataPlane) stop() bool {
 func (ddp *directDataPlane) capture() bool {
 	for _, entry := range ddp.portmap.GetEntries() {
 		portNumber := entry.GetPortNumber()
-		portType := entry.GetPortType()
+		//Commented below section in order to create pcap file for all ports.
+		//pcap file will be used to verify no packets are captured on ingress port during verifyOnPort()
+		/*portType := entry.GetPortType()
 		if portType == pm.Entry_IN {
 			// We don't capture packets on this port
 			continue
-		}
+		}*/
 		intf := entry.GetInterfaceName()
 		if intf == "" {
 			log.Fatalf("No interface specified for port %d", portNumber)

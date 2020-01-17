@@ -46,7 +46,7 @@ func TearDown() {
 //ProcessGetRequest sends a request to switch and compares the response
 func ProcessGetRequest(greq *gnmi.GetRequest, gresp *gnmi.GetResponse) bool {
 	resp := gnmiConn.Get(greq)
-	return verifyGetResp(resp, gresp)
+	return verifyGetResp(gresp, resp)
 }
 
 //ProcessSetRequest sends a set request to switch and compares the response
