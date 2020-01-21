@@ -24,6 +24,9 @@ type loopbackPacketIn struct {
 func (l loopbackPacketIn) ProcessPacketIn(exp *v1.PacketIn) bool {
 	//FIXME: instead of first Metadata object, find metadata that matches with ingress port id
 	ingressPort := common.GetStr(exp.GetMetadata()[0].GetValue())
+	if _, ok := l.pktChans[ingressPort]; !ok {
+		ingressPort = "generic"
+	}
 	select {
 	case ret := <-l.pktChans[ingressPort]:
 		log.Debug("In ProcessPacketIn Case PktInChan")
