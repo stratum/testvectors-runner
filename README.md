@@ -27,7 +27,9 @@ In addition to Test Vector files, a `target.pb.txt` file and a `portmap.pb.txt` 
 
 ## Test with testvectors-runner
 
-For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the SUT. We'll be supporting testvectors-runner deployment directly on the SUT soon. For running with `stratum-bmv2`, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed.
+For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the SUT. For running with `stratum-bmv2`, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed.
+
+When loopback mode is enabled on hardware switches, it's also supported to deploy testvectors-runner directly on the switch. See the loopback section below for more details.
 
 ### Use existing testvectors-runner binary docker image
 ```bash
@@ -78,6 +80,25 @@ Use the executed binary to run tests
 ./tvrunner --target <TARGET_FILE> --portmap <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR>
 ```
 >Note: For more optional arguments, run *go run cmd/main/testvectors-runner.go -h* or *./tvrunner -h*
+
+### Loopback mode
+
+To run tests in loopback mode just add `--dp-mode loopback` to the command. It applies to all the options above.
+
+As part of loopback mode setup, after pipeline configuration is pushed to the switch, extra `Insert*` Test Vectors need to be executed before running any tests (see more details [here](docs/loopback.md)). Take a Tofino switch as an example:
+```bash
+./tvrunner.sh --target ~/testvectors/tofino/target.pb.txt --portmap ~/testvectors/tofino/portmap.pb.txt --tv-dir ~/testvectors/tofino --tv-name Insert.* --dp-mode loopback
+```
+
+Then run `p4runtime` test suite by:
+```bash
+./tvrunner.sh --target ~/testvectors/tofino/target.pb.txt --portmap ~/testvectors/tofino/portmap.pb.txt --tv-dir ~/testvectors/tofino/p4runtime --dp-mode loopback
+```
+
+After all tests are done, run the `Delete*` Test Vectors to clean up.
+```bash
+./tvrunner.sh --target ~/testvectors/tofino/target.pb.txt --portmap ~/testvectors/tofino/portmap.pb.txt --tv-dir ~/testvectors/tofino --tv-name Delete.* --dp-mode loopback
+```
 
 ## Additional Documents
 * [Test Vectors Runner Architecture](docs/architecture.md)
