@@ -27,7 +27,7 @@ In addition to Test Vector files, a `target.pb.txt` file and a `portmap.pb.txt` 
 
 ## Test with testvectors-runner
 
-For running with hardware switches, testvectors-runner could be deployed on a server which has both gPRC and data plane connections to the SUT. For running with `stratum-bmv2`, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed.
+For running with hardware switches, testvectors-runner could be deployed on a server which has both gRPC and data plane connections to the SUT. For running with `stratum-bmv2`, testvectors-runner needs to be deployed on the same network where the bmv2 container is deployed.
 
 When loopback mode is enabled on hardware switches, it's also supported to deploy testvectors-runner directly on the switch. See the [loopback](#loopback-mode) section below for more details.
 
