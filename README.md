@@ -83,9 +83,12 @@ Use the executed binary to run tests
 
 ### Loopback mode
 
-To run tests in loopback mode just add `--dp-mode loopback` to the command. It applies to all the options above.
+To run tests in loopback mode just add `--dp-mode loopback` to the commands. It applies to all the options above. Take a Tofino switch as an example. First push a pipeline configuration by:
+```bash
+./tvrunner.sh --target ~/testvectors/tofino/target.pb.txt --portmap ~/testvectors/tofino/portmap.pb.txt --tv-dir ~/testvectors/tofino --tv-name PipelineConfig --dp-mode loopback
+```
 
-As part of loopback mode setup, after pipeline configuration is pushed to the switch, extra `Insert*` Test Vectors need to be executed before running any tests (see more details [here](docs/loopback.md)). Take a Tofino switch as an example:
+As part of loopback mode setup, extra `Insert*` Test Vectors need to be executed before running any tests (see more details [here](docs/loopback.md)).
 ```bash
 ./tvrunner.sh --target ~/testvectors/tofino/target.pb.txt --portmap ~/testvectors/tofino/portmap.pb.txt --tv-dir ~/testvectors/tofino --tv-name Insert.* --dp-mode loopback
 ```
