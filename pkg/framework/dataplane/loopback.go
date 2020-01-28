@@ -32,14 +32,6 @@ func createLoopbackDataPlane(portmap *pm.PortMap, match Match) *loopbackDataPlan
 	return &ldp
 }
 
-// captureOnPort starts packet capturing on all ports specified in portmap.
-// In loopback mode p4rt package implements packet capturing functions so there
-// is nothing needs to be done here.
-// It takes as arguments a timeout which specifies the duration of the capture.
-// When timeout is set to -1*time.Second, it'll use maxTimeout instead.
-func (ldp *loopbackDataPlane) captureOnPorts(timeout time.Duration) {
-}
-
 // sendOnPort sends a raw packet to a specific port via packet-out.
 // It takes as arguments the port number and a slice of byte which
 // represents the packet payload.
@@ -64,7 +56,6 @@ func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
 		result = result && p4rt.ProcessPacketIn(pi)
 	}
 	// Still need to check for unexpected packets
-	//TODO: Check if this PacketIn is valid
 	pi := convertToPktIn(port, nil)
 	result = result && p4rt.ProcessPacketIn(pi)
 	return result
@@ -72,26 +63,13 @@ func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
 
 //stop stops all captures
 func (ldp *loopbackDataPlane) stop() bool {
-	// In loopback mode p4rt package implements packet capturing functions so there
-	// is nothing needs to be done here.
+	//This function is emtpy because packet capture in loopback is done as part of p4rt packet-ins but stop() still has to be defined as part of the interface definition
 	return true
 }
 
 //capture starts packet capturing
 func (ldp *loopbackDataPlane) capture() bool {
-	for _, entry := range ldp.portmap.GetEntries() {
-		portNumber := entry.GetPortNumber()
-		//Commented below section as we start capture on all ports regardless of its type.
-		//This if for verifying no packets are captured on ingress port during verifyOnPort()
-		/*
-			portType := entry.GetPortType()
-			if portType == pm.Entry_IN {
-				// We don't capture packets on this port
-				continue
-			}*/
-		log.Debugf("Capturing packets on port %d\n", portNumber)
-	}
-	ldp.captureOnPorts(-1 * time.Second)
+	//This function is emtpy because packet capture in loopback is done as part of p4rt packet-ins but capture() still has to be defined as part of the interface definition
 	return true
 }
 
