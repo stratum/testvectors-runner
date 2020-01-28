@@ -54,7 +54,7 @@ docker build -t <IMAGE_NAME> -f build/test/Dockerfile .
 ```
 Run tests with below command:
 ```bash
-./tvrunner.sh --target <TARGET_FILE> --portmap <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR> --image-name <IMAGE_NAME>
+./tvrunner.sh --target <TARGET_FILE> --portmap <PORT_MAP_FILE> --tv-dir <TESTVECTORS_DIR> --image <IMAGE_NAME>
 ```
 
 In both cases, `tvrunner.sh` runs docker container in `host` network. To run docker container in another container's network, use below command:

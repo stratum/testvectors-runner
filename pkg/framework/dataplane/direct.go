@@ -266,7 +266,7 @@ func (ddp *directDataPlane) capture() bool {
 	for _, entry := range ddp.portmap.GetEntries() {
 		portNumber := entry.GetPortNumber()
 		//Commented below section in order to create pcap file for all ports.
-		//pcap file will be used to verify no packets are captured on ingress port during verifyOnPort()
+		//pcap file will be used to verify no packets are captured on ingress port during verifyOnInterface()
 		/*portType := entry.GetPortType()
 		if portType == pm.Entry_IN {
 			// We don't capture packets on this port
@@ -307,7 +307,7 @@ func (ddp *directDataPlane) send(pkts [][]byte, port uint32) bool {
 
 //verify finds the ports in the port map and calls verifyOnInterface for each port.
 func (ddp *directDataPlane) verify(pkts [][]byte, ports []uint32) bool {
-	result := true
+	result := false
 	for _, port := range ports {
 		log.Infof("Checking packets on port %d", port)
 		entry := getPortMapEntryByPortNumber(ddp.portmap, port)
@@ -324,7 +324,7 @@ func (ddp *directDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 			if intf == "" {
 				log.Fatalf("No interface specified for port %d", port)
 			}
-			result = ddp.verifyOnInterface(intf, pkts) && result
+			result = result || ddp.verifyOnInterface(intf, pkts)
 		} else {
 			log.Fatalf("Failed to find portmap entry that has port number %d", port)
 		}

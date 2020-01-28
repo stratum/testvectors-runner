@@ -18,13 +18,8 @@ import (
 type loopbackDataPlane struct {
 	portmap *pm.PortMap
 	match   Match
-	// Packet check timeout
-	pktCheckTimeout time.Duration
 	// Maximum duration for packet capturing
 	maxTimeout time.Duration
-	// Timer that controls the duration of packet capturing
-	captureTimer *time.Timer
-	// TODO: channels for buffering captured packets
 }
 
 // createLoopbackDataPlane creates a data plane instance which utilizes packet-out/packet-in to
@@ -33,41 +28,20 @@ func createLoopbackDataPlane(portmap *pm.PortMap, match Match) *loopbackDataPlan
 	ldp := loopbackDataPlane{}
 	ldp.portmap = portmap
 	ldp.match = match
-	ldp.pktCheckTimeout = 2 * time.Second
 	ldp.maxTimeout = 1 * time.Hour
 	return &ldp
 }
 
 // captureOnPort starts packet capturing on all ports specified in portmap.
-// It saves packet-ins to a channel for future processing.
+// In loopback mode p4rt package implements packet capturing functions so there
+// is nothing needs to be done here.
 // It takes as arguments a timeout which specifies the duration of the capture.
 // When timeout is set to -1*time.Second, it'll use maxTimeout instead.
 func (ldp *loopbackDataPlane) captureOnPorts(timeout time.Duration) {
 	if timeout == -1*time.Second {
 		timeout = ldp.maxTimeout
 	}
-	ldp.captureTimer = time.NewTimer(timeout)
-	// Start the packet capturing loop in a goroutine
-	go func() {
-		for {
-			select {
-			// TODO: replace the following commented block: get packet-ins from some channel
-			/*
-				 case packet := <-packetSource.Packets():
-					 log.Infof("Caught packet on port %s\n", port)
-					 log.Debugf("Packet info: %s\n", packet)
-					 // Save packet to channel, use different channels for different ports
-			*/
-			case <-ldp.captureTimer.C:
-				// Stop capturing on timeout
-				log.Debugf("Stop packet capturing")
-				return
-			// The default case is only for passing CI and will be updated/removed once implemetation completes
-			default:
-				time.Sleep(1 * time.Second)
-			}
-		}
-	}()
+	return
 }
 
 // sendOnPort sends a raw packet to a specific port via packet-out.
@@ -77,72 +51,33 @@ func (ldp *loopbackDataPlane) captureOnPorts(timeout time.Duration) {
 func (ldp *loopbackDataPlane) sendOnPort(port uint32, pkt []byte) bool {
 	log.Infof("Sending packet to port %d\n", port)
 	log.Debugf("Packet info: % x\n", pkt)
-	// TODO: send packet to some channel that sends it as a packet-out
 	po := convertToPktOut(port, pkt)
 	return p4rt.ProcessPacketOutOperation(po)
-	//return true
 }
 
 // verifyOnPort verifies if packets captured on sepcific port are as expected.
 // It takes as arguments the name of the port and a slice of packets with each packet
 // represented by a slice of bytes.
 // It verifies that the packets captured on specified port match the ones specified in
-// pkts within the timeout. When pkts is empty it verifies that no packet has been
-// received.
-// When "Exact" is used as match type, it returns true if packets captured are exactly
-// the same as pkts including the order. Otherwise it returns false.
-// When "In" is used as match type, it returns true if packets captured contain pkts.
-// Otherwise if returns false.
+// pkts. When pkts is empty it verifies that no packet has been received.
 func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
-	timer := time.After(ldp.pktCheckTimeout)
-	log.Debugf("Expecting %d packets captured on port %d\n", len(pkts), port)
-	result := false
-	for {
-		select {
-		// TODO: read from buffer and compare packets
-		/*
-		 if !bytes.Equal(pkt, packet) {
-		 }
-		*/
-		case <-timer:
-			log.Debugf("Timeout exceeded, stop checking packet on port %d...", port)
-			if result {
-				log.Infof("Packet check passed on port %d...", port)
-			} else {
-				log.Errorf("Packet check failed on port %d...", port)
-			}
-			return result
-		// The default case is only for passing CI and will be updated/removed once implemetation completes
-		default:
-			if len(pkts) > 0 {
-				result := true
-				for _, pkt := range pkts {
-					pi := convertToPktIn(port, pkt)
-					result = result && p4rt.ProcessPacketIn(pi)
-				}
-				return result
-			}
-			//TODO: Check if this PacketIn is valid
-			pi := convertToPktIn(port, nil)
-			return p4rt.ProcessPacketIn(pi)
-			//time.Sleep(1 * time.Second)
-		}
+	log.Debugf("Expecting %d packets captured on port %s", len(pkts), port)
+	result := true
+	for _, pkt := range pkts {
+		pi := convertToPktIn(port, pkt)
+		result = result && p4rt.ProcessPacketIn(pi)
 	}
+	// Still need to check for unexpected packets
+	//TODO: Check if this PacketIn is valid
+	pi := convertToPktIn(port, nil)
+	result = result && p4rt.ProcessPacketIn(pi)
+	return result
 }
 
 //stop stops all captures
 func (ldp *loopbackDataPlane) stop() bool {
-	for _, entry := range ldp.portmap.GetEntries() {
-		portNumber := entry.GetPortNumber()
-		portType := entry.GetPortType()
-		if portType == pm.Entry_IN {
-			// We don't capture packets on this port
-			continue
-		}
-		log.Debugf("Stop packet capturing on port %d\n", portNumber)
-	}
-	// Stop packet capturing by resetting the capture timer
-	ldp.captureTimer.Reset(1 * time.Nanosecond)
+	// In loopback mode p4rt package implements packet capturing functions so there
+	// is nothing needs to be done here.
 	return true
 }
 
@@ -150,11 +85,14 @@ func (ldp *loopbackDataPlane) stop() bool {
 func (ldp *loopbackDataPlane) capture() bool {
 	for _, entry := range ldp.portmap.GetEntries() {
 		portNumber := entry.GetPortNumber()
+		//Commented below section as we start capture on all ports regardless of its type.
+		//This if for verifying no packets are captured on ingress port during verifyOnPort()
+		/*
 		portType := entry.GetPortType()
 		if portType == pm.Entry_IN {
 			// We don't capture packets on this port
 			continue
-		}
+		}*/
 		log.Debugf("Capturing packets on port %d\n", portNumber)
 	}
 	ldp.captureOnPorts(-1 * time.Second)
@@ -189,7 +127,7 @@ func (ldp *loopbackDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 		if entry != nil {
 			//Commented below section in order to verify that no packets are captured on ingress ports.
 			//To verify no packets are captured on ingress ports, traffic expectation should have port number and empty packet.
-			//verifyOnInterface should return true on time out if traffic expectation has empty packet or no packet
+			//verifyOnPort should return true on time out if traffic expectation has empty packet or no packet
 			/*portType := entry.GetPortType()
 			 if portType == pm.Entry_IN {
 				 // We shouldn't capture packets on this port
