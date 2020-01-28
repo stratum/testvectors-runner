@@ -38,10 +38,6 @@ func createLoopbackDataPlane(portmap *pm.PortMap, match Match) *loopbackDataPlan
 // It takes as arguments a timeout which specifies the duration of the capture.
 // When timeout is set to -1*time.Second, it'll use maxTimeout instead.
 func (ldp *loopbackDataPlane) captureOnPorts(timeout time.Duration) {
-	if timeout == -1*time.Second {
-		timeout = ldp.maxTimeout
-	}
-	return
 }
 
 // sendOnPort sends a raw packet to a specific port via packet-out.
@@ -88,11 +84,11 @@ func (ldp *loopbackDataPlane) capture() bool {
 		//Commented below section as we start capture on all ports regardless of its type.
 		//This if for verifying no packets are captured on ingress port during verifyOnPort()
 		/*
-		portType := entry.GetPortType()
-		if portType == pm.Entry_IN {
-			// We don't capture packets on this port
-			continue
-		}*/
+			portType := entry.GetPortType()
+			if portType == pm.Entry_IN {
+				// We don't capture packets on this port
+				continue
+			}*/
 		log.Debugf("Capturing packets on port %d\n", portNumber)
 	}
 	ldp.captureOnPorts(-1 * time.Second)
