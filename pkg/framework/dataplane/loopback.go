@@ -63,13 +63,13 @@ func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
 
 //stop stops all captures
 func (ldp *loopbackDataPlane) stop() bool {
-	//This function is emtpy because packet capture in loopback is done as part of p4rt packet-ins but stop() still has to be defined as part of the interface definition
+	//This function is empty because packet capture in loopback is done as part of p4rt packet-ins but stop() still has to be defined as part of the interface definition
 	return true
 }
 
 //capture starts packet capturing
 func (ldp *loopbackDataPlane) capture() bool {
-	//This function is emtpy because packet capture in loopback is done as part of p4rt packet-ins but capture() still has to be defined as part of the interface definition
+	//This function is empty because packet capture in loopback is done as part of p4rt packet-ins but capture() still has to be defined as part of the interface definition
 	return true
 }
 
