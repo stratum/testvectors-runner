@@ -49,7 +49,7 @@ func (ldp *loopbackDataPlane) sendOnPort(port uint32, pkt []byte) bool {
 // It verifies that the packets captured on specified port match the ones specified in
 // pkts. When pkts is empty it verifies that no packet has been received.
 func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
-	log.Debugf("Expecting %d packets captured on port %s", len(pkts), port)
+	log.Debugf("Expecting %d packets captured on port %d", len(pkts), port)
 	result := true
 	for _, pkt := range pkts {
 		pi := convertToPktIn(port, pkt)
@@ -118,6 +118,8 @@ func (ldp *loopbackDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 func convertToPktOut(port uint32, pkt []byte) *v1.PacketOut {
 	po := &v1.PacketOut{}
 	po.Payload = pkt
+	//MetadataId 1 represents egress_physical_port of packet_out controller_packet_metadata based on the P4 program
+	//TODO: make the metadata id configurable to allow loopback for any P4 program
 	po.Metadata = []*v1.PacketMetadata{{MetadataId: 1, Value: common.GetUint32(port)}}
 	return po
 }
@@ -126,8 +128,9 @@ func convertToPktIn(port uint32, pkt []byte) *v1.PacketIn {
 	pi := &v1.PacketIn{}
 	pi.Payload = pkt
 	pi.Metadata = []*v1.PacketMetadata{
+		//MetadataId 1 represents ingress_physical_port of packet_in controller_packet_metadata based on the P4 program
+		//TODO: make the metadata id configurable to allow loopback for any P4 program
 		{MetadataId: 1, Value: common.GetUint32(port)},
-		//{MetadataId: 4, Value: common.GetUint32(port)},
 	}
 	return pi
 }
