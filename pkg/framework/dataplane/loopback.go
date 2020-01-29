@@ -49,7 +49,7 @@ func (ldp *loopbackDataPlane) sendOnPort(port uint32, pkt []byte) bool {
 // It verifies that the packets captured on specified port match the ones specified in
 // pkts. When pkts is empty it verifies that no packet has been received.
 func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
-	log.Debugf("Expecting %d packets captured on port %s", len(pkts), port)
+	log.Debugf("Expecting %d packets captured on port %d", len(pkts), port)
 	result := true
 	for _, pkt := range pkts {
 		pi := convertToPktIn(port, pkt)
