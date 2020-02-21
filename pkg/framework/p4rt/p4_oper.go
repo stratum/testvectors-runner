@@ -15,6 +15,8 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/opennetworkinglab/testvectors-runner/pkg/utils/common"
+	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 
@@ -24,15 +26,37 @@ var log = logger.NewLogger()
 const PktTimeout = 3 * time.Second
 
 var (
+	s        pktInInterface
 	scv      streamChannel
 	p4rtConn connection
 )
 
+type pktInInterface interface {
+	ProcessPacketIn(*v1.PacketIn) bool
+}
+
 //Init starts a P4Runtime client and runs go routines to send and receive stream channel messages from P4Runtime stream channel client
-func Init(target *tg.Target) {
+func Init(target *tg.Target, dpMode string, portmap *pm.PortMap) {
 	log.Debug("In p4_oper Init")
 	p4rtConn = connect(target)
 	scv = getStreamChannel(p4rtConn.client)
+
+	switch dpMode {
+	case "direct":
+		s = &directPacketIn{scv}
+	case "loopback":
+		pktChans := make(map[string]chan *v1.PacketIn)
+		for _, entry := range portmap.GetEntries() {
+			portNumber := entry.GetPortNumber()
+			pktChans[common.GetStr(portNumber)] = make(chan *v1.PacketIn)
+		}
+		pktChans["generic"] = make(chan *v1.PacketIn)
+		s = &loopbackPacketIn{scv, pktChans}
+		go sort(scv.pktInChan, pktChans)
+
+	default:
+		log.Fatalf("Unknown data plane mode: %s", dpMode)
+	}
 }
 
 //TearDown closes the stream channel client
@@ -81,12 +105,5 @@ func ProcessPacketOutOperation(po *v1.PacketOut) bool {
 
 //ProcessPacketIn verifies if the packet received is same as expected packet.
 func ProcessPacketIn(exp *v1.PacketIn) bool {
-	select {
-	case ret := <-scv.pktInChan:
-		log.Debug("In ProcessPacketIn Case PktInChan")
-		return verifyPacketIn(ret, exp)
-	case <-time.After(PktTimeout):
-		log.Error("Timed out waiting for packet in")
-		return false
-	}
+	return s.ProcessPacketIn(exp)
 }
