@@ -123,11 +123,14 @@ BINARY="./tvrunner "
 DOCKER_TV_TESTS=/tv/tests
 DOCKER_TV_SETUP=/tv/setup
 
-TG_FILE_MOUNT=$DOCKER_TV_SETUP/${TG_FILE##*/}
-PM_FILE_MOUNT=$DOCKER_TV_SETUP/${PM_FILE##*/}
-TV_DIR_MOUNT=$DOCKER_TV_TESTS/${TV_DIR##*/}
+TG_FILE_ABS=$(cd $(dirname $TG_FILE); pwd)/$(basename $TG_FILE)
+PM_FILE_ABS=$(cd $(dirname $PM_FILE); pwd)/$(basename $PM_FILE)
+TV_DIR_ABS=$(cd $TV_DIR; pwd)
+TG_FILE_MOUNT=$DOCKER_TV_SETUP/$(basename $TG_FILE)
+PM_FILE_MOUNT=$DOCKER_TV_SETUP/$(basename $PM_FILE)
+TV_DIR_MOUNT=$DOCKER_TV_TESTS/$(basename $TV_DIR)
 
-DOCKER_RUN_OPTIONS="--rm -v /tmp:/tmp --mount type=bind,source=$TG_FILE,target=$TG_FILE_MOUNT --mount type=bind,source=$PM_FILE,target=$PM_FILE_MOUNT --mount type=bind,source=$TV_DIR,target=$TV_DIR_MOUNT --network $NETWORK"
+DOCKER_RUN_OPTIONS="--rm -v /tmp:/tmp --mount type=bind,source=$TG_FILE_ABS,target=$TG_FILE_MOUNT --mount type=bind,source=$PM_FILE_ABS,target=$PM_FILE_MOUNT --mount type=bind,source=$TV_DIR_ABS,target=$TV_DIR_MOUNT --network $NETWORK"
 ENTRY_POINT="--entrypoint /root/$BINARY"
 
 CMD="docker run $DOCKER_RUN_OPTIONS $ENTRY_POINT -ti $IMAGE_NAME"
