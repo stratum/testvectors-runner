@@ -120,26 +120,17 @@ if [ "$PULL_DOCKER" == YES ]; then
 fi
 
 BINARY="./tvrunner "
-TMP_TV_TESTS=/tmp/tv/tests
-TMP_TV_SETUP=/tmp/tv/setup
+DOCKER_TV_TESTS=/tv/tests
+DOCKER_TV_SETUP=/tv/setup
 
-#make temporary directories
-rm -rf $TMP_TV_TESTS || true
-mkdir -p $TMP_TV_TESTS
-rm -rf $TMP_TV_SETUP || true
-mkdir -p $TMP_TV_SETUP
+TG_FILE_ABS=$(cd $(dirname $TG_FILE); pwd)/$(basename $TG_FILE)
+PM_FILE_ABS=$(cd $(dirname $PM_FILE); pwd)/$(basename $PM_FILE)
+TV_DIR_ABS=$(cd $TV_DIR; pwd)
+TG_FILE_MOUNT=$DOCKER_TV_SETUP/$(basename $TG_FILE)
+PM_FILE_MOUNT=$DOCKER_TV_SETUP/$(basename $PM_FILE)
+TV_DIR_MOUNT=$DOCKER_TV_TESTS/$(basename $TV_DIR)
 
-#copy input files, folders
-cp $TG_FILE $TMP_TV_SETUP
-cp $PM_FILE $TMP_TV_SETUP
-cp -rf $TV_DIR $TMP_TV_TESTS
-
-#
-TG_FILE_MOUNT=$TMP_TV_SETUP/${TG_FILE##*/}
-PM_FILE_MOUNT=$TMP_TV_SETUP/${PM_FILE##*/}
-TV_DIR_MOUNT=$TMP_TV_TESTS/${TV_DIR##*/}
-
-DOCKER_RUN_OPTIONS="--rm -v /tmp:/tmp --network $NETWORK"
+DOCKER_RUN_OPTIONS="--rm -v /tmp:/tmp --mount type=bind,source=$TG_FILE_ABS,target=$TG_FILE_MOUNT --mount type=bind,source=$PM_FILE_ABS,target=$PM_FILE_MOUNT --mount type=bind,source=$TV_DIR_ABS,target=$TV_DIR_MOUNT --network $NETWORK"
 ENTRY_POINT="--entrypoint /root/$BINARY"
 
 CMD="docker run $DOCKER_RUN_OPTIONS $ENTRY_POINT -ti $IMAGE_NAME"
