@@ -14,6 +14,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"bytes"
+	"text/template"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
@@ -28,6 +30,16 @@ var log = logger.NewLogger()
 //TVSuite struct stores a list of testvector file names
 type TVSuite struct {
 	TvFiles []string
+}
+
+type Packet struct {
+	Payload string
+}
+
+type Config struct {
+	Port1	string
+	Port2	string
+	Packets []Packet
 }
 
 // Create builds and returns a slice of testing.InternalTest from a slice of Test Vector files.
@@ -69,8 +81,14 @@ func getTVFromFile(fileName string) *tv.TestVector {
 	if err != nil {
 		log.Fatalf("Error opening test vector file: %s\n%s", fileName, err)
 	}
+	t := template.Must(template.New("tv.tmpl").Parse(string(tvdata)))
+	buf := new(bytes.Buffer)
+	err = t.Execute(buf, Config{Port1:"1", Port2:"2", Packets: []Packet{Packet{Payload:"x"}, Packet{Payload:"y"}}})
+	if err != nil {
+		panic(err)
+	}
 	testvector := &tv.TestVector{}
-	if err = proto.UnmarshalText(string(tvdata), testvector); err != nil {
+	if err = proto.UnmarshalText(buf.String(), testvector); err != nil {
 		log.Fatalf("Error parsing proto message of type %T from file %s\n%s", testvector, fileName, err)
 	}
 	return testvector
