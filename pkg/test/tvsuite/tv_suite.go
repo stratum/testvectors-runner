@@ -38,13 +38,15 @@ type Packet struct {
 	Payload string
 }
 
+type Port struct {
+	Decimal	string
+	Octal	string
+}
+
 //Config struct stores port numbers and packets; Used for templates
 type Config struct {
-	Port1      string
-	Port2      string
-	Port1Octal string
-	Port2Octal string
-	Packets    []Packet
+	Ports []Port
+	Packets []Packet
 }
 
 // Create builds and returns a slice of testing.InternalTest from a slice of Test Vector files.
@@ -111,7 +113,7 @@ func getTVFromTemplateFile(templateFile string, templateConfigFile string) *tv.T
 	}
 	t := template.Must(template.New("tv.tmpl").Parse(string(tvdata)))
 	buf := new(bytes.Buffer)
-	err = t.Execute(buf, Config{Port1: "1", Port2: "2", Port1Octal: "\000\001", Port2Octal: "\000\002", Packets: []Packet{Packet{Payload: "x"}, Packet{Payload: "y"}}})
+	err = t.Execute(buf, Config{Ports: []Port{Port{Decimal:"1",Octal:"\000\001"}, Port{Decimal:"2",Octal:"\000\002"}}, Packets: []Packet{Packet{Payload:"x"}, Packet{Payload:"y"}}})
 	if err != nil {
 		panic(err)
 	}
