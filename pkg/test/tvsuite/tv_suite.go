@@ -16,6 +16,7 @@ import (
 	"strings"
 	"testing"
 	"text/template"
+	"encoding/json"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
@@ -33,22 +34,6 @@ type TVSuite struct {
 	TemplateFiles []string
 }
 
-//Packet struct stores packet payload
-type Packet struct {
-	Payload string
-}
-
-type Port struct {
-	Decimal	string
-	Octal	string
-}
-
-//Config struct stores port numbers and packets; Used for templates
-type Config struct {
-	Ports []Port
-	Packets []Packet
-}
-
 // Create builds and returns a slice of testing.InternalTest from a slice of Test Vector files.
 // It iterates through Test Vector files and for each test case it wraps around ProcessTestCase
 // to build anonymous functions for testing.InternalTest.
@@ -63,7 +48,7 @@ func (tv TVSuite) Create() []testing.InternalTest {
 	}
 	// Read TV template files and add them to the test suite
 	for _, templateFile := range tv.TemplateFiles {
-		tv := getTVFromTemplateFile(templateFile, "")
+		tv := getTVFromTemplateFile(templateFile, "/tmp/template_config.json")
 		t := getInternalTest(templateFile, tv)
 		testSuite = append(testSuite, t)
 	}
@@ -112,9 +97,16 @@ func getTVFromTemplateFile(templateFile string, templateConfigFile string) *tv.T
 		log.Fatalf("Error opening test vector file: %s\n%s", templateFile, err)
 	}
 	t := template.Must(template.New("tv.tmpl").Parse(string(tvdata)))
-	buf := new(bytes.Buffer)
-	err = t.Execute(buf, Config{Ports: []Port{Port{Decimal:"1",Octal:"\000\001"}, Port{Decimal:"2",Octal:"\000\002"}}, Packets: []Packet{Packet{Payload:"x"}, Packet{Payload:"y"}}})
+	jsondata, err := ioutil.ReadFile(templateConfigFile)
 	if err != nil {
+		log.Fatalf("Error opening template config file: %s\n%s", templateConfigFile, err)
+	}
+	m := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(jsondata), &m); err != nil {
+		panic(err)
+	}
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, m); err != nil {
 		panic(err)
 	}
 	testvector := &tv.TestVector{}
