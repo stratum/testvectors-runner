@@ -23,6 +23,7 @@ Usage: $0
     [--target <filename>]               run testvectors against the provided target proto file
     [--portmap <filename>]              use the provided port mapping file
     [--tv-dir <directory>]              run all the testvectors from provided directory
+    [--template-config <filename>]      use the provided config file to convert templates to test vectors
     [--tv-name <regex>]                 run all the testvectors matching provided regular expression
     [--dp-mode <mode>]                  run the testvectors in provided mode
                                         default is direct; acceptable modes are <direct, loopbak>
@@ -77,6 +78,10 @@ do
         PM_FILE="$2"
         shift 2
         ;;
+    --template-config)
+        TEMPLATE_CONFIG_FILE="$2"
+        shift 2
+        ;;
     --tv-dir)
         TV_DIR="$2"
         shift 2
@@ -125,6 +130,7 @@ DOCKER_TV_SETUP=/tv/setup
 
 TG_FILE_ABS=$(cd $(dirname $TG_FILE); pwd)/$(basename $TG_FILE)
 PM_FILE_ABS=$(cd $(dirname $PM_FILE); pwd)/$(basename $PM_FILE)
+
 TV_DIR_ABS=$(cd $TV_DIR; pwd)
 TG_FILE_MOUNT=$DOCKER_TV_SETUP/$(basename $TG_FILE)
 PM_FILE_MOUNT=$DOCKER_TV_SETUP/$(basename $PM_FILE)
@@ -133,9 +139,14 @@ TV_DIR_MOUNT=$DOCKER_TV_TESTS/$(basename $TV_DIR)
 DOCKER_RUN_OPTIONS="--rm -v /tmp:/tmp --mount type=bind,source=$TG_FILE_ABS,target=$TG_FILE_MOUNT --mount type=bind,source=$PM_FILE_ABS,target=$PM_FILE_MOUNT --mount type=bind,source=$TV_DIR_ABS,target=$TV_DIR_MOUNT --network $NETWORK"
 ENTRY_POINT="--entrypoint /root/$BINARY"
 
-CMD="docker run $DOCKER_RUN_OPTIONS $ENTRY_POINT -ti $IMAGE_NAME"
-
 TV_RUN_OPTIONS="--target $TG_FILE_MOUNT --portmap $PM_FILE_MOUNT --tv-dir $TV_DIR_MOUNT"
+
+if [ -n "$TEMPLATE_CONFIG_FILE" ]; then
+    TEMPLATE_CONFIG_FILE_ABS=$(cd $(dirname $TEMPLATE_CONFIG_FILE); pwd)/$(basename $TEMPLATE_CONFIG_FILE)
+    TEMPLATE_CONFIG_FILE_MOUNT=$DOCKER_TV_SETUP/$(basename $TEMPLATE_CONFIG_FILE)
+    DOCKER_RUN_OPTIONS="$DOCKER_RUN_OPTIONS --mount type=bind,source=$TEMPLATE_CONFIG_FILE_ABS,target=$TEMPLATE_CONFIG_FILE_MOUNT"
+    TV_RUN_OPTIONS="$TV_RUN_OPTIONS --template-config $TEMPLATE_CONFIG_FILE_MOUNT"
+fi
 
 if [ -n "$TV_NAME" ]; then
     TV_RUN_OPTIONS="$TV_RUN_OPTIONS --tv-name $TV_NAME"
@@ -156,6 +167,8 @@ fi
 if [ -n "$LOG_DIR" ]; then
     TV_RUN_OPTIONS="$TV_RUN_OPTIONS --log-dir $LOG_DIR"
 fi
+
+CMD="docker run $DOCKER_RUN_OPTIONS $ENTRY_POINT -ti $IMAGE_NAME"
 
 CMD="$CMD $TV_RUN_OPTIONS"
 
