@@ -31,6 +31,8 @@ func main() {
 	matchType := flag.String("match-type", "exact", "Data plane match type: 'exact' or 'in'")
 	logDir := flag.String("log-dir", "/tmp", "Location to store logs")
 	logLevel := flag.String("log-level", "warn", "Log Level")
+	templateConfig := flag.String("template-config", "", "Path to template config file")
+
 	help := flag.Bool("help", false, "Help")
 	h := flag.Bool("h", false, "Help")
 	//Add -test.v to list of arguments for verbose go test output
@@ -49,7 +51,7 @@ func main() {
 	}
 
 	setupLog(*logDir, *logLevel)
-	testSuiteSlice := test.CreateSuite(*testNames, *tvDir, *tvName)
+	testSuiteSlice := test.CreateSuite(*testNames, *tvDir, *tvName, *templateConfig)
 	test.Run(*tgFile, *dpMode, *matchType, *pmFile, testSuiteSlice)
 }
 
@@ -62,19 +64,20 @@ func usage() {
 	usage := `Usage:
 ***mandatory arguments***
 	[--target <filename>]               	run testvectors against the provided target proto file
-	[--portmap <filename>]             	use the provided port mapping file
+	[--portmap <filename>]             		use the provided port mapping file
 	[--tv-dir <directory>]              	run all the testvectors from provided directory
 
 ***optional arguments***
+	[--template-config <filename>]			use the provided config file to convert templates to test vectors
 	[--tv-name <regex>]                 	run all the testvectors matching provided regular expression
 	[--dp-mode <mode>]                  	run the testvectors in provided mode
-						default is direct; acceptable modes are <direct, loopbak>
+											default is direct; acceptable modes are <direct, loopbak>
 	[--match-type <type>]               	match packets based on the provided match-type
-						default is exact; acceptable modes <exact, in>
+											default is exact; acceptable modes <exact, in>
 	[--log-level <level>]               	run tvrunner binary with provided log level
-						default is warn; acceptable levels are <panic, fatal, error, warn, info, debug>
+											default is warn; acceptable levels are <panic, fatal, error, warn, info, debug>
 	[--log-dir <directory>]             	save logs to provided directory
-						default is /tmp
+											default is /tmp
 `
 	fmt.Println(usage)
 }

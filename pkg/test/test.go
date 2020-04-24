@@ -48,7 +48,7 @@ type Suite interface {
 }
 
 //CreateSuite returns a slice of InternalTest based on go test names or testvector directory name.
-func CreateSuite(testNames string, tvDir string, tvName string) []testing.InternalTest {
+func CreateSuite(testNames string, tvDir string, tvName string, templateConfig string) []testing.InternalTest {
 	var testSuite Suite
 	switch {
 	case testNames != "":
@@ -57,10 +57,17 @@ func CreateSuite(testNames string, tvDir string, tvName string) []testing.Intern
 		testSuite = ts
 	case tvDir != "":
 		var tvs tvsuite.TVSuite
-		re, _ := regexp.Compile("^" + tvName + "\\.pb.txt$")
-		log.Debugf("Test Vectors file regex: %s", re)
-		tvs.TvFiles = getFiles(tvDir, re)
+		tvRegExp, _ := regexp.Compile("^" + tvName + "\\.pb.txt$")
+		log.Debugf("Test Vectors file regex: %s", tvRegExp)
+		tvs.TvFiles = getFiles(tvDir, tvRegExp)
 		log.Debugf("Test Vectors to run: %s", tvs.TvFiles)
+
+		tmplRegExp, _ := regexp.Compile("^" + tvName + "\\.tmpl$")
+		log.Debugf("Template file regex: %s", tvRegExp)
+		tvs.TemplateFiles = getFiles(tvDir, tmplRegExp)
+		tvs.TemplateConfig = templateConfig
+		log.Debugf("Test Vectors to run: %s", tvs.TemplateFiles)
+
 		testSuite = tvs
 	}
 	return testSuite.Create()
