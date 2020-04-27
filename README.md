@@ -1,7 +1,7 @@
 
 # Test Vectors Runner
 
-This project is a reference implementation of a Test Vector runner which executes [Test Vectors](https://github.com/opennetworkinglab/testvectors) based tests for black-box testing of Stratum enabled switches.
+This project is a reference implementation of a Test Vector runner which executes [Test Vectors](https://github.com/stratum/testvectors) based tests for black-box testing of Stratum enabled switches.
 
 Build status (master): [![CircleCI](https://circleci.com/gh/stratum/testvectors-runner.svg?style=svg)](https://circleci.com/gh/stratum/testvectors-runner)
 
@@ -21,7 +21,9 @@ To start Stratum on hardware switches, including devices with Barefoot Tofino an
 
 ## Get Test Vectors
 
-Download Test Vector files matching your SUT (tofino/bcm/bmv2) from [Test Vectors repo](https://github.com/opennetworkinglab/testvectors) or create your own Test Vectors.
+Download Test Vector files matching your SUT (tofino/bcm/bmv2) from [Test Vectors repo](https://github.com/stratum/testvectors) or create your own Test Vectors.
+
+> Another options is to download `Test Vector templates` which work with any switch platform together with a `template configuration file` which is used for rendering the templates and producing Test Vector files that match your SUT. See more details in the [Run with Test Vector Templates](#run-with-test-vector-templates) section below.
 
 In addition to Test Vector files, a `target.pb.txt` file and a `portmap.pb.txt` file are mandatory for starting testvectors-runner. `target.pb.txt` stores the IP and port that your SUT is using, and `portmap.pb.txt` stores information related to specific switch ports used in the Test Vectors. Check [examples](https://github.com/stratum/testvectors/tree/master/tofino) in Test Vectors repo as well as the [readme](https://github.com/stratum/testvectors/blob/master/README.md) for more details.
 
@@ -101,6 +103,14 @@ Then run `p4runtime` test suite by:
 After all tests are done, run the `Delete*` Test Vectors to clean up.
 ```bash
 ./tvrunner.sh --target ~/testvectors/tofino/target.pb.txt --portmap ~/testvectors/tofino/portmap.pb.txt --tv-dir ~/testvectors/tofino --tv-name Delete.* --dp-mode loopback
+```
+
+### Run with Test Vector Templates
+
+Test Vector templates are tokenized Test Vector files and were created with the goal of maintaining a single set of tests that works across multiple switch platforms. As an alternative way of running Test Vectors, now it is also supported to run Test Vector templates together with a template configuration file (get more details in [Test Vectors repo](https://github.com/stratum/testvectors)) by pointing `--tv-dir` and `--tv-name` to the template file and using `--template-config` argument to specify the template configuration file, and all the other options above still apply:
+
+```bash
+./tvrunner.sh --target ~/testvectors/tofino/target.pb.txt --portmap ~/testvectors/tofino/portmap.pb.txt --tv-dir ~/testvectors/templates/p4runtime --tv-name L3ForwardTest --template-config ~/testvectors/tofino/template_config.json
 ```
 
 ## Additional Documents
