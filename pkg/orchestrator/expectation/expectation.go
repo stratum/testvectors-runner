@@ -12,11 +12,11 @@ package expectation
 import (
 	"time"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/action"
+	"github.com/stratum/testvectors-runner/pkg/framework/dataplane"
+	"github.com/stratum/testvectors-runner/pkg/framework/gnmi"
+	"github.com/stratum/testvectors-runner/pkg/framework/p4rt"
+	"github.com/stratum/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/orchestrator/action"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
 

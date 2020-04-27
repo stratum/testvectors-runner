@@ -10,7 +10,7 @@ Package dataplane implements packet send/receive functions
 package dataplane
 
 import (
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/logger"
 	pm "github.com/stratum/testvectors/proto/portmap"
 )
 

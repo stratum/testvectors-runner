@@ -14,7 +14,7 @@ import (
 
 	"github.com/openconfig/gnmi/proto/gnmi"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/logger"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 

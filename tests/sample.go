@@ -9,7 +9,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/logger"
 	"gotest.tools/assert"
 )
 

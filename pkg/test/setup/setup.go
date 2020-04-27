@@ -10,11 +10,11 @@ Package setup implements suite, test and test case setup functions
 package setup
 
 import (
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	"github.com/stratum/testvectors-runner/pkg/framework/dataplane"
+	"github.com/stratum/testvectors-runner/pkg/framework/gnmi"
+	"github.com/stratum/testvectors-runner/pkg/framework/p4rt"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/logger"
 	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 )

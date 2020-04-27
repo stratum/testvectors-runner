@@ -13,7 +13,7 @@ import (
 	"time"
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/utils/common"
+	"github.com/stratum/testvectors-runner/pkg/utils/common"
 )
 
 type loopbackPacketIn struct {
