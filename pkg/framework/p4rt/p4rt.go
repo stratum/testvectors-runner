@@ -17,7 +17,7 @@ import (
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	"github.com/golang/protobuf/proto"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/utils/common"
+	"github.com/stratum/testvectors-runner/pkg/utils/common"
 	tvb "github.com/stratum/testvectors/proto/target"
 	"google.golang.org/grpc"
 )

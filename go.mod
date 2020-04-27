@@ -1,4 +1,4 @@
-module github.com/opennetworkinglab/testvectors-runner
+module github.com/stratum/testvectors-runner
 
 go 1.12
 

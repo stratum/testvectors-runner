@@ -14,8 +14,8 @@ import (
 
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/utils/common"
+	"github.com/stratum/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/utils/common"
 	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 )

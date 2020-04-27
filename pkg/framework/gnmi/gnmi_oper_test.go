@@ -11,7 +11,7 @@ import (
 	"time"
 
 	gpb "github.com/openconfig/gnmi/proto/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
+	"github.com/stratum/testvectors-runner/pkg/framework/gnmi"
 	tg "github.com/stratum/testvectors/proto/target"
 )
 

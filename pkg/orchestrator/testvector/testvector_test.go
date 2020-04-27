@@ -9,8 +9,8 @@ package testvector_test
 import (
 	"testing"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/testvector"
+	"github.com/stratum/testvectors-runner/pkg/framework/gnmi"
+	"github.com/stratum/testvectors-runner/pkg/orchestrator/testvector"
 	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )

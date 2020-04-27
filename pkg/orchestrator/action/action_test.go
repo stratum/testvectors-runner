@@ -14,8 +14,8 @@ import (
 	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	"github.com/stratum/testvectors-runner/pkg/framework/gnmi"
+	"github.com/stratum/testvectors-runner/pkg/framework/p4rt"
 )
 
 var (

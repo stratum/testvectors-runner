@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	gpb "github.com/openconfig/gnmi/proto/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/gnmi"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
+	"github.com/stratum/testvectors-runner/pkg/framework/gnmi"
+	"github.com/stratum/testvectors-runner/pkg/framework/p4rt"
 	pm "github.com/stratum/testvectors/proto/portmap"
 	tg "github.com/stratum/testvectors/proto/target"
 	tv "github.com/stratum/testvectors/proto/testvector"
