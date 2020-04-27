@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/test"
+	"github.com/stratum/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/test"
 )
 
 var log = logger.NewLogger()

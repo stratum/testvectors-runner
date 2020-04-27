@@ -13,10 +13,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/test/setup"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/test/teardown"
-	"github.com/opennetworkinglab/testvectors-runner/tests"
+	"github.com/stratum/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/test/setup"
+	"github.com/stratum/testvectors-runner/pkg/test/teardown"
+	"github.com/stratum/testvectors-runner/tests"
 )
 
 var log = logger.NewLogger()

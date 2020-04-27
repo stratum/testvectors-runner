@@ -12,10 +12,10 @@ import (
 	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	"github.com/golang/protobuf/proto"
 
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/dataplane"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/framework/p4rt"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/test/setup"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/test/teardown"
+	"github.com/stratum/testvectors-runner/pkg/framework/dataplane"
+	"github.com/stratum/testvectors-runner/pkg/framework/p4rt"
+	"github.com/stratum/testvectors-runner/pkg/test/setup"
+	"github.com/stratum/testvectors-runner/pkg/test/teardown"
 	"github.com/stretchr/testify/assert"
 )
 

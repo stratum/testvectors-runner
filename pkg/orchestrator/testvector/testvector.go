@@ -10,9 +10,9 @@ Package testvector implements functions to extract and run each test case from t
 package testvector
 
 import (
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/action"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/expectation"
+	"github.com/stratum/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/orchestrator/action"
+	"github.com/stratum/testvectors-runner/pkg/orchestrator/expectation"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
 

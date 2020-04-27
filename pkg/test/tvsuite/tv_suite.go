@@ -19,10 +19,10 @@ import (
 	"text/template"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/logger"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/orchestrator/testvector"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/test/setup"
-	"github.com/opennetworkinglab/testvectors-runner/pkg/test/teardown"
+	"github.com/stratum/testvectors-runner/pkg/logger"
+	"github.com/stratum/testvectors-runner/pkg/orchestrator/testvector"
+	"github.com/stratum/testvectors-runner/pkg/test/setup"
+	"github.com/stratum/testvectors-runner/pkg/test/teardown"
 	tv "github.com/stratum/testvectors/proto/testvector"
 )
 
