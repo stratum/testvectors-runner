@@ -12,7 +12,7 @@ import (
 
 	scpb "google.golang.org/genproto/googleapis/rpc/code"
 
-	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
+	v1 "github.com/p4lang/p4runtime/go/p4/v1"
 )
 
 //CtxTimeout for contexts

@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	config "github.com/abhilashendurthi/p4runtime/proto/p4/config/v1"
-	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
+	config "github.com/p4lang/p4runtime/go/p4/config/v1"
+	v1 "github.com/p4lang/p4runtime/go/p4/v1"
 	"github.com/stratum/testvectors-runner/pkg/framework/p4rt"
 	"github.com/stratum/testvectors-runner/pkg/logger"
 	pm "github.com/stratum/testvectors/proto/portmap"
