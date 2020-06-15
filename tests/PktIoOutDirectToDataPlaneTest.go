@@ -9,8 +9,8 @@ package tests
 import (
 	"testing"
 
-	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
 	"github.com/golang/protobuf/proto"
+	v1 "github.com/p4lang/p4runtime/go/p4/v1"
 
 	"github.com/stratum/testvectors-runner/pkg/framework/dataplane"
 	"github.com/stratum/testvectors-runner/pkg/framework/p4rt"

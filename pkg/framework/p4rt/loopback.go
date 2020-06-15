@@ -12,7 +12,7 @@ package p4rt
 import (
 	"time"
 
-	v1 "github.com/abhilashendurthi/p4runtime/proto/p4/v1"
+	v1 "github.com/p4lang/p4runtime/go/p4/v1"
 	"github.com/stratum/testvectors-runner/pkg/utils/common"
 )
 
