@@ -21,6 +21,14 @@ func GetUint32(i uint32) []byte {
 	return byteSlice
 }
 
+//GetUint16 converts uint32 to byte slice
+func GetUint16(i uint32) []byte {
+	i16 := uint16(i)
+	byteSlice := make([]byte, 2)
+	binary.BigEndian.PutUint16(byteSlice, i16)
+	return byteSlice
+}
+
 //GetInt converts byte slice to int
 func GetInt(s []byte) int {
 	var res int
@@ -34,6 +42,8 @@ func GetInt(s []byte) int {
 //GetStr converts various interfaces to string
 func GetStr(i interface{}) string {
 	switch v := i.(type) {
+	case uint16:
+		return strconv.Itoa(int(v))
 	case uint32:
 		return strconv.Itoa(int(v))
 	case []byte:
