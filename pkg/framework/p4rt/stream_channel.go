@@ -43,11 +43,11 @@ func (s streamChannel) Close() {
 //GetStreamChannel gets a new P4Runtime stream channel client, starts Recv() and Send() goroutines
 func getStreamChannel(p4rtClient v1.P4RuntimeClient) streamChannel {
 	scv := streamChannel{}
-	scv.masterArbRecvChan = make(chan *v1.MasterArbitrationUpdate)
-	scv.masterArbSendChan = make(chan *v1.MasterArbitrationUpdate)
-	scv.pktInChan = make(chan *v1.PacketIn)
-	scv.pktOutChan = make(chan *v1.PacketOut)
-	scv.genericStreamMessageChannel = make(chan *v1.StreamMessageResponse)
+	scv.masterArbRecvChan = make(chan *v1.MasterArbitrationUpdate, channelSize)
+	scv.masterArbSendChan = make(chan *v1.MasterArbitrationUpdate, channelSize)
+	scv.pktInChan = make(chan *v1.PacketIn, channelSize)
+	scv.pktOutChan = make(chan *v1.PacketOut, channelSize)
+	scv.genericStreamMessageChannel = make(chan *v1.StreamMessageResponse, channelSize)
 	scContext := context.Background()
 	scContext, scv.cancel = context.WithCancel(scContext)
 	scv.sc, scv.scError = p4rtClient.StreamChannel(scContext)

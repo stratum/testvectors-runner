@@ -133,7 +133,7 @@ func processControlPlaneOperation(cpo *tv.ControlPlaneOperation) bool {
 		return p4rt.ProcessP4WriteRequest(cpo.GetWriteOperation().GetP4WriteRequest(), cpo.GetWriteOperation().GetP4WriteResponse())
 	case cpo.GetPacketOutOperation() != nil:
 		log.Debug("In PacketOut Oper")
-		return p4rt.ProcessPacketOutOperation(cpo.GetPacketOutOperation().GetP4PacketOut())
+		return p4rt.ProcessPacketOut(cpo.GetPacketOutOperation().GetP4PacketOut())
 	}
 	return false
 }

@@ -106,7 +106,7 @@ func (st Test) PktIoOutDirectToDataPlaneTest(t *testing.T) {
 		log.Fatalf("Error parsing proto message of type %T\n%s", pktOut, err)
 	}
 	// Send packet-out
-	result := p4rt.ProcessPacketOutOperation(pktOut)
+	result := p4rt.ProcessPacketOut(pktOut)
 	assert.True(t, result, "PacketOut operation failed")
 
 	// Check if we received packets from data plane port 1
@@ -141,7 +141,7 @@ func (st Test) PktIoOutToIngressPipelineACLRedirectToPortTest(t *testing.T) {
 		log.Fatalf("Error parsing proto message of type %T\n%s", pktOut, err)
 	}
 	// Send packet-out
-	result = p4rt.ProcessPacketOutOperation(pktOut)
+	result = p4rt.ProcessPacketOut(pktOut)
 	assert.True(t, result, "PacketOut operation failed")
 
 	// Check if we received packets from data plane port 2
