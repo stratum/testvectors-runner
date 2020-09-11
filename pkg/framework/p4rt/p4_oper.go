@@ -21,18 +21,22 @@ import (
 )
 
 var log = logger.NewLogger()
+var electionID = &v1.Uint128{High: 1, Low: 5}
+var deviceID uint64 = 1
+var channelSize = 20
 
 //PktTimeout for receiving all packets
 const PktTimeout = 3 * time.Second
 
 var (
-	s        pktInInterface
+	s        pktIOInterface
 	scv      streamChannel
 	p4rtConn connection
 )
 
-type pktInInterface interface {
+type pktIOInterface interface {
 	ProcessPacketIn(*v1.PacketIn) bool
+	ProcessPacketOut(*v1.PacketOut) bool
 }
 
 //Init starts a P4Runtime client and runs go routines to send and receive stream channel messages from P4Runtime stream channel client
@@ -43,15 +47,15 @@ func Init(target *tg.Target, dpMode string, portmap *pm.PortMap) {
 
 	switch dpMode {
 	case "direct":
-		s = &directPacketIn{scv}
+		s = &directPacketIO{scv}
 	case "loopback":
-		pktChans := make(map[string]chan *v1.PacketIn)
+		pktChans := make(map[string]chan *v1.PacketIn, channelSize)
 		for _, entry := range portmap.GetEntries() {
 			portNumber := entry.GetPortNumber()
-			pktChans[common.GetStr(portNumber)] = make(chan *v1.PacketIn)
+			pktChans[common.GetStr(portNumber)] = make(chan *v1.PacketIn, channelSize)
 		}
-		pktChans["generic"] = make(chan *v1.PacketIn)
-		s = &loopbackPacketIn{scv, pktChans}
+		pktChans["generic"] = make(chan *v1.PacketIn, channelSize)
+		s = &loopbackPacketIO{scv, pktChans}
 		go sort(scv.pktInChan, pktChans)
 
 	default:
@@ -90,20 +94,12 @@ func ProcessP4PipelineConfigOperation(req *v1.SetForwardingPipelineConfigRequest
 	return false
 }
 
-//ProcessPacketOutOperation sends packet to stream channel client.
-func ProcessPacketOutOperation(po *v1.PacketOut) bool {
-	var deviceID uint64 = 1
-	electionID := &v1.Uint128{High: 1, Low: 5}
-	if scv.getMasterArbitrationLock(deviceID, electionID) {
-		log.Info("Sending packet")
-		log.Debugf("Packet info: %s", po)
-		scv.pktOutChan <- po
-		return true
-	}
-	return false
-}
-
 //ProcessPacketIn verifies if the packet received is same as expected packet.
 func ProcessPacketIn(exp *v1.PacketIn) bool {
 	return s.ProcessPacketIn(exp)
+}
+
+//ProcessPacketOut sends packet to stream channel client.
+func ProcessPacketOut(po *v1.PacketOut) bool {
+	return s.ProcessPacketOut(po)
 }

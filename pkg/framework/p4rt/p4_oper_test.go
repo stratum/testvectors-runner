@@ -19,8 +19,10 @@ import (
 )
 
 var (
-	TestTarget = &tg.Target{Address: "localhost:50001"}
-	log        = logger.NewLogger()
+	TestTarget        = &tg.Target{Address: "localhost:50001"}
+	log               = logger.NewLogger()
+	electionID        = &v1.Uint128{High: 1, Low: 5}
+	deviceID   uint64 = 1
 )
 
 func setupTest() {
@@ -40,9 +42,7 @@ func TestProcessP4PipelineConfigOperation(t *testing.T) {
 	setupTest()
 	defer tearDownTest()
 	var (
-		deviceID       uint64 = 1
-		electionID            = &v1.Uint128{High: 1, Low: 5}
-		pipelineCfgReq        = &v1.SetForwardingPipelineConfigRequest{
+		pipelineCfgReq = &v1.SetForwardingPipelineConfigRequest{
 			DeviceId:   deviceID,
 			ElectionId: electionID,
 			Action:     v1.SetForwardingPipelineConfigRequest_VERIFY_AND_COMMIT,
@@ -519,11 +519,9 @@ func TestProcessP4WriteRequest(t *testing.T) {
 	setupTest()
 	defer tearDownTest()
 	var (
-		deviceID           uint64 = 1
-		electionID                = &v1.Uint128{High: 1, Low: 5}
-		emptyWriteWithID          = &v1.WriteRequest{DeviceId: deviceID, ElectionId: electionID}
-		emptyWriteRequest         = &v1.WriteRequest{}
-		emptyWriteResponse        = &v1.WriteResponse{}
+		emptyWriteWithID   = &v1.WriteRequest{DeviceId: deviceID, ElectionId: electionID}
+		emptyWriteRequest  = &v1.WriteRequest{}
+		emptyWriteResponse = &v1.WriteResponse{}
 	)
 	type args struct {
 		target *tg.Target
@@ -571,10 +569,8 @@ func TestProcessPacketIOOperation(t *testing.T) {
 	setupTest()
 	defer tearDownTest()
 	var (
-		deviceID           uint64 = 1
-		electionID                = &v1.Uint128{High: 1, Low: 5}
-		emptyWriteResponse        = &v1.WriteResponse{}
-		insertWriteReq            = &v1.WriteRequest{
+		emptyWriteResponse = &v1.WriteResponse{}
+		insertWriteReq     = &v1.WriteRequest{
 			DeviceId:   deviceID,
 			ElectionId: electionID,
 			Updates: []*v1.Update{
@@ -752,8 +748,8 @@ func TestProcessPacketIOOperation(t *testing.T) {
 			if got := p4rt.ProcessP4WriteRequest(tt.args.insertWriteReq, tt.args.writeResponse); got != tt.writeWant {
 				t.Errorf("Insert Write ProcessP4WriteRequest() = %v, want %v", got, tt.writeWant)
 			}
-			if got := p4rt.ProcessPacketOutOperation(tt.args.po); got != tt.poWant {
-				t.Errorf("ProcessPacketOutOperation() = %v, want %v", got, tt.poWant)
+			if got := p4rt.ProcessPacketOut(tt.args.po); got != tt.poWant {
+				t.Errorf("ProcessPacketOut() = %v, want %v", got, tt.poWant)
 			}
 			if got := p4rt.ProcessPacketIn(tt.args.pi); got != tt.piWant {
 				t.Errorf("ProcessPacketIn() = %v, want %v", got, tt.piWant)
@@ -770,9 +766,7 @@ func TestProcessPacketIOOperation(t *testing.T) {
 	log.Info("Start of TestMasterArbitration")
 	setupTest()
 	var (
-		deviceID        uint64 = 1
 		invalidDeviceID uint64 = 2
-		electionID             = &v1.Uint128{High: 1, Low: 5}
 		highElectionID         = &v1.Uint128{High: 2, Low: 5}
 		scv                    = p4rt.GetStreamChannel(p4rt.P4rtClient)
 	)
@@ -830,8 +824,6 @@ func TestLowElectionMasterArbitration(t *testing.T) {
 	log.Info("Start of TestLowElectionMasterArbitration")
 	setupTest()
 	var (
-		deviceID      uint64 = 1
-		electionID           = &v1.Uint128{High: 1, Low: 5}
 		lowElectionID        = &v1.Uint128{High: 0, Low: 5}
 		scv1                 = p4rt.GetStreamChannel(p4rt.P4rtClient)
 		scv2                 = p4rt.GetStreamChannel(p4rt.P4rtClient)

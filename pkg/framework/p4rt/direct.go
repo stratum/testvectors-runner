@@ -15,11 +15,11 @@ import (
 	v1 "github.com/p4lang/p4runtime/go/p4/v1"
 )
 
-type directPacketIn struct {
+type directPacketIO struct {
 	scv streamChannel
 }
 
-func (d directPacketIn) ProcessPacketIn(exp *v1.PacketIn) bool {
+func (d directPacketIO) ProcessPacketIn(exp *v1.PacketIn) bool {
 	select {
 	case ret := <-d.scv.pktInChan:
 		log.Debug("In ProcessPacketIn Case PktInChan")
@@ -31,4 +31,14 @@ func (d directPacketIn) ProcessPacketIn(exp *v1.PacketIn) bool {
 		log.Error("Timed out waiting for packet in")
 		return false
 	}
+}
+
+func (d directPacketIO) ProcessPacketOut(po *v1.PacketOut) bool {
+	if d.scv.getMasterArbitrationLock(deviceID, electionID) {
+		log.Info("Sending packet")
+		log.Debugf("Packet info: %s", po)
+		scv.pktOutChan <- po
+		return true
+	}
+	return false
 }

@@ -41,7 +41,7 @@ func (ldp *loopbackDataPlane) sendOnPort(port uint32, pkt []byte) bool {
 	log.Infof("Sending packet to port %d\n", port)
 	log.Debugf("Packet info: % x\n", pkt)
 	po := convertToPktOut(port, pkt)
-	return p4rt.ProcessPacketOutOperation(po)
+	return p4rt.ProcessPacketOut(po)
 }
 
 // verifyOnPort verifies if packets captured on sepcific port are as expected.
@@ -56,9 +56,9 @@ func (ldp *loopbackDataPlane) verifyOnPort(port uint32, pkts [][]byte) bool {
 		pi := convertToPktIn(port, pkt)
 		result = result && p4rt.ProcessPacketIn(pi)
 	}
-	// Still need to check for unexpected packets
-	pi := convertToPktIn(port, nil)
-	result = result && p4rt.ProcessPacketIn(pi)
+	// Unexpected packets can be checked with empty packet in dataplane expectation
+	// pi := convertToPktIn(port, nil)
+	// result = result && p4rt.ProcessPacketIn(pi)
 	return result
 }
 
@@ -119,9 +119,15 @@ func (ldp *loopbackDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 func convertToPktOut(port uint32, pkt []byte) *v1.PacketOut {
 	po := &v1.PacketOut{}
 	po.Payload = pkt
-	//MetadataId 1 represents egress_physical_port of packet_out controller_packet_metadata based on the P4 program
+	//MetadataId 1 represents egress_physical_port, 2 represents cpuLoopbackMode, 3 represents padding of packet_out controller_packet_metadata based on the P4 program
+	//cpuLoopbackMode == 2 represents a dataplane packet meant to be sent to egress
 	//TODO: make the metadata id configurable to allow loopback for any P4 program
-	po.Metadata = []*v1.PacketMetadata{{MetadataId: 1, Value: common.GetUint16(port)}}
+	po.Metadata = []*v1.PacketMetadata{
+		{MetadataId: 1, Value: common.GetByteSlice(port, 2)},
+		{MetadataId: 2, Value: common.GetByteSlice(2, 1)},
+		{MetadataId: 3, Value: common.GetByteSlice(0, 2)},
+	}
+	log.Debugf("Packet info: %s", po)
 	return po
 }
 
@@ -131,7 +137,7 @@ func convertToPktIn(port uint32, pkt []byte) *v1.PacketIn {
 	pi.Metadata = []*v1.PacketMetadata{
 		//MetadataId 1 represents ingress_physical_port of packet_in controller_packet_metadata based on the P4 program
 		//TODO: make the metadata id configurable to allow loopback for any P4 program
-		{MetadataId: 1, Value: common.GetUint16(port)},
+		{MetadataId: 1, Value: common.GetByteSlice(port, 2)},
 	}
 	return pi
 }

@@ -14,18 +14,19 @@ import (
 	"strconv"
 )
 
-//GetUint32 converts uint32 to byte slice
-func GetUint32(i uint32) []byte {
-	byteSlice := make([]byte, 4)
-	binary.BigEndian.PutUint32(byteSlice, i)
-	return byteSlice
-}
-
-//GetUint16 converts uint32 to byte slice
-func GetUint16(i uint32) []byte {
-	i16 := uint16(i)
-	byteSlice := make([]byte, 2)
-	binary.BigEndian.PutUint16(byteSlice, i16)
+//GetByteSlice converts int to byteslice based on the size
+func GetByteSlice(i uint32, noOfBytes uint32) []byte {
+	byteSlice := make([]byte, noOfBytes)
+	switch noOfBytes {
+	case 1:
+		byteSlice[0] = byte(i)
+	case 2:
+		i16 := uint16(i)
+		binary.BigEndian.PutUint16(byteSlice, i16)
+	case 4:
+		binary.BigEndian.PutUint32(byteSlice, i)
+	default:
+	}
 	return byteSlice
 }
 
