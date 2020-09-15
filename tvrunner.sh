@@ -5,8 +5,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # 
 
-NETWORK=host
-IMAGE_NAME=stratumproject/tvrunner:binary
+NETWORK=${NETWORK:-host}
+IMAGE_NAME=${IMAGE_NAME:-stratumproject/tvrunner:binary}
 PULL_DOCKER=NO
 
 print_help() {
