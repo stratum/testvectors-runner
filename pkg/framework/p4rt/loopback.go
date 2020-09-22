@@ -62,10 +62,12 @@ func (l loopbackPacketIO) ProcessPacketOut(po *v1.PacketOut) bool {
 	//If cpuLoopbackMode (metadata_id:2) == 0, it's a packet_out; To punt to cpu, set cpu_loopback_mode=1
 	if cpuLoopbackMode != 2 {
 		port := po.GetMetadata()[0].Value
+		etherType := po.GetMetadata()[3].Value
 		po.Metadata = []*v1.PacketMetadata{
 			{MetadataId: 1, Value: port},
 			{MetadataId: 2, Value: common.GetByteSlice(1, 1)},
 			{MetadataId: 3, Value: common.GetByteSlice(0, 2)},
+			{MetadataId: 4, Value: etherType},
 		}
 	}
 	if l.scv.getMasterArbitrationLock(deviceID, electionID) {
