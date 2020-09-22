@@ -104,10 +104,10 @@ func (ldp *loopbackDataPlane) verify(pkts [][]byte, ports []uint32) bool {
 			//To verify no packets are captured on ingress ports, traffic expectation should have port number and empty packet.
 			//verifyOnPort should return true on time out if traffic expectation has empty packet or no packet
 			/*portType := entry.GetPortType()
-			 if portType == pm.Entry_IN {
-				 // We shouldn't capture packets on this port
-				 log.Fatalf("Port %d could only be used as ingress to switch", port)
-			 }*/
+			  if portType == pm.Entry_IN {
+				  // We shouldn't capture packets on this port
+				  log.Fatalf("Port %d could only be used as ingress to switch", port)
+			  }*/
 			result = result || ldp.verifyOnPort(port, pkts)
 		} else {
 			log.Fatalf("Failed to find portmap entry that has port number %d", port)
@@ -125,7 +125,8 @@ func convertToPktOut(port uint32, pkt []byte) *v1.PacketOut {
 	po.Metadata = []*v1.PacketMetadata{
 		{MetadataId: 1, Value: common.GetByteSlice(port, 2)},
 		{MetadataId: 2, Value: common.GetByteSlice(2, 1)},
-		{MetadataId: 3, Value: common.GetByteSlice(0, 2)},
+		{MetadataId: 3, Value: common.GetByteSlice(0, 1)},
+		{MetadataId: 4, Value: common.GetByteSlice(48897, 2)},
 	}
 	log.Debugf("Packet info: %s", po)
 	return po
